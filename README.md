@@ -1,7 +1,6 @@
 # THE VERY BEST REPO
 ## link to overleaf
 [overleaf doc](https://www.overleaf.com/1442327655stwrrmfrymjv#707254)<br>
-[comment]: <> ([the right one](https://www.pornhub.com))
 
 ## Structure of our project
 
