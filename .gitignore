@@ -12,3 +12,16 @@ UI/.env
 !UI/UI/frontend/migrations/__init__.py
 
 # subfolders from ignored folders to include
+
+# Some random cache
+.ccls-cache
+
+build/
+
+# vscode
+.vscode
+
+# Executables
+*.exe
+*.out
+*.app
