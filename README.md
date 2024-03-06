@@ -11,8 +11,7 @@
 
 ## Staring the UI service(easy mode)
 
-1. have docker installed
-1. navigate to UI folder
+1. Have docker installed and running
 1. run `docker compose build`
 1. run `docker compose up -d`
 1. open browser to [frontpage](http://localhost:8000)
