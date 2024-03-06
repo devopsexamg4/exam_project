@@ -1,18 +1,20 @@
 # THE VERY BEST REPO
 # For development purposes only
 ## Staring the UI service first time(Hardmode)
+
 1. assuming linux environment with python installed and project has been pulled
-2. go to UI directory open terminal
-3.	`python -m venv env` to start a virtual python environment
-4. `source env/bin/activate` to start python env(ironment)
-5. `pip install -r requirements.txt` to install dependencies into env
-6. `./UI/manage.py runserver` to start development server
+1. go to UI directory open terminal
+1.	`python -m venv env` to start a virtual python environment
+1. `source env/bin/activate` to start python env(ironment)
+1. `pip install -r requirements.txt` to install dependencies into env
+1. `./UI/manage.py runserver` to start development server<br>
+
 ## Staring the UI service(easy mode)
-1. have docker installed
-2. navigate to UI folder
-3. run `docker compose build`
-4. run `docker compose up -d`
-5. open browser to [frontpage](http://localhost:8000)
+
+1. Have docker installed and running
+1. run `docker compose build`
+1. run `docker compose up -d`
+1. open browser to [frontpage](http://localhost:8000)
 
 ## link to overleaf
 [overleaf doc](https://www.overleaf.com/1442327655stwrrmfrymjv#707254)<br>
