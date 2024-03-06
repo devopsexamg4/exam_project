@@ -1,0 +1,14 @@
+# folders to ignore
+UI/env
+UI/UI/frontend/__pycache__/
+UI/UI/UI/__pycache__/
+UI/UI/frontend/migrations/*
+
+# files to ignore
+db.*
+UI/.env
+
+# files from ignored folders to include
+!UI/UI/frontend/migrations/__init__.py
+
+# subfolders from ignored folders to include
