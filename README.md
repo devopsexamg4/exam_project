@@ -11,11 +11,11 @@
 
 ## Staring the UI service(easy mode)
 
-2. have docker installed
-2. navigate to UI folder
-2. run `docker compose build`
-2. run `docker compose up -d`
-2. open browser to [frontpage](http://localhost:8000)
+1. have docker installed
+1. navigate to UI folder
+1. run `docker compose build`
+1. run `docker compose up -d`
+1. open browser to [frontpage](http://localhost:8000)
 
 ## link to overleaf
 [overleaf doc](https://www.overleaf.com/1442327655stwrrmfrymjv#707254)<br>
