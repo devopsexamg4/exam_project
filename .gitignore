@@ -7,6 +7,7 @@ UI/UI/frontend/migrations/*
 # files to ignore
 db.*
 UI/.env
+clear.sh
 
 # files from ignored folders to include
 !UI/UI/frontend/migrations/__init__.py
