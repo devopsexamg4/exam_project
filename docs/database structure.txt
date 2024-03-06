@@ -1,0 +1,33 @@
+https://app.quickdatabasediagrams.com/#/
+
+UserTable
+rel >- a
+rel >- StudentSubmissions
+-
+UserID PK int
+Username string 
+Password string
+UserType  A/T/S
+E-mail NULL string
+
+Assignments as a
+-
+AssID PK int
+Dockerfile DockerImage
+Status hidden/active/paused/finished
+MaxMemory NULL int
+MaxCPU NULL int
+Start timestamp
+End timestamp
+Timer timeframe
+
+StudentSubmissions 
+rel >- a
+-
+# StudentSubmissions  FK >- a
+SubID PK int 
+File sourcefile
+Result passed/failed/notRun
+Logfile NULL logfile
+UploadTime NULL timestamp
+
