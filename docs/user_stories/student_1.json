@@ -1,0 +1,72 @@
+[
+    {
+        "As_a": "Student",
+        "I_want": "the ability to create my own profile with username and password",
+        "such_that": "I can sign up to courses"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to login to my profile using username and password",
+        "such_that": "I can continue working on my courses"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to view my assignments",
+        "such_that": "I can complete them"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to view the status of my assignments",
+        "such_that": "I can see if they are paused, in progress or completed"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to view the deadline of my assignments",
+        "such_that": "I can plan my time"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to view the description of my assignments",
+        "such_that": "I can understand what is expected from me"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to view the detailed results of my assignments",
+        "such_that": "I can see what I did wrong"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to view the feedback of my assignments",
+        "such_that": "I can understand what I did wrong"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to submit solutions to my assignments, by uploading a file",
+        "such_that": "I can get feedback"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to check if my solution has been evaluated",
+        "such_that": "I can see my feedback"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to cancel the submission of my solution if it has not been evaluated",
+        "such_that": "I can make changes to my solution"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to view the detailed results of my solution",
+        "such_that": "I can see what I did wrong"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "my solutions be processed fairly among the other students",
+        "such_that": "I can trust the system in evaluating my solutions"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "a visual web interface",
+        "such_that": "I can easily navigate through the system"
+    }
+]
