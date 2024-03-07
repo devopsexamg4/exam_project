@@ -34,6 +34,9 @@
 - containerisation: docker
 - some sort of orchestrator
 - webserver: nginx
+- GUI: django
+- API: FastAPI
+- consider rabbitmq for message passing between containers
 
 
 ### pre-work

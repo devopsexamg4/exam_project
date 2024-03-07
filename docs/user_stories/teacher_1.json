@@ -16,7 +16,7 @@
 	},
 	{
 		"As_a":"Teacher",
-		"I_want":"remove a student from an assignmet",
+		"I_want":"remove a student from an assignment",
 		"such_that":"a student who is no longer following the course, is not evaluated",
 	},
 	{
@@ -31,10 +31,62 @@
 	},
 	{
 		"As_a":"Teacher",
-		"I_want":"",
-		"such_that":"",
+		"I_want":"have a GUI",
+		"such_that":"i can easily use the system",
 	},
 	{
+		"As_a":"Teacher",
+		"I_want":"to extract data with a script",
+		"such_that":"i can easily retrieve all data of an assignment",
+	}{
+		"As_a":"Teacher",
+		"I_want":"to view submissions of individual students",
+		"such_that":"i can quickly evaluate a student",
+	}{
+		"As_a":"Teacher",
+		"I_want":"to not rely on a GUI to access the system",
+		"such_that":"i can automate all my interactions with it",
+	}{
+		"As_a":"Teacher",
+		"I_want":"edit an assignment",
+		"such_that":"misconfiguration of an assignment does not persist throughout the assignment duration",
+	}{
+		"As_a":"Teacher",
+		"I_want":"get a list of students assigned to a project",
+		"such_that":"i can verify that all students are enrolled",
+	}{
+		"As_a":"Teacher",
+		"I_want":"re-evaluate individual submissions",
+		"such_that":"if a student complains, the complaint can be addressed immediately",
+	}{
+		"As_a":"Teacher",
+		"I_want":"stop the evaluation of a submission",
+		"such_that":"a malformed submission does not block the evaluation of other submissions",
+	}{
+		"As_a":"Teacher",
+		"I_want":"automatic evaluation of submissions",
+		"such_that":"manual labour is reduced",
+	}{
+		"As_a":"Teacher",
+		"I_want":"",
+		"such_that":"",
+	}{
+		"As_a":"Teacher",
+		"I_want":"",
+		"such_that":"",
+	}{
+		"As_a":"Teacher",
+		"I_want":"",
+		"such_that":"",
+	}{
+		"As_a":"Teacher",
+		"I_want":"",
+		"such_that":"",
+	}{
+		"As_a":"Teacher",
+		"I_want":"",
+		"such_that":"",
+	}{
 		"As_a":"Teacher",
 		"I_want":"",
 		"such_that":"",
