@@ -55,5 +55,5 @@
 - individual reports
 
 ### Link to API readme
-[Link to API readme](./api/README.md)
+[Link to API readme](https://github.com/devopsexamg4/api/README.md)
 
