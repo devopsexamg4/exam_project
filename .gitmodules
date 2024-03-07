@@ -7,3 +7,6 @@
 [submodule "API"]
 	path = API
 	url = git@github.com:devopsexamg4/api.git
+[submodule "PIPELINE"]
+	path = PIPELINE
+	url = git@github.com:devopsexamg4/pipeline.git
