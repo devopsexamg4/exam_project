@@ -18,8 +18,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'
+
+      - name: Submodules
+        run: |
+          git submodule deinit --all --force
+          git submodule update --init --recursive
 
       - id: 'auth'
         uses: 'google-github-actions/auth@v2'
