@@ -1,12 +1,12 @@
 [submodule "UI"]
 	path = UI
-	url = https://github.com/devopsexamg4/ui.git
+	url = git@github.com:devopsexamg4/ui.git
 [submodule "DB"]
 	path = DB
-	url = https://github.com/devopsexamg4/db.git
+	url = git@github.com:devopsexamg4/db.git
 [submodule "API"]
 	path = API
-	url = https://github.com/devopsexamg4/api.git
+	url = git@github.com:devopsexamg4/api.git
 [submodule "PIPELINE"]
 	path = PIPELINE
-	url = https://github.com/devopsexamg4/pipeline.git
+	url = git@github.com:devopsexamg4/pipeline.git
