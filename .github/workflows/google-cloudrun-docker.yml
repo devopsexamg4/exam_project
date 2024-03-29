@@ -24,16 +24,21 @@ jobs:
         with:
           repository: 'devopsexamg4/api'
           ssh-key: ${{ secrets.SSH_PRIVATE_KEY_API }}
+          path: './API'
+        
       - name: Checkout DB
         uses: actions/checkout@v4
         with:
           repository: 'devopsexamg4/db'
           ssh-key: ${{ secrets.SSH_PRIVATE_KEY_DB }}
+          path: './DB'
+          
       - name: Checkout UI
         uses: actions/checkout@v4
         with:
           repository: 'devopsexamg4/ui'
           ssh-key: ${{ secrets.SSH_PRIVATE_KEY_UI }}
+          path: './UI'
 
       - id: 'auth'
         uses: 'google-github-actions/auth@v2'
