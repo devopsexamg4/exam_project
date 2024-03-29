@@ -16,15 +16,21 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - name: Setup SSH Agent
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          
-      - name: Checkout
+      - name: Checkout API
         uses: actions/checkout@v4
         with:
-          submodules: 'recursive'
+          repository: 'devopsexamg4/api'
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY_API }}
+      - name: Checkout DB
+        uses: actions/checkout@v4
+        with:
+          repository: 'devopsexamg4/db'
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY_DB }}
+      - name: Checkout UI
+        uses: actions/checkout@v4
+        with:
+          repository: 'devopsexamg4/ui'
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY_UI }}
 
       - id: 'auth'
         uses: 'google-github-actions/auth@v2'
