@@ -54,6 +54,8 @@ jobs:
             for service in $(docker-compose config --services); do
               image_id=$(docker-compose images -q $service)
               image_tag="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${service}:${{ github.sha }}"
+              echo "image_id: $image_id"
+              echo "image_tag: $image_tag"
               docker tag $image_id $image_tag
               docker push $image_tag
             done
