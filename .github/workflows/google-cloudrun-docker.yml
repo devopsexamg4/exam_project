@@ -39,6 +39,8 @@ jobs:
         uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: ${{ secrets.SERVICE_ACCOUNT_KEY}}
+      - name: List directory contents
+        run: ls -la ${{ github.workspace }}
 
       - name: Build and Push Container
         run: |-
