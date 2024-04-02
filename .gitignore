@@ -3,6 +3,7 @@ UI/env
 UI/UI/frontend/__pycache__/
 UI/UI/UI/__pycache__/
 UI/UI/frontend/migrations/*
+UI/static
 
 # files to ignore
 db.*
