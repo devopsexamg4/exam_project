@@ -1,12 +1,16 @@
 [submodule "UI"]
 	path = UI
 	url = https://github.com/devopsexamg4/ui.git
+	branch = main
 [submodule "DB"]
 	path = DB
 	url = https://github.com/devopsexamg4/db.git
+	branch = main
 [submodule "API"]
 	path = API
 	url = https://github.com/devopsexamg4/api.git
+	branch = main
 [submodule "PIPELINE"]
 	path = PIPELINE
 	url = https://github.com/devopsexamg4/pipeline.git
+	branch = main
