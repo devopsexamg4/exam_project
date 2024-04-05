@@ -18,7 +18,7 @@ jobs:
       - name: Git submodule update
         run: |
           git pull --recurse-submodules
-          git submodule update --remote --recursive
+          git submodule update --init --remote --recursive
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
