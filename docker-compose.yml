@@ -3,5 +3,7 @@
 services:
   web:
     build: ./UI
+    env_file:
+      - UI/.env
     ports:
       - 8000:8000
