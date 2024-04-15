@@ -14,3 +14,7 @@
 	path = PIPELINE
 	url = https://github.com/devopsexamg4/pipeline.git
 	branch = main
+[submodule "traefik"]
+	path = traefik
+	url = https://github.com/devopsexamg4/traefik.git
+	branch = main
