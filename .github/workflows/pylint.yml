@@ -22,4 +22,4 @@ jobs:
       run: |
         git pull --recurse-submodules
         git submodule update --init --remote --recursive
-        pylint $(git ls-files '*.py')
+        pylint $(git ls-files --recurse-submodules '*.py')
