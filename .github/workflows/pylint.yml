@@ -22,7 +22,7 @@ jobs:
         git pull --recurse-submodules
         git submodule update --init --remote --recursive
         # get all requirement.txt files and call pip install on them
-        find . | grep -h *requirements.txt | while read line; do pip install -r $line ; done
+        find . | grep -h *requirements.txt | while read line; do pip install -r $line ; echo $line ; done
     - name: Analysing the code with pylint
       run: |
         git pull --recurse-submodules
