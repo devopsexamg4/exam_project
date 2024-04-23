@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.12"]
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
@@ -23,7 +23,7 @@ jobs:
         git submodule update --init --remote --recursive
         # get all requirement.txt files and call pip install on them
         echo "installing requirements"
-        git ls-files --recurse-submodules --full-name | grep -E *requirements.txt 2>/dev/null  | while read line; do pip install -r $line ; echo $line ; done
+        git ls-files --recurse-submodules --full-name | grep -E *requirements.txt 2>/dev/null  |  echo installing requirements from $line ; while read line; do pip install -r $line ; done
         echo "done installing requirements"
     - name: Analysing the code with pylint
       run: |
