@@ -18,7 +18,7 @@ spec:
       containers:
         - name: gui
           image: europe-north1-docker.pkg.dev/devsecopsexamproject/exam-project/ui:latest
-          imagePullPolicy: Never
+          #imagePullPolicy: Never
           ports:
             - name: incomming
               containerPort: 8000
