@@ -4,14 +4,11 @@ metadata:
   name: traefik-vol
 spec:
   accessModes:
-    - ReadWriteOnce
+  - ReadWriteOnce
+  storageClassName: standard-rwo
   resources:
     requests:
-      storage: 128Mi
-  storageClassName: standard
-  selector:
-    matchLabels:
-      app: traefik
+      storage: 1Gi
 ---
 kind: Deployment
 apiVersion: apps/v1
@@ -51,13 +48,13 @@ spec:
         - name: traefik
           image: traefik:v2.11
           args:
-            # - --api.insecure
             - --providers.kubernetesingress
             ## certificate resolver
-            - --certificatesresolvers.myresolver.acme.email=aaskh20@student.sdu.dk
+            - --certificatesresolvers.myresolver.acme.email=andreas.askholm@gmail.com
             - --certificatesresolvers.myresolver.acme.dnschallenge.provider=gcloud
             - --certificatesresolvers.myresolver.acme.dnschallenge=true
             - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+            # remove the staging part of this when everything is nice
             - --certificatesresolvers.myresolver.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
             ## entrypoint config
             - --entrypoints.web.http.redirections.entrypoint.to=websecure
@@ -66,8 +63,8 @@ spec:
             - --entrypoints.websecure.address=:443
             - --entrypoints.websecure.http.tls=true
             - --entrypoints.websecure.http.tls.certresolver=myresolver
-            - --entrypoints.websecure.http.tls.domains[0].main=devg4.tf
-            - --entrypoints.websecure.http.tls.domains[1].sans=api.devg4.tf
+            # - --entrypoints.websecure.http.tls.domains[0].main=devg4.dk.eu.org
+            # - --entrypoints.websecure.http.tls.domains[1].sans=api.devg4.dk.eu.org
             ## logging config
             - --log=true
             - --log.format=json
@@ -94,20 +91,6 @@ spec:
           - mountPath: "/etc/service-account.json"
             name: gcloud-service
             readOnly: true
-
-# ---
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: traefik-dashboard-service
-
-# spec:
-#   type: LoadBalancer
-#   ports:
-#     - port: 8080
-#       targetPort: dashboard
-#   selector:
-#     app: traefik
 ---
 apiVersion: v1
 kind: Service

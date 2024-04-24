@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: gui
-          image: django:v2
+          image: europe-north1-docker.pkg.dev/devsecopsexamproject/exam-project/ui:latest
           imagePullPolicy: Never
           ports:
             - name: incomming
@@ -42,13 +42,13 @@ metadata:
   name: gui-ingress
 spec:
   rules:
-  - host: devg4.tf
-    http:
+  # - host: devg4.dk.eu.org
+  - http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: gui
+            name: gui-service
             port:
               name: websecure
