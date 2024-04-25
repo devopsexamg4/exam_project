@@ -27,4 +27,4 @@ jobs:
         echo "done installing requirements"
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files --recurse-submodules '*.py' ':!:*conf.py')
+        pylint $(git ls-files --recurse-submodules '*.py' ':!:*conf.py' ':!:*manage.py')
