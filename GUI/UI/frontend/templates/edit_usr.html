@@ -1,0 +1,8 @@
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_div }}
+    <div class="pt-3">
+        <button class="btn btn-secondary" type="submit"> update</button>
+        <input type="hidden" value={{ record.pk }} name="pk"/>
+    </div>
+</form>

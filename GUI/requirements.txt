@@ -3,8 +3,10 @@ argon2-cffi-bindings==21.2.0
 asgiref==3.7.2
 cffi==1.16.0
 Django==5.0.3
+django-bootstrap5==24.2
+django-filter==24.2
 django-tables2==2.7.0
-gunicorn==21.2.0
+gunicorn==22.0.0
 packaging==24.0
 pycparser==2.22
 python-decouple==3.8
