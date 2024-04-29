@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_div }}
+    <div class="pt-2 row">
+        <div class="col-3">
+            <button class="btn btn-secondary" type="submit" >Signup</button>
+        </div>
+        <div class="col-3">
+            <p>Already have a user:</p>
+            <a class="btn btn-secondary" href="{% url 'login' %}" role="button">Login</a>
+        </div>
+    </div>
+</form> 
+
+{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block scripts %}{% endblock %}
