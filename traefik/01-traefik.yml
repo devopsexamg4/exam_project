@@ -1,0 +1,119 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: traefik-vol
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: standard-rwo
+  resources:
+    requests:
+      storage: 1Gi
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: traefik-deployment
+  labels:
+    app: traefik
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      serviceAccountName: traefik-account
+
+      volumes:
+      - name: traefik-data
+        persistentVolumeClaim:
+          claimName: traefik-vol
+      - name: gcloud-service
+        secret:
+          secretName: traefik-dns-acc
+
+      initContainers:
+        - name: volume-permissions
+          image: busybox:1.36.1
+          command: ["sh", "-c", "touch /letsencrypt/acme.json && chmod -Rv 600 /letsencrypt/* && chown 65532:65532 /letsencrypt/acme.json"]
+          volumeMounts:
+          - mountPath: /letsencrypt
+            name: traefik-data
+          
+      containers:
+        - name: traefik
+          image: traefik:v2.11
+          args:
+            - --providers.kubernetesingress
+            ## certificate resolver
+            - --certificatesresolvers.myresolver.acme.email=andreas.askholm@gmail.com
+            - --certificatesresolvers.myresolver.acme.dnschallenge.provider=gcloud
+            - --certificatesresolvers.myresolver.acme.dnschallenge=true
+            - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+            # remove the staging part of this when everything is nice
+            - --certificatesresolvers.myresolver.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
+            ## entrypoint config
+            - --entrypoints.web.http.redirections.entrypoint.to=websecure
+            - --entrypoints.web.http.redirections.entrypoint.scheme=https
+            - --entrypoints.web.address=:80
+            - --entrypoints.websecure.address=:443
+            - --entrypoints.websecure.http.tls=true
+            - --entrypoints.websecure.http.tls.certresolver=myresolver
+            # - --entrypoints.websecure.http.tls.domains[0].main=devg4.dk.eu.org
+            # - --entrypoints.websecure.http.tls.domains[1].sans=api.devg4.dk.eu.org
+            ## logging config
+            - --log=true
+            - --log.format=json
+            - --log.level=WARNING
+          ## environment variables
+          env:
+            - name: GCE_SERVICE_ACCOUNT_FILE
+              value: "/etc/service-account.json"
+            - name: GCE_PROJECT
+              valueFrom:
+                secretKeyRef:
+                  key: project
+                  name: gcloud-project
+          ## ports to use
+          ports:
+            - name: web
+              containerPort: 80
+            - name: websecure
+              containerPort: 443
+          ## mounted volumes
+          volumeMounts:
+          - mountPath: /letsencrypt
+            name: traefik-data
+          - mountPath: "/etc/service-account.json"
+            name: gcloud-service
+            readOnly: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-web-service
+
+spec:
+  type: LoadBalancer
+  ports:
+    - targetPort: web
+      port: 80
+  selector:
+    app: traefik
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-websec-service
+
+spec:
+  type: LoadBalancer
+  ports:
+    - targetPort: websecure
+      port: 443
+  selector:
+    app: traefik
