@@ -2,6 +2,89 @@
 
 services:
   web:
-    build: ./UI
+    build: ./GUI
+    env_file:
+      - ./GUI/.env
     ports:
       - 8000:8000
+    networks:
+      - prox
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.django.rule=Host(`gui.django`)
+      - traefik.http.routers.django.entrypoints=websec
+      - traefik.http.routers.django.priority=1
+      - traefik.http.routers.django.tls=true
+      - traefik.http.services.django.loadbalancer.server.port=8000
+      - traefik.http.middlewares.mywwwredirect.redirectregex.regex=^https://www\.(.*)
+      - traefik.http.middlewares.mywwwredirect.redirectregex.replacement=https://$${1}
+      - traefik.http.routers.django.middlewares=mywwwredirect
+      # - traefik.http.routers.django.tls.certresolver=myresolver
+
+      
+
+  whoami:
+    image: traefik/whoami:v1.8
+    networks:
+      - prox
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.mywhoami.rule=Host(`who.tf`)
+      - traefik.http.routers.mywhoami.entrypoints=websec
+      - traefik.http.routers.mywhoami.tls=true
+      - traefik.http.routers.mywhoami.priority=25
+      - traefik.http.middlewares.mywwwredirect.redirectregex.regex=^https://www\.(.*)
+      - traefik.http.middlewares.mywwwredirect.redirectregex.replacement=https://$${1}
+      - traefik.http.routers.mywhoami.middlewares=mywwwredirect
+      # - traefik.http.routers.mywhoami.tls.certresolver=myresolver
+
+  traefik:
+    image: "traefik:v3.0"
+    container_name: "traefik"
+    command:
+      - --api.dashboard=true
+      # - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=prox
+      - --entrypoints.web.http.redirections.entrypoint.to=websec
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.web.address=:80
+      - --entrypoints.websec.address=:443
+      - --entrypoints.websec.asDefault=true
+      - --entrypoints.websec.http.tls.certresolver=myresolver
+      - --certificatesresolvers.myresolver.acme.email=aaskh20@student.sdu.dk
+      - --certificatesresolvers.myresolver.acme.tlschallenge=true
+      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.dashboard.rule=Host(`dashboard.traefik`)
+      - traefik.http.routers.dashboard.service=api@internal
+      - traefik.http.routers.dashboard.priority=27
+      - traefik.http.routers.dashboard.entrypoints=websec
+      - traefik.http.routers.dashboard.tls=true
+      - traefik.http.middlewares.mywwwredirect.redirectregex.regex=^https://www\.(.*)
+      - traefik.http.middlewares.mywwwredirect.redirectregex.replacement=https://$${1}
+      - traefik.http.routers.dashboard.middlewares=mywwwredirect
+      - traefik.http.routers.dashboard.middlewares=myauth
+      - traefik.http.middlewares.myauth.basicauth.users=test:$$apr1$$3K37Izhy$$XloTklTLMVGBSokbpAJmH1
+      # - traefik.http.routers.dashboard.tls.certresolver=myresolver
+
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - letsencrypt:/letsencrypt
+    networks:
+      - prox
+
+networks:
+  prox:
+    name: prox
+    external: true
+
+volumes:
+  letsencrypt:
+    name: letsencrypt
