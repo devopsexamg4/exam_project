@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # THE VERY BEST REPO
 # For development purposes only
 ## Staring the UI service first time(Hardmode)
@@ -57,3 +58,7 @@
 ### This is but a test
 [Link to API readme](https://github.com/devopsexamg4/api/blob/a0b96d2763a471bad7a3e72c5c6bce2d5c8e5971/README.md)
 
+=======
+# traefik
+Small repo containing the reverse proxy stuf and things
+>>>>>>> traefik-origin/main
