@@ -6,7 +6,3 @@
 	path = API
 	url = https://github.com/devopsexamg4/api.git
 	branch = main
-[submodule "PIPELINE"]
-	path = PIPELINE
-	url = https://github.com/devopsexamg4/pipeline.git
-	branch = main
