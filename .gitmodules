@@ -2,7 +2,3 @@
 	path = DB
 	url = https://github.com/devopsexamg4/db.git
 	branch = main
-[submodule "API"]
-	path = API
-	url = https://github.com/devopsexamg4/api.git
-	branch = main
