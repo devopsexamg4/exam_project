@@ -4,6 +4,7 @@ TODO:
     - make sure help text exists
     - make sure the docstrings provide a simple how to
     - use a proper date picker for the assignments
+    - enhance visibility of already added students in AddStudForm
 """
 from django import forms
 from django.utils.translation import gettext_lazy as _
@@ -59,4 +60,4 @@ class SubmissionForm(forms.ModelForm):
 
 class AddStudForm(forms.Form):
     """form to add students to an assignment"""
-    students = forms.MultipleChoiceField(choices = [User.objects.filter(type = 'STU')], widget = forms.CheckboxSelectMultiple())
+    students = forms.MultipleChoiceField(choices = [(u.id,u.username) for u in User.objects.filter(type = 'STU')], widget = forms.CheckboxSelectMultiple())

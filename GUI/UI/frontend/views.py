@@ -83,7 +83,9 @@ def student(request):
             messages.error(request, form.errors)
     form = SubmissionForm(user=request.user)
 
-    test = AddStudForm()
+    test = AddStudForm(initial = {'students':[u.id for u in User.objects.filter(username = 'watercres')]})
+    print(test.fields)
+
     context = {
         'title':'Student',
         'form':form,
