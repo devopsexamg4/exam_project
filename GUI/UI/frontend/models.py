@@ -2,6 +2,7 @@
 All models used througout the application is defined in this file
 """
 from datetime import datetime,timedelta
+from tkinter import CASCADE
 from uuid import uuid4
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -11,11 +12,11 @@ from django.core.validators import MaxValueValidator
 
 def dockerdir(instance, _):
     """generate a path to save the uploaded dockerfile"""
-    return f"assignments/{instance.user.id}/{str(uuid4())}/"
+    return f"assignments/{str(uuid4())}/{instance.dockerfile}"
 
 def subdir(instance, _):
     """Generate a path to save the uploaded submission"""
-    return f"submissions/{instance.user.id}/{str(uuid4())}/"
+    return f"submissions/{str(uuid4())}/{instance.File}"
 
 class Assignments(models.Model):
     """
@@ -96,6 +97,11 @@ class StudentSubmissions(models.Model):
         auto_now_add = True
     )
 
+    assignment = models.ForeignKey(
+        Assignments,
+        on_delete = models.CASCADE
+    )
+
 class User(AbstractUser):
     class TypeChoices(models.TextChoices):
         ADMIN = "ADM", _("Admin")
@@ -117,5 +123,5 @@ class User(AbstractUser):
     )
 
     assignments = models.ManyToManyField(
-        Assignments,
+        Assignments
     )

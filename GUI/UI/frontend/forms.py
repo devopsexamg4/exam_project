@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.forms import UserCreationForm
-from .models import User
+from .models import Assignments, StudentSubmissions, User
 
 class SignupForm(UserCreationForm):
     """form to create a new user"""
@@ -29,3 +29,23 @@ class UserTypeForm(forms.ModelForm):
         help_texts = {
             'type':_('Select the type this user should have'),
         }
+
+class AssignmentForm(forms.ModelForm):
+    """A form to submit new assignments"""
+    class Meta:
+        """The model and attributes used to create a new assignment"""
+        model = Assignments
+        fields = "__all__"
+
+class SubmissionForm(forms.ModelForm):
+    """A form to make a submission"""
+    def __init__(self, *args, user = None, **kwargs):
+        super().__init__(*args,**kwargs)
+        if user is not None:
+            self.fields['assignment'].queryset = user.assignments.all()
+        else:
+            self.fields['assignment'].queryset = Assignments.objects.none()
+    class Meta:
+        """The model and atrributes to create a submission"""
+        model = StudentSubmissions
+        exclude = ['result','log']

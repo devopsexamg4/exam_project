@@ -9,7 +9,7 @@ from django_tables2 import RequestConfig
 
 from .tables import *
 from .models import User
-from .forms import SignupForm, LoginForm, UserTypeForm
+from .forms import SignupForm, LoginForm, SubmissionForm, UserTypeForm, AssignmentForm
 
 STRING_403 = "You do not have permissions to view this page"
 
@@ -47,6 +47,8 @@ def admin(request):
         if form.is_valid():
             form.save()
             messages.info(request, f"{usr.username} has been updated")
+        else:
+            messages.error(request, form.errors)
 
     filt = UserFilter(request.GET, queryset = User.objects.all())
     table = UserTable(data=filt.qs)
@@ -70,8 +72,19 @@ def student(request):
         messages.error(request, STRING_403)
         return redirect('index')
 
+    if request.method == "POST":
+        form = SubmissionForm(request.POST, request.FILES, user = request.user)
+        if form.is_valid():
+            sub = form.save()
+            usr = User.objects.filter(username = request.user).first()
+            usr.submission.add(sub)
+            messages.info(request, f"submission received")
+        else:
+            messages.error(request, form.errors)
+    form = SubmissionForm(user=request.user)
     context = {
         'title':'Student',
+        'form':form
     }
     return render(request, 'student.html', context)
 
@@ -82,9 +95,21 @@ def teacher(request):
         # the logged in user is not a teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
+    
+    if request.method == "POST":
+        form = AssignmentForm(request.POST, request.FILES)
+        if form.is_valid():
+            assignment = form.save()
+            usr = User.objects.filter(username = request.user).first()
+            usr.assignments.add(assignment)
+            messages.info(request, f"Assignment has been created")
+        else:
+            messages.error(request, form.errors)
 
+    form = AssignmentForm()
     context = {
         'title':'Teacher',
+        'form':form,
     }
     return render(request, 'teacher.html', context)
 

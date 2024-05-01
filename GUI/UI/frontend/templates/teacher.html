@@ -1,8 +1,17 @@
 {% extends 'base.html' %}
 
-{% block title %}{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
-{% block content %}{% endblock %}
+{% block content %}
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="pt-3">
+        <button class="btn btn-secondary" type="submit">Submit Assignment</button>
+    </div>
+</form>
+{% endblock %}
 
 {% block footer %}{% endblock %}
 
