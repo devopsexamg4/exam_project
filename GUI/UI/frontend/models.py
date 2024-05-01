@@ -1,5 +1,10 @@
 """
 All models used througout the application is defined in this file
+TODO:
+    - add help text to all fields
+    - add docstring to studentsubmission
+    - add docstring to User
+    - validate the uploaded files
 """
 from datetime import datetime,timedelta
 from tkinter import CASCADE

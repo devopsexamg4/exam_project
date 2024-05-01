@@ -1,3 +1,10 @@
+"""
+TODO:
+    - create a docstring for this module
+    - make sure help text exists
+    - make sure the docstrings provide a simple how to
+    - use a proper date picker for the assignments
+"""
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.forms import UserCreationForm
@@ -49,3 +56,7 @@ class SubmissionForm(forms.ModelForm):
         """The model and atrributes to create a submission"""
         model = StudentSubmissions
         exclude = ['result','log']
+
+class AddStudForm(forms.Form):
+    """form to add students to an assignment"""
+    students = forms.MultipleChoiceField(choices = [User.objects.filter(type = 'STU')], widget = forms.CheckboxSelectMultiple())

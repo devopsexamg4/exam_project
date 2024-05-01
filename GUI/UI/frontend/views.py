@@ -9,7 +9,7 @@ from django_tables2 import RequestConfig
 
 from .tables import *
 from .models import User
-from .forms import SignupForm, LoginForm, SubmissionForm, UserTypeForm, AssignmentForm
+from .forms import AddStudForm, SignupForm, LoginForm, SubmissionForm, UserTypeForm, AssignmentForm
 
 STRING_403 = "You do not have permissions to view this page"
 
@@ -82,9 +82,12 @@ def student(request):
         else:
             messages.error(request, form.errors)
     form = SubmissionForm(user=request.user)
+
+    test = AddStudForm()
     context = {
         'title':'Student',
-        'form':form
+        'form':form,
+        'test':test,
     }
     return render(request, 'student.html', context)
 

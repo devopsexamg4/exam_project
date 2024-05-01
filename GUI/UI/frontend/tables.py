@@ -1,3 +1,10 @@
+"""
+TODO:
+    - add a descriptive docstring to this module
+    - create table to list assignments
+    - create table to list submissions
+    - ensure descriptive docstrings for all classes
+"""
 import django_tables2 as tables
 from django_tables2 import SingleTableMixin
 from django_filters.views import FilterView
