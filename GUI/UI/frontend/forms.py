@@ -3,7 +3,6 @@ TODO:
     - create a docstring for this module
     - make sure help text exists
     - make sure the docstrings provide a simple how to
-    - use a proper date picker for the assignments
     - enhance visibility of already added students in AddStudForm
 """
 from bootstrap_datepicker_plus.widgets import DateTimePickerInput, TimePickerInput
