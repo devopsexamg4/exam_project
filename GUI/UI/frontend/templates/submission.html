@@ -6,7 +6,7 @@
 Assignment: {{submission.assignment }}</br>
 Uploaded: {{ submission.uploadtime }}</br>
 Result: {{ submission.result }}</br>
-Log: {{ submission.log }}</br>
+Log: <a href="{{ submission.log.url }}">{{submission.log}}</a>
 
 {% endblock %}
 
