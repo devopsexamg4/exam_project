@@ -3,16 +3,18 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
+{% load django_bootstrap5 %}
 
 <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ form.as_table }}
+    {% bootstrap_form form %}
     <div class="pt-3">
         <button class="btn btn-secondary" type="submit">Submit</button>
     </div>
 </form>
 
-{{test.as_div}}
+{% bootstrap_form test %}
+
 
 {% endblock %}
 

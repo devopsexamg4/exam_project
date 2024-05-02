@@ -6,6 +6,7 @@ TODO:
     - use a proper date picker for the assignments
     - enhance visibility of already added students in AddStudForm
 """
+from bootstrap_datepicker_plus.widgets import DateTimePickerInput, TimePickerInput
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.forms import UserCreationForm
@@ -44,6 +45,11 @@ class AssignmentForm(forms.ModelForm):
         """The model and attributes used to create a new assignment"""
         model = Assignments
         fields = "__all__"
+        widgets = {
+            'start':DateTimePickerInput(),
+            'end':DateTimePickerInput(),
+            'timer':TimePickerInput()
+        }
 
 class SubmissionForm(forms.ModelForm):
     """A form to make a submission"""

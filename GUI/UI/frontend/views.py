@@ -84,7 +84,6 @@ def student(request):
     form = SubmissionForm(user=request.user)
 
     test = AddStudForm(initial = {'students':[u.id for u in User.objects.filter(username = 'watercres')]})
-    print(test.fields)
 
     context = {
         'title':'Student',
@@ -100,7 +99,7 @@ def teacher(request):
         # the logged in user is not a teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
-    
+
     if request.method == "POST":
         form = AssignmentForm(request.POST, request.FILES)
         if form.is_valid():

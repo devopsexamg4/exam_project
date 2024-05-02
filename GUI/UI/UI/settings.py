@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django_tables2',
     'django_bootstrap5',
     'django_filters',
+    'bootstrap_datepicker_plus'
 
 ]
 

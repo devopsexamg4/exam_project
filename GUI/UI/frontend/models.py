@@ -7,7 +7,6 @@ TODO:
     - validate the uploaded files
 """
 from datetime import datetime,timedelta
-from tkinter import CASCADE
 from uuid import uuid4
 from django.db import models
 from django.contrib.auth.models import AbstractUser

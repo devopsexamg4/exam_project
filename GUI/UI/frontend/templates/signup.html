@@ -3,15 +3,19 @@
 {% block title %}{{title}}{% endblock %}
 
 {% block content %}
+{% load django_bootstrap5 %}
+
 <form method="POST">
     {% csrf_token %}
-    {{ form.as_div }}
+    {% bootstrap_form form %}
     <div class="pt-2 row">
-        <div class="col-3">
+        <div class="col-7">
             <button class="btn btn-secondary" type="submit" >Signup</button>
         </div>
         <div class="col-3">
             <p>Already have a user:</p>
+        </div>
+        <div class="col-2">
             <a class="btn btn-secondary" href="{% url 'login' %}" role="button">Login</a>
         </div>
     </div>

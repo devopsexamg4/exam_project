@@ -3,9 +3,11 @@
 {% block title %}{{title}}{% endblock %}
 
 {% block content %}
+{% load django_bootstrap5 %}
+
 <form method="POST">
 {% csrf_token %}
-{{ form.as_p }}
+{% bootstrap_form form %}
     <div class="col-3">
         <button class="btn btn-secondary" type="submit" >Login</button>
     </div>
