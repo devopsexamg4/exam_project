@@ -14,16 +14,17 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator
 from django.conf import settings
+import os
 
 
 
 def dockerdir(instance, _):
     """generate a path to save the uploaded dockerfile"""
-    return f"{settings.MEDIA_ROOT}/assignments/{str(uuid4())}/{instance.dockerfile}"
+    return f"assignments/{str(uuid4())[0:5]}{instance.dockerfile}"
 
 def subdir(instance, _):
     """Generate a path to save the uploaded submission"""
-    return f"{settings.MEDIA_ROOT}/submissions/{str(uuid4())}/{instance.File}"
+    return f"submissions/{str(uuid4())[0:5]}{instance.File}"
 
 class Assignments(models.Model):
     """
