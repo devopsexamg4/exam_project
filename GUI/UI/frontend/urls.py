@@ -9,4 +9,9 @@ urlpatterns = [
     path('signup/', views.signup, name='signup'),
     path('admin/', views.admin, name='admin'),
     path('student/', views.student, name='student'),
+    path('editassignment/', views.edit_assignment, name='edit_assignment'),
+    path('newassignment/', views.create_assignment, name='new_assignment'),
+    path('assignment/', views.assignment, name='assignment_detail'),
+    path('submission/', views.submission, name='sub_details'),
+    path(r'deleteassignment/<pk>/', views.AssignmentDeleteView.as_view() ,name='delassign'),
 ]

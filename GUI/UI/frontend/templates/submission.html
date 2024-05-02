@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+Assignment: {{submission.assignment }}</br>
+Uploaded: {{ submission.uploadtime }}</br>
+Result: {{ submission.result }}</br>
+Log: {{ submission.log }}</br>
+
+{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block scripts %}{% endblock %}

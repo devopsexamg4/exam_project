@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+{% load django_bootstrap5 %}
+{{ form.media }}
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    {% bootstrap_form studform %}
+    <div class="pt-3">
+        <button class="btn btn-secondary" type="submit">Submit Assignment</button>
+        <input type="hidden" value="save" name="save"/>
+        <input type="hidden" value="{{ pk }}" name="pk"/>
+    </div>
+</form>
+{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block scripts %}{% endblock %}

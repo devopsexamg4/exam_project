@@ -4,6 +4,8 @@
 
 {% block content %}
 {% load django_bootstrap5 %}
+{% load render_table from django_tables2 %}
+
 
 <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
@@ -12,8 +14,19 @@
         <button class="btn btn-secondary" type="submit">Submit</button>
     </div>
 </form>
+<div class="pt-3">
+    {% if filter %}
+    <form action="" method="get" class="form">
+        <div class="row">    			
+            {% bootstrap_field filter.form.result__contains wrapper_class="form-control-sm col-md  p-2" %}
+            {% bootstrap_field filter.form.uploadtime__contains wrapper_class="form-control-sm col-md  p-2" %}
+        </div> 
+        {% bootstrap_button 'search table' button_class="btn-secondary" %}
+    </form>
+    {% endif %}
+    {% render_table table %}
+</div>
 
-{% bootstrap_form test %}
 
 
 {% endblock %}

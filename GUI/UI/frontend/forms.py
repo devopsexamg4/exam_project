@@ -9,7 +9,7 @@ from bootstrap_datepicker_plus.widgets import DateTimePickerInput, TimePickerInp
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.forms import UserCreationForm
-from .models import Assignments, StudentSubmissions, User
+from .models import Assignments, User, StudentSubmissions
 
 class SignupForm(UserCreationForm):
     """form to create a new user"""
@@ -47,7 +47,8 @@ class AssignmentForm(forms.ModelForm):
         widgets = {
             'start':DateTimePickerInput(),
             'end':DateTimePickerInput(),
-            'timer':TimePickerInput()
+            'timer':TimePickerInput(),
+            'title':forms.Textarea(attrs={'rows':2})
         }
 
 class SubmissionForm(forms.ModelForm):
@@ -61,7 +62,7 @@ class SubmissionForm(forms.ModelForm):
     class Meta:
         """The model and atrributes to create a submission"""
         model = StudentSubmissions
-        exclude = ['result','log']
+        exclude = ['result','log', 'student']
 
 class AddStudForm(forms.Form):
     """form to add students to an assignment"""

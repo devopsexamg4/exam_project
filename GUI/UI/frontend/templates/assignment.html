@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+
+<p>Assigned students:</p>
+{% for stud in students %}
+{{ stud.username }}</br>
+{% endfor %}
+
+{{ assignment.title }}
+{{ assignment.start }}
+{{ assignment.end }}
+{{ assignment.end }}
+
+<P>submissions:</p>
+{% for sub in submissions %}
+{{ sub }}</br>
+{% endfor %}
+
+{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block scripts %}{% endblock %}

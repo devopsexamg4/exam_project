@@ -5,6 +5,7 @@ TODO:
     - add docstring to studentsubmission
     - add docstring to User
     - validate the uploaded files
+    - fix the delete function for file fields
 """
 from datetime import datetime,timedelta
 from uuid import uuid4
@@ -37,6 +38,10 @@ class Assignments(models.Model):
         PAUSED = "PAU",_("Paused")
         FINISHED = "FIN",_("Finished")
 
+    title = models.TextField(
+        default=f"Assignment-{str(uuid4())[:5]}"
+    )
+
     status = models.CharField(
         max_length = 3,
         choices = StatusChoices,
@@ -45,7 +50,8 @@ class Assignments(models.Model):
 
     maxmemory = models.PositiveIntegerField(
         default = 100,
-        validators = [ MaxValueValidator(1000) ]
+        validators = [ MaxValueValidator(1000) ],
+        help_text = "Amount of memory allocated to this assignment, in MiB"
     )
 
     maxcpu = models.PositiveIntegerField(
@@ -75,12 +81,33 @@ class Assignments(models.Model):
         validators = [ MaxValueValidator(15) ]
     )
 
+class User(AbstractUser):
+    class TypeChoices(models.TextChoices):
+        ADMIN = "ADM", _("Admin")
+        TEACHER = "TEA", _("Teacher")
+        STUDENT = "STU", _("Student")
+
+    type = models.CharField(
+        max_length = 3,
+        choices = TypeChoices,
+        null = True,
+        default = TypeChoices.STUDENT,
+        )
+
+    assignments = models.ManyToManyField(
+        Assignments
+    )
 
 class StudentSubmissions(models.Model):
     class ResChoices(models.TextChoices):
         PASSED = "PAS", _("Passed")
         FAILED = "FAI", _("Failed")
         PENDING = "PEN", _("Pending")
+
+    student = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
 
     result = models.CharField(
         max_length = 3,
@@ -101,31 +128,8 @@ class StudentSubmissions(models.Model):
         auto_now_add = True
     )
 
+
     assignment = models.ForeignKey(
         Assignments,
         on_delete = models.CASCADE
-    )
-
-class User(AbstractUser):
-    class TypeChoices(models.TextChoices):
-        ADMIN = "ADM", _("Admin")
-        TEACHER = "TEA", _("Teacher")
-        STUDENT = "STU", _("Student")
-
-    type = models.CharField(
-        max_length = 3,
-        choices = TypeChoices,
-        null = True,
-        default = TypeChoices.STUDENT,
-        )
-
-    submission = models.ForeignKey(
-        StudentSubmissions,
-        on_delete = models.CASCADE,
-        blank = True,
-        null = True
-    )
-
-    assignments = models.ManyToManyField(
-        Assignments
     )
