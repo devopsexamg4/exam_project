@@ -33,7 +33,7 @@ class UserTypeForm(forms.ModelForm):
     class Meta:
         """The model and attributes needed to perform the action"""
         model = User
-        fields = ['type']
+        fields = ['type','is_active']
         help_texts = {
             'type':_('Select the type this user should have'),
         }

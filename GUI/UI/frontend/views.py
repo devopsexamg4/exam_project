@@ -296,3 +296,10 @@ class AssignmentDeleteView(DeleteView, SingleObjectMixin):
     model = Assignments
     success_url = reverse_lazy('teacher')
     
+class UserDeleteView(DeleteView, SingleObjectMixin):
+    model = User
+    success_url = reverse_lazy('admin')
+
+class SubDeleteView(DeleteView, SingleObjectMixin):
+    model = StudentSubmissions
+    success_url = reverse_lazy('student')

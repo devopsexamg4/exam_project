@@ -19,7 +19,7 @@ class UserTable(tables.Table):
         """Meta class for the UserTable."""
         model = User
         template_name = TABLE_TEMPLATE
-        fields = ('username', 'email', 'type')
+        fields = ('username', 'email', 'type', 'is_active')
         attrs = {'ref':'UserTable'}
 
 class AssTable(tables.Table):
@@ -36,7 +36,8 @@ class AssTable(tables.Table):
 
 class SubmissionTable(tables.Table):
     """A table to list submissions in the system."""
-    details = tables.TemplateColumn(orderable = False, template_name='sub_detail_button.html') 
+    details = tables.TemplateColumn(orderable = False, template_name='sub_detail_button.html')
+    delete = tables.TemplateColumn(orderable = False, template_name="subdel.html")
     class Meta:
         """Meta class for the SubmissionTable."""
         model = StudentSubmissions

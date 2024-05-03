@@ -1,8 +1,52 @@
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_div }}
-    <div class="pt-3">
-        <button class="btn btn-secondary" type="submit"> update</button>
-        <input type="hidden" value={{ record.pk }} name="pk"/>
+{% load django_bootstrap5 %}
+<div class="container-sm">	
+        <form method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col">
+                {% bootstrap_form form exclude="is_active" layout='inline' %}
+                </div>
+                <div class="col">
+                {% bootstrap_form form exclude="type" layout='inline' %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+            <button class="btn btn-secondary" type="submit"> Update</button>
+            <input type="hidden" value={{ record.pk }} name="pk"/>
+                </div>
+        </form>
+        <div class="col">
+        <button  
+            type="button" 
+            class="btn btn-outline-danger" 
+            data-bs-toggle="modal"
+            data-bs-target="#confirm_del{{record.pk}}">
+            Delete user
+        </button>
     </div>
-</form>
+    </div>
+<div class="modal fade" 
+    id="confirm_del{{record.pk}}" 
+    tabindex="-1" 
+    aria-labelledby="confirm_del_label{{record.pk}}"
+    aria-hidden="true">
+   <div class="modal-dialog modal-dialog-centered">
+       <div class="modal-content">
+           <div class="modal-header">
+               <h1 class="modal-title fs-5" id="confirm_del_label{{record.pk}}">Confirm deletion!</h1>
+               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
+           </div>
+           <div class="modal-body">
+               <p>Are you sure you want to delete the user '{{record}}' and all data associated with it?</p>
+               <p>Consider making the user inactive instead</p>
+           </div>
+           <div class="modal-footer">
+               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+               <form method="POST" action={% url 'deluser' record.pk %} method="post">{% csrf_token %}
+                   <input class="btn btn-outline-danger" type="submit" value="Confirm">
+               </form>
+           </div>
+       </div>
+   </div>
+</div>
