@@ -14,21 +14,21 @@
 				type="button" 
 				class="btn btn-outline-danger" 
 				data-bs-toggle="modal"
-				data-bs-target="#confirm_del">
+				data-bs-target="#confirm_del{{record.pk}}">
 				Delete
 			</button>
 		</div>
 	</div>
 </div>
 <div class="modal fade" 
-	 id="confirm_del" 
+	 id="confirm_del{{record.pk}}" 
 	 tabindex="-1" 
-	 aria-labelledby="confirm_del_label"
+	 aria-labelledby="confirm_del_label{{record.pk}}"
 	 aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h1 class="modal-title fs-5" id="confirm_del_label">Confirm deletion!</h1>
+				<h1 class="modal-title fs-5" id="confirm_del_label{{record.pk}}">Confirm deletion!</h1>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
 			</div>
 			<div class="modal-body">

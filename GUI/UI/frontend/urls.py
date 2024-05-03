@@ -13,6 +13,7 @@ urlpatterns = [
     path('newassignment/', views.create_assignment, name='new_assignment'),
     path('assignment/', views.assignment, name='assignment_detail'),
     path('submission/', views.submission, name='sub_details'),
+    path('studentdetails/', views.viewstudent, name='viewstudent'),
     path(r'deleteassignment/<pk>/', views.AssignmentDeleteView.as_view() ,name='delassign'),
     path(r'deleteuser/<pk>/', views.UserDeleteView.as_view() ,name='deluser'),
     path(r'deletesub/<pk>/', views.SubDeleteView.as_view() ,name='delsub'),

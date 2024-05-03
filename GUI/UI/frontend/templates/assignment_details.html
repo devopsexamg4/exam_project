@@ -1,7 +1,9 @@
-<form method="post" action="{% url 'assignment_detail' %}">
-    {% csrf_token %}
-    <div>
-        <button class="btn btn-secondary" type="submit">View details</button>
-        <input type="hidden" value={{ record.pk }} name="pk"/>
-    </div>
-</form>
+<div class="col col-lg-auto p-1">
+    <form method="post" action="{% url 'assignment_detail' %}">
+        {% csrf_token %}
+        <div>
+            <button class="btn btn-secondary" type="submit">View details</button>
+            <input type="hidden" value={{ record.pk }} name="pk"/>
+        </div>
+    </form>
+</div>

@@ -106,6 +106,7 @@ class StudentSubmissions(models.Model):
         PASSED = "PAS", _("Passed")
         FAILED = "FAI", _("Failed")
         PENDING = "PEN", _("Pending")
+        STOP = "STP",_("Stopped")
 
     student = models.ForeignKey(
         User,

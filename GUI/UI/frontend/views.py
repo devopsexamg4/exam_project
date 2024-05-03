@@ -59,6 +59,7 @@ def admin(request):
 
     filt = UserFilter(request.GET, queryset = User.objects.all())
     table = UserTable(data=filt.qs)
+    table.exclude = ('teacher_actions')
     RequestConfig(request).configure(table)
 
     form = UserTypeForm()
@@ -92,6 +93,7 @@ def student(request):
 
     filt = SubmissionFilter(request.GET, queryset = StudentSubmissions.objects.filter(student = request.user))
     table = SubmissionTable(data=filt.qs)
+    table.exclude = ('teacher_actions')
     RequestConfig(request).configure(table)
 
     context = {
@@ -101,6 +103,22 @@ def student(request):
         'table':table
     }
     return render(request, 'student.html', context)
+
+@login_required(login_url='/login')
+def viewstudent(request):
+    stud = User.objects.get(pk = request.POST['student-pk'])
+    assign = Assignments.objects.get(pk = request.POST['assignment-pk'])
+
+    table = SubmissionTable(data = StudentSubmissions.objects.filter(student = stud).filter(assignment = assign))
+    table.exclude = ('delete')
+
+    context = {
+        'title':stud.username,
+        'table':table
+    }
+
+    return render(request, 'student.html', context)
+
 
 @login_required(login_url='/login/')
 def teacher(request):
@@ -183,11 +201,21 @@ def assignment(request):
         messages.error(request, STRING_403)
         return redirect('index')
     studs = assign.user_set.filter(type = 'STU')
+
+    table = UserTable(data=studs)
+    table.exclude = ('type','is_active','action')
+    table._orderable = False
+
+    subtable = SubmissionTable(data = StudentSubmissions.objects.filter(student__in=studs).filter(assignment = assign))
+    subtable.exclude = ('assignment','delete')
+    subtable._orderable = False
+
+
     context = {
         'title':f"{assign.title}",
         'assignment':assign,
-        'students':studs,
-        'submissions':StudentSubmissions.objects.filter(student__in=studs).filter(assignment = assign)
+        'students':table,
+        'submissions':subtable
     }
     return render(request, 'assignment.html', context)
 
@@ -280,8 +308,9 @@ def create_assignment(request):
 def submission(request):
     sub = StudentSubmissions.objects.get(pk = request.POST['pk'])
     if (User.objects.filter(username = request.user).first()
-        not in User.objects.filter(type = 'STU').filter(studentsubmissions = sub)):
-        # the logged in user is not a student but is trying to access the page
+        not in (User.objects.filter(type = 'STU').filter(studentsubmissions = sub) 
+        and User.objects.filter(type = 'TEA'))):
+        # the logged in user is not a student or teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
     

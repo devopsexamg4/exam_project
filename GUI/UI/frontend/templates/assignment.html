@@ -3,21 +3,18 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
+{% load django_bootstrap5 %}
+{% load render_table from django_tables2 %}
 
-<p>Assigned students:</p>
-{% for stud in students %}
-{{ stud.username }}</br>
-{% endfor %}
+<p class="h4">Title:</p> {{ assignment.title }}</br>
+<p class="h4">Start time:</p> {{ assignment.start }}
+<p class="h4">End time:</p> {{ assignment.end }}</br>
 
-{{ assignment.title }}
-{{ assignment.start }}
-{{ assignment.end }}
-{{ assignment.end }}
+<p class="h4">Assigned students:</p>
+{% render_table students  %}
 
-<P>submissions:</p>
-{% for sub in submissions %}
-{{ sub }}</br>
-{% endfor %}
+<P class="h4">All submissions:</p>
+{% render_table submissions %}
 
 {% endblock %}
 
