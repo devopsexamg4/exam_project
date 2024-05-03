@@ -23,7 +23,7 @@ jobs:
         git submodule update --init --remote --recursive
         # get all requirement.txt files and call pip install on them
         echo "installing requirements"
-        git ls-files --recurse-submodules --full-name | grep -E *requirements.txt 2>/dev/null  | while read line; do echo installing requirements from $line ; pip install -r $line ; done
+        git ls-files --full-name | grep -E *requirements.txt 2>/dev/null  | while read line; do echo installing requirements from $line ; pip install -r $line ; done
         echo "done installing requirements"
     - name: Analysing the code with pylint
       run: |
