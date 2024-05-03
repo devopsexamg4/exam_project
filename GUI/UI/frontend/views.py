@@ -2,6 +2,7 @@
 In This file all the rendering of the pages is defined
 TODO:
     - do some nice formatting and stuff for the html pages
+    - docstring and stuff
 """
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -189,11 +190,13 @@ def user_logout(request):
     messages.info(request, "You have been logged out")
     return redirect('index')
 
-@require_http_methods(["POST"])
 @login_required(login_url='/login/')
 def assignment(request):
+    if request.method == 'POST':
+        request.session['pk'] = request.POST['pk']
+
     # get the assignment
-    assign = Assignments.objects.get(pk=request.POST['pk'])
+    assign = Assignments.objects.get(pk=request.session['pk'])
     # make sure the user is a teacher who is associated with the assignment
     if (User.objects.filter(username = request.user).first() not in
         User.objects.filter(type = 'TEA').filter(assignments__pk = assign.pk)):
@@ -201,21 +204,28 @@ def assignment(request):
         messages.error(request, STRING_403)
         return redirect('index')
     studs = assign.user_set.filter(type = 'STU')
-
-    table = UserTable(data=studs)
+    filter = UserFilter(request.GET, queryset = studs)
+    table = UserTable(data = filter.qs)
     table.exclude = ('type','is_active','action')
     table._orderable = False
+    # filt = AssFilter(request.GET, queryset = usr.assignments.all())
 
-    subtable = SubmissionTable(data = StudentSubmissions.objects.filter(student__in=studs).filter(assignment = assign))
+    subfilter = SubmissionFilter(request.GET, queryset = StudentSubmissions.objects.filter(student__in=studs).filter(assignment = assign))
+    subtable = SubmissionTable(data = subfilter.qs)
     subtable.exclude = ('assignment','delete')
     subtable._orderable = False
+
+    RequestConfig(request).configure(table)
+    RequestConfig(request).configure(subtable)
 
 
     context = {
         'title':f"{assign.title}",
         'assignment':assign,
         'students':table,
-        'submissions':subtable
+        'studfilter':filter,
+        'submissions':subtable,
+        'subfilter':subfilter,
     }
     return render(request, 'assignment.html', context)
 
@@ -320,7 +330,39 @@ def submission(request):
     }
     return render(request, 'submission.html', context)
 
-# @login_required(login_url='/login/')
+@login_required(login_url='/login/')
+def reeval(request):
+    mode = request.POST['mode']
+
+    assign = Assignments.objects.get(pk = request.POST['pk'])
+    if mode == 'single':
+        subs = StudentSubmissions.objects.filter(pk = request.POST['subpk'])
+    else:
+        subs = assign.studentsubmissions_set.exclude(result = StudentSubmissions.ResChoices.PENDING )
+
+    for sub in subs:
+        sub.result = StudentSubmissions.ResChoices.PENDING
+        sub.save()
+    
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+    
+@login_required(login_url='/login/')
+def stopeval(request):
+    mode = request.POST['mode']
+
+    assign = Assignments.objects.get(pk = request.POST['pk'])
+    if mode == 'single':
+        subs = StudentSubmissions.objects.filter(pk = request.POST['subpk'])
+    else:
+        subs = assign.studentsubmissions_set.filter(result = StudentSubmissions.ResChoices.PENDING )
+
+    for sub in subs:
+        sub.result = StudentSubmissions.ResChoices.STOP
+        sub.save()
+
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
 class AssignmentDeleteView(DeleteView, SingleObjectMixin):
     model = Assignments
     success_url = reverse_lazy('teacher')

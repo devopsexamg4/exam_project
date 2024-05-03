@@ -5,7 +5,8 @@ TODO:
     - add docstring to studentsubmission
     - add docstring to User
     - validate the uploaded files
-    - fix the delete function for file fields
+    - fix the delete function for file fields (should also delete the file)
+    - validate that end time is after start time for assignments
 """
 from datetime import datetime,timedelta
 from uuid import uuid4
