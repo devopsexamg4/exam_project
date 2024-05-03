@@ -8,9 +8,19 @@
         </form>
     </div>
     <div class="col">
-        <button class="btn btn-secondary">Submission logs as zip</button>
+        <form action="{% url 'getzip' %}" method="post" class="form">
+            {% csrf_token %}
+            <button class="btn btn-secondary" type="submit">Extract logs for all as zip</button>
+            <input type="hidden" value={{ record.pk }} name="student-pk"/>
+            <input type="hidden" value="single" name="mode"/>
+        </form>
     </div>
     <div class="col">
-        <button class="btn btn-secondary">Submission data as csv</button>
+        <form action="{% url 'getcsv' %}" method="post" class="form">
+            {% csrf_token %}
+            <button class="btn btn-secondary" type="submit">Extract metadata for student as csv</button>
+            <input type="hidden" value={{ record.pk }} name="student-pk"/>
+            <input type="hidden" value="single" name="mode"/>
+        </form>
     </div>
 </div>

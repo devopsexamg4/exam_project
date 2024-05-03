@@ -4,6 +4,11 @@ TODO:
     - do some nice formatting and stuff for the html pages
     - docstring and stuff
 """
+import csv
+import zipfile
+import io
+
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -13,7 +18,6 @@ from django_tables2 import RequestConfig
 from django.views.generic.edit import DeleteView
 from django.views.generic.detail import SingleObjectMixin
 from django.urls import reverse_lazy
-
 
 from .tables import *
 from .models import User
@@ -208,7 +212,6 @@ def assignment(request):
     table = UserTable(data = filter.qs)
     table.exclude = ('type','is_active','action')
     table._orderable = False
-    # filt = AssFilter(request.GET, queryset = usr.assignments.all())
 
     subfilter = SubmissionFilter(request.GET, queryset = StudentSubmissions.objects.filter(student__in=studs).filter(assignment = assign))
     subtable = SubmissionTable(data = subfilter.qs)
@@ -334,7 +337,7 @@ def submission(request):
 def reeval(request):
     mode = request.POST['mode']
 
-    assign = Assignments.objects.get(pk = request.POST['pk'])
+    assign = Assignments.objects.get(pk = request.session['pk'])
     if mode == 'single':
         subs = StudentSubmissions.objects.filter(pk = request.POST['subpk'])
     else:
@@ -350,7 +353,7 @@ def reeval(request):
 def stopeval(request):
     mode = request.POST['mode']
 
-    assign = Assignments.objects.get(pk = request.POST['pk'])
+    assign = Assignments.objects.get(pk = request.session['pk'])
     if mode == 'single':
         subs = StudentSubmissions.objects.filter(pk = request.POST['subpk'])
     else:
@@ -362,7 +365,54 @@ def stopeval(request):
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
+def getcsv(request):
+    mode = request.POST['mode']
 
+    assign = Assignments.objects.get(pk = request.session['pk'])
+    if mode == 'single':
+        stud = User.objects.get(pk = request.POST['student-pk'])
+        subs = stud.studentsubmissions_set.filter(assignment = assign)
+    else:
+        subs = assign.studentsubmissions_set.all()
+    
+    response = HttpResponse(
+        content_type = "text/csv",
+        headers = {"Content-Disposition": 'attachment; filename="metadata.csv"'},
+    )
+    fields = ["student", "submission id", "submission time", "submission result"]
+
+    writer = csv.writer(response)
+    writer.writerow(fields)
+    for sub in subs:
+        writer.writerow([sub.student.username, 
+                         str(sub.pk), 
+                         sub.uploadtime.strftime("%d/%m/%y, %H:%M:%S"),
+                         sub.get_result_display() ])
+
+    return response
+
+def getzip(request):
+    mode = request.POST['mode']
+
+    assign = Assignments.objects.get(pk = request.session['pk'])
+    if mode == 'single':
+        stud = User.objects.get(pk = request.POST['student-pk'])
+        subs = stud.studentsubmissions_set.filter(assignment = assign)
+    else:
+        subs = assign.studentsubmissions_set.all()
+    
+    buffer = io.BytesIO()
+    zip = zipfile.ZipFile(buffer, mode='w')
+
+    for sub in subs:
+        zip.writestr(sub.log.name, sub.log.open('r').read())
+    zip.close()
+
+    response = HttpResponse(buffer.getvalue())
+    response['Content-Type'] = "application/x-zip-compressed"
+    response['Content-Disposition'] = 'attachment; filename="logs.zip"'
+    
+    return response
 class AssignmentDeleteView(DeleteView, SingleObjectMixin):
     model = Assignments
     success_url = reverse_lazy('teacher')
