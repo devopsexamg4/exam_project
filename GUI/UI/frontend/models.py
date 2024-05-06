@@ -103,7 +103,7 @@ class Assignments(models.Model):
     def save(self, *args, **kwargs):
         """Validate that the assignment has a valid interval before saving"""
         self._validinterval()
-        super(Assignments, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         """returns a textual representation of the assignment"""
@@ -117,7 +117,7 @@ class Assignments(models.Model):
         https://docs.djangoproject.com/en/5.0/ref/models/fields/#django.db.models.fields.files.FieldFile.delete
         """
         self.dockerfile.delete()
-        super(Assignments,self).delete()
+        super().delete()
 
 class User(AbstractUser):
     """
@@ -227,10 +227,10 @@ class StudentSubmissions(models.Model):
          """
         self._validtime()
         self._validpending()
-        super(StudentSubmissions, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def delete(self):
         """custom delete function to remove the associated file
         """
         self.File.delete()
-        super(StudentSubmissions, self).delete()
+        super().delete()
