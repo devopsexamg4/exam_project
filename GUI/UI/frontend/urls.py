@@ -1,3 +1,7 @@
+"""
+This file maps all the urls used in this app to a function in view
+additionally a name is assigned to each path to make routing a bit easier
+"""
 from django.urls import path
 from . import views
 

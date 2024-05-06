@@ -16,7 +16,7 @@ TABLE_TEMPLATE = "django_tables2/bootstrap5-responsive.html"
 class UserTable(tables.Table):
     """A table to list users in the system."""
     action = tables.TemplateColumn(orderable = False, template_name = 'edit_usr.html')
-    teacher_actions = tables.TemplateColumn(orderable = False, template_name='teacher_stud.html')
+    teacher = tables.TemplateColumn(orderable = False, template_name='teacher_stud.html')
     class Meta:
         """Meta class for the UserTable."""
         model = User

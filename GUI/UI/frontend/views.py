@@ -19,9 +19,9 @@ from django.views.generic.edit import DeleteView
 from django.views.generic.detail import SingleObjectMixin
 from django.urls import reverse_lazy
 
-from .tables import *
-from .models import User
-from .forms import AddStudForm, SignupForm, LoginForm, SubmissionForm, UserTypeForm, AssignmentForm
+from . import tables as t
+from . import forms as f
+from .models import User, Assignments, StudentSubmissions
 
 STRING_403 = "You do not have permissions to view this page"
 
@@ -48,30 +48,34 @@ admin, student and teacher presents the views of those types of users
 @login_required(login_url='/login/')
 def admin(request):
     """collect data to show on the admin page"""
-    if (User.objects.filter(username = request.user).first() not in User.objects.filter(type = 'ADM')) and (not request.user.is_staff):
+    if (User.objects.filter(username = request.user).first() 
+        not in User.objects.filter(type = 'ADM')) and (not request.user.is_staff):
         # the logged in user is not a teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
     
     if request.method == 'POST':
+        # a user has had its type updated
         usr = User.objects.get(pk = request.POST['pk'])
-        form = UserTypeForm(request.POST, instance=usr)
+        form = f.UserTypeForm(request.POST, instance=usr)
         if form.is_valid():
             form.save()
             messages.info(request, f"{usr.username} has been updated")
         else:
             messages.error(request, form.errors)
 
-    filt = UserFilter(request.GET, queryset = User.objects.all())
-    table = UserTable(data=filt.qs)
-    table.exclude = ('teacher_actions')
+    # populate the user table
+    filt = t.UserFilter(request.GET, queryset = User.objects.all())
+    table = t.UserTable(data=filt.qs)
+    table.exclude = ('teacher')
     RequestConfig(request).configure(table)
 
-    form = UserTypeForm()
+    form = f.UserTypeForm()
+
     context = {
         'title':'Admin',
-        'form':form,
         'table':table,
+        'form':form,
         'filter':filt
     }
     return render(request, 'admin.html', context)
@@ -86,7 +90,7 @@ def student(request):
         return redirect('index')
 
     if request.method == "POST":
-        form = SubmissionForm(request.POST, request.FILES, user = request.user)
+        form = f.SubmissionForm(request.POST, request.FILES, user = request.user)
         if form.is_valid():
             sub = form.save(commit=False)
             sub.student = request.user
@@ -94,10 +98,10 @@ def student(request):
             messages.info(request, f"submission received")
         else:
             messages.error(request, form.errors)
-    form = SubmissionForm(user=request.user)
+    form = f.SubmissionForm(user=request.user)
 
-    filt = SubmissionFilter(request.GET, queryset = StudentSubmissions.objects.filter(student = request.user))
-    table = SubmissionTable(data=filt.qs)
+    filt = t.SubmissionFilter(request.GET, queryset = StudentSubmissions.objects.filter(student = request.user))
+    table = t.SubmissionTable(data=filt.qs)
     table.exclude = ('teacher_actions')
     RequestConfig(request).configure(table)
 
@@ -114,7 +118,7 @@ def viewstudent(request):
     stud = User.objects.get(pk = request.POST['student-pk'])
     assign = Assignments.objects.get(pk = request.POST['assignment-pk'])
 
-    table = SubmissionTable(data = StudentSubmissions.objects.filter(student = stud).filter(assignment = assign))
+    table = t.SubmissionTable(data = StudentSubmissions.objects.filter(student = stud).filter(assignment = assign))
     table.exclude = ('delete')
 
     context = {
@@ -133,8 +137,8 @@ def teacher(request):
         messages.error(request, STRING_403)
         return redirect('index')
     usr = request.user
-    filt = AssFilter(request.GET, queryset = usr.assignments.all())
-    bobby = AssTable(data=filt.qs)
+    filt = t.AssFilter(request.GET, queryset = usr.assignments.all())
+    bobby = t.AssTable(data=filt.qs)
     RequestConfig(request).configure(bobby)
 
     context = {
@@ -153,7 +157,7 @@ def user_login(request):
         'title':'Login',
     }
     if request.method == 'POST':
-        form = LoginForm(request.POST)
+        form = f.LoginForm(request.POST)
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
@@ -163,7 +167,7 @@ def user_login(request):
                 messages.info(request, f"Welcome {username}")
                 return redirect('index')
     else:
-        form = LoginForm()
+        form = f.LoginForm()
 
     context['form'] = form
     return render(request, 'login.html', context )
@@ -174,13 +178,13 @@ def signup(request):
         'title':'Signup',
     }
     if request.method == 'POST':
-        form = SignupForm(request.POST)
+        form = f.SignupForm(request.POST)
         if form.is_valid():
             form.save()
             messages.info(request, f"user {form.cleaned_data['username']} has been created\nPlease login")
             return redirect('login')
     else:
-        form = SignupForm()
+        form = f.SignupForm()
 
     context['form'] = form
 
@@ -208,13 +212,15 @@ def assignment(request):
         messages.error(request, STRING_403)
         return redirect('index')
     studs = assign.user_set.filter(type = 'STU')
-    filter = UserFilter(request.GET, queryset = studs)
-    table = UserTable(data = filter.qs)
+    filter = t.UserFilter(request.GET, queryset = studs)
+    table = t.UserTable(data = filter.qs)
     table.exclude = ('type','is_active','action')
     table._orderable = False
 
-    subfilter = SubmissionFilter(request.GET, queryset = StudentSubmissions.objects.filter(student__in=studs).filter(assignment = assign))
-    subtable = SubmissionTable(data = subfilter.qs)
+    subfilter = t.SubmissionFilter(request.GET, queryset =
+                StudentSubmissions.objects.filter(student__in=studs).filter(assignment = assign))
+
+    subtable = t.SubmissionTable(data = subfilter.qs)
     subtable.exclude = ('assignment','delete')
     subtable._orderable = False
 
@@ -223,7 +229,7 @@ def assignment(request):
 
 
     context = {
-        'title':f"{assign.title}",
+        'title':f"{assign}",
         'assignment':assign,
         'students':table,
         'studfilter':filter,
@@ -246,8 +252,8 @@ def edit_assignment(request):
     print(studs_old)
     if 'save' in request.POST.keys():
         # we want to save our edit
-        form = AssignmentForm(request.POST, request.FILES, instance = assign)
-        studform = AddStudForm(request.POST)
+        form = f.AssignmentForm(request.POST, request.FILES, instance = assign)
+        studform = f.AddStudForm(request.POST)
         
         if form.is_valid():
             if studform.is_valid():
@@ -269,8 +275,8 @@ def edit_assignment(request):
 
     # we intent to edit an existing assignment
     # get the assignment
-    form = AssignmentForm(instance = assign)
-    studform = AddStudForm(initial = {'students':[u.id for u in studs_old]})
+    form = f.AssignmentForm(instance = assign)
+    studform = f.AddStudForm(initial = {'students':[u.id for u in studs_old]})
     context = {
         'title':f"edit {assign.title}",
         'form':form,
@@ -288,8 +294,8 @@ def create_assignment(request):
         return redirect('index')
 
     if request.method == "POST":
-        form = AssignmentForm(request.POST, request.FILES)
-        users = AddStudForm(request.POST)
+        form = f.AssignmentForm(request.POST, request.FILES)
+        users = f.AddStudForm(request.POST)
         if form.is_valid():
             if users.is_valid():
                 # save the assignment
@@ -308,8 +314,8 @@ def create_assignment(request):
         else:
             messages.error(request, form.errors)
 
-    form = AssignmentForm()
-    studform = AddStudForm()
+    form = f.AssignmentForm()
+    studform = f.AddStudForm()
     context = {
         'title':'Teacher',
         'form':form,
