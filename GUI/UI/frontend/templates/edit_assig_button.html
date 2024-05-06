@@ -1,0 +1,46 @@
+<div class="container-sm">	
+	<div class="row justify-content-md-left">
+		<div class="col col-lg-auto p-1">
+			<form method="post" action="{% url 'edit_assignment' %}" >
+                {% csrf_token %}
+                <div>
+					<button class="btn btn-secondary" type="submit"> Edit</button>
+                    <input type="hidden" value={{ record.pk }} name="pk"/>
+                </div>
+            </form>
+		</div>
+		<div class="col col-lg-auto p-1">
+			<button  
+				type="button" 
+				class="btn btn-outline-danger" 
+				data-bs-toggle="modal"
+				data-bs-target="#confirm_del{{record.pk}}">
+				Delete
+			</button>
+		</div>
+	</div>
+</div>
+<div class="modal fade" 
+	 id="confirm_del{{record.pk}}" 
+	 tabindex="-1" 
+	 aria-labelledby="confirm_del_label{{record.pk}}"
+	 aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="confirm_del_label{{record.pk}}">Confirm deletion!</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
+			</div>
+			<div class="modal-body">
+				<p>Are you sure you want to delete '{{record}}' and all data associated with it?</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+				<form method="POST" action={% url 'delassign' record.pk %} method="post">{% csrf_token %}
+					<input class="btn btn-outline-danger" type="submit" value="Confirm">
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+

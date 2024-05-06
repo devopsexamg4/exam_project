@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+Assignment: {{submission.assignment }}</br>
+Uploaded: {{ submission.uploadtime }}</br>
+Result: {{ submission.result }}</br>
+Log: <a href="{{ submission.log.url }}">{{submission.log}}</a>
+
+{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block scripts %}{% endblock %}

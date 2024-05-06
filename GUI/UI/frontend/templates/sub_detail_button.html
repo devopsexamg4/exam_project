@@ -1,0 +1,7 @@
+<form method="post" action="{% url 'sub_details' %}" >
+    {% csrf_token %}
+    <div>
+        <button class="btn btn-secondary" type="submit">Details</button>
+        <input type="hidden" value={{ record.pk }} name="pk"/>
+    </div>
+</form>

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+{% load django_bootstrap5 %}
+{% load render_table from django_tables2 %}
+
+<p class="h4">Title:</p> {{ assignment.title }}</br>
+<p class="h4">Start time:</p> {{ assignment.start }}
+<p class="h4">End time:</p> {{ assignment.end }}</br>
+<hr><hr>
+<p class="h4">Assigned students:</p>
+<form action="" method="get" class="form">
+    <div class="row">    			
+        {% bootstrap_field studfilter.form.username__contains wrapper_class="form-control-sm col-md  p-2" %}
+        {% bootstrap_field studfilter.form.email__contains wrapper_class="form-control-sm col-md  p-2" %}
+    </div> 
+    {% bootstrap_button 'search table' button_class="btn-secondary" %}
+</form>
+{% render_table students  %}
+<hr><hr>
+<P class="h4">All submissions:</p>
+<form action="" method="get" class="form">
+    <div class="row">
+        {% bootstrap_field subfilter.form.result__contains wrapper_class="form-control-sm col-md  p-2" %}
+        {% bootstrap_field subfilter.form.uploadtime__contains wrapper_class="form-control-sm col-md  p-2" %}
+    </div>
+            {% bootstrap_button 'search table' button_class="btn-secondary" %}
+</form>
+<div class="row pt-3">
+    <div class="col">
+        <form action="{% url 'getcsv' %}" method="post" class="form">
+            {% csrf_token %}
+            <button class="btn btn-secondary" type="submit">Extract metadata for all as csv</button>
+            <input type="hidden" value="all" name="mode"/>
+        </form>
+    </div>
+    <div class="col">
+        <form action="{% url 'getzip' %}" method="post" class="form">
+            {% csrf_token %}
+            <button class="btn btn-secondary" type="submit">Extract logs for all as zip</button>
+            <input type="hidden" value="all" name="mode"/>
+        </form>
+    </div>
+    <div class="col">
+        <form method="post" action="{% url 'stopeval' %}">
+            {% csrf_token %}
+            <button class="btn btn-secondary" type="submit">Stop all evaluations</button>
+            <input type="hidden" value="all" name="mode"/>
+        </form>
+    </div>
+</div>
+
+{% render_table submissions %}
+
+{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block scripts %}{% endblock %}

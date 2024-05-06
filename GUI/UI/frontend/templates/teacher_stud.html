@@ -1,0 +1,26 @@
+<div class="row">
+    <div class="col">
+        <form method="post" action="{% url 'viewstudent' %}">
+            {% csrf_token %}
+            <button class="btn btn-secondary" type="submit">View submissions</button>
+            <input type="hidden" value={{ record.pk }} name="student-pk"/>
+            <input type="hidden" value={{ assignment.pk }} name="assignment-pk"/>
+        </form>
+    </div>
+    <div class="col">
+        <form action="{% url 'getzip' %}" method="post" class="form">
+            {% csrf_token %}
+            <button class="btn btn-secondary" type="submit">Extract logs for all as zip</button>
+            <input type="hidden" value={{ record.pk }} name="student-pk"/>
+            <input type="hidden" value="single" name="mode"/>
+        </form>
+    </div>
+    <div class="col">
+        <form action="{% url 'getcsv' %}" method="post" class="form">
+            {% csrf_token %}
+            <button class="btn btn-secondary" type="submit">Extract metadata for student as csv</button>
+            <input type="hidden" value={{ record.pk }} name="student-pk"/>
+            <input type="hidden" value="single" name="mode"/>
+        </form>
+    </div>
+</div>

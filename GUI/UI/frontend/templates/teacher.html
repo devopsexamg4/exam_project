@@ -1,8 +1,27 @@
 {% extends 'base.html' %}
 
-{% block title %}{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
-{% block content %}{% endblock %}
+{% block content %}
+{% load render_table from django_tables2 %}
+{% load django_bootstrap5 %}
+<div class="pb-3">
+    <a class="btn btn-secondary" href="{% url 'new_assignment' %}" role="button">Create new Assignment</a>
+</div>
+{% if filter %}
+<form action="" method="get" class="form">
+    <div class="row">    			
+    {% bootstrap_field filter.form.status__contains wrapper_class="form-control-sm col-md  p-2" %}
+    {% bootstrap_field filter.form.title__contains wrapper_class="form-control-sm col-md  p-2" %}
+    {% bootstrap_field filter.form.start__contains wrapper_class="form-control-sm col-md p-2" %}
+    {% bootstrap_field filter.form.end__contains wrapper_class="form-control-sm col-md p-2" %}
+    </div> 
+    {% bootstrap_button 'search table' button_class="btn-secondary" %}
+</form>
+{% endif %}
+{% render_table table %}
+
+{% endblock %}
 
 {% block footer %}{% endblock %}
 

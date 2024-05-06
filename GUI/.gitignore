@@ -63,6 +63,8 @@ db.sqlite3-journal
 migrations/
 # static folder does not belong in repo
 UI/static/*
+UI/assignments/*
+UI/submissions/*
 
 # Flask stuff:
 instance/

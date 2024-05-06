@@ -1,3 +1,7 @@
-from django.test import TestCase
+"""
+unit tests for the GUI module
+TODO:
+    - make some tests
+"""
 
-# Create your tests here.
+# from django.test import TestCase
