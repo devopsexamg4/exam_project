@@ -1,6 +1,12 @@
 """
 In This file all the rendering of the pages is defined
-TODO:
+
+home and about are info pages, viewable by all
+admin, student and teacher presents the views of those types of users
+user_login, signup and user_logout are used as their names suggest
+    to login, create a user and logout
+
+    TODO:
     - do some nice formatting and stuff for the html pages
     - docstring and stuff
 """
@@ -13,11 +19,10 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_http_methods
-from django_tables2 import RequestConfig
 from django.views.generic.edit import DeleteView
 from django.views.generic.detail import SingleObjectMixin
 from django.urls import reverse_lazy
+from django_tables2 import RequestConfig
 
 from . import tables as t
 from . import forms as f
@@ -25,9 +30,6 @@ from .models import User, Assignments, StudentSubmissions
 
 STRING_403 = "You do not have permissions to view this page"
 
-"""
-home and about are info pages, viewable by all
-"""
 def home(request):
     """Collect the data to show on the frontpage"""
     context = {
@@ -42,18 +44,15 @@ def about(request):
     }
     return render(request, 'about.html', context)
 
-"""
-admin, student and teacher presents the views of those types of users
-"""
 @login_required(login_url='/login/')
 def admin(request):
     """collect data to show on the admin page"""
-    if (User.objects.filter(username = request.user).first() 
+    if (User.objects.filter(username = request.user).first()
         not in User.objects.filter(type = 'ADM')) and (not request.user.is_staff):
         # the logged in user is not a teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
-    
+
     if request.method == 'POST':
         # a user has had its type updated
         usr = User.objects.get(pk = request.POST['pk'])
@@ -67,7 +66,7 @@ def admin(request):
     # populate the user table
     filt = t.UserFilter(request.GET, queryset = User.objects.all())
     table = t.UserTable(data=filt.qs)
-    table.exclude = ('teacher')
+    table.exclude = 'teacher'
     RequestConfig(request).configure(table)
 
     form = f.UserTypeForm()
@@ -84,7 +83,8 @@ def admin(request):
 @login_required(login_url='/login/')
 def student(request):
     """collect data to show on the student page"""
-    if User.objects.filter(username = request.user).first() not in User.objects.filter(type = 'STU'):
+    if (User.objects.filter(username = request.user).first()
+        not in User.objects.filter(type = 'STU')):
         # the logged in user is not a student but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
@@ -95,14 +95,15 @@ def student(request):
             sub = form.save(commit=False)
             sub.student = request.user
             sub.save()
-            messages.info(request, f"submission received")
+            messages.info(request, "submission received")
         else:
             messages.error(request, form.errors)
     form = f.SubmissionForm(user=request.user)
 
-    filt = t.SubmissionFilter(request.GET, queryset = StudentSubmissions.objects.filter(student = request.user))
+    filt = t.SubmissionFilter(request.GET,
+                              queryset = StudentSubmissions.objects.filter(student = request.user))
     table = t.SubmissionTable(data=filt.qs)
-    table.exclude = ('teacher_actions')
+    table.exclude = 'teacher_actions'
     RequestConfig(request).configure(table)
 
     context = {
@@ -115,10 +116,13 @@ def student(request):
 
 @login_required(login_url='/login')
 def viewstudent(request):
+    """Presents a detailed view of a student"""
     stud = User.objects.get(pk = request.POST['student-pk'])
     assign = Assignments.objects.get(pk = request.POST['assignment-pk'])
 
-    table = t.SubmissionTable(data = StudentSubmissions.objects.filter(student = stud).filter(assignment = assign))
+    table = t.SubmissionTable(
+        data = StudentSubmissions.objects.filter(student = stud).filter(assignment = assign)
+                            )
     table.exclude = ('delete')
 
     context = {
@@ -132,7 +136,8 @@ def viewstudent(request):
 @login_required(login_url='/login/')
 def teacher(request):
     """collect data to show on the teacher page"""
-    if User.objects.filter(username = request.user).first() not in User.objects.filter(type = 'TEA'):
+    if (User.objects.filter(username = request.user).first()
+        not in User.objects.filter(type = 'TEA')):
         # the logged in user is not a teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
@@ -148,9 +153,6 @@ def teacher(request):
     }
     return render(request, 'teacher.html', context)
 
-"""
-user_login, signup and user_logout are used as their names suggest to login, create a user and logout
-"""
 def user_login(request):
     """the login page"""
     context = {
@@ -181,7 +183,8 @@ def signup(request):
         form = f.SignupForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.info(request, f"user {form.cleaned_data['username']} has been created\nPlease login")
+            messages.info(request, 
+                          f"user {form.cleaned_data['username']} has been created\nPlease login")
             return redirect('login')
     else:
         form = f.SignupForm()
@@ -200,6 +203,7 @@ def user_logout(request):
 
 @login_required(login_url='/login/')
 def assignment(request):
+    """Provides a detailed view of an assignment"""
     if request.method == 'POST':
         request.session['pk'] = request.POST['pk']
 
@@ -240,21 +244,21 @@ def assignment(request):
 
 @login_required(login_url='/login/')
 def edit_assignment(request):
+    """Presents the form to edit an existing assignment"""
     assign = Assignments.objects.get(pk = request.POST['pk'])
 
-    if (User.objects.filter(username = request.user).first() not in 
-            User.objects.filter(type = 'TEA').filter(assignments__pk = assign.pk)):
-            # the logged in user is not a teacher but is trying to access the page
-            messages.error(request, STRING_403)
-            return redirect('index')    
-    
+    if (User.objects.filter(username = request.user).first() not in
+        User.objects.filter(type = 'TEA').filter(assignments__pk = assign.pk)):
+        # the logged in user is not a teacher but is trying to access the page
+        messages.error(request, STRING_403)
+        return redirect('index')    
+
     studs_old = User.objects.filter(assignments__pk = assign.pk)
-    print(studs_old)
     if 'save' in request.POST.keys():
         # we want to save our edit
         form = f.AssignmentForm(request.POST, request.FILES, instance = assign)
         studform = f.AddStudForm(request.POST)
-        
+
         if form.is_valid():
             if studform.is_valid():
                 assign = form.save()
@@ -266,10 +270,10 @@ def edit_assignment(request):
                     user.assignments.remove(assign)
                 for user in add:
                     user.assignments.add(assign)
-                messages.info(request, f"Assignment has been updated")
+                messages.info(request, "Assignment has been updated")
                 return redirect('teacher')
             else:
-                messages.error(request, form.errors)
+                messages.error(request, studform.errors)
         else:
             messages.error(request, form.errors)
 
@@ -287,6 +291,7 @@ def edit_assignment(request):
 
 @login_required(login_url='/login/')
 def create_assignment(request):
+    """view presents the form to create a new assignment"""
     if (User.objects.filter(username = request.user).first() not in
         User.objects.filter(type = 'TEA')):
         # the logged in user is not a teacher but is trying to access the page
@@ -299,18 +304,18 @@ def create_assignment(request):
         if form.is_valid():
             if users.is_valid():
                 # save the assignment
-                assignment = form.save()
+                assign = form.save()
                 # get the students and add them to the assignment
                 users = users.cleaned_data['students']
                 studs_new = User.objects.filter(pk__in = users)
                 # very important
-                request.user.assignments.add(assignment)
+                request.user.assignments.add(assign)
                 for studs in studs_new:
-                    studs.assignments.add(assignment)
-                messages.info(request, f"Assignment has been created")
+                    studs.assignments.add(assign)
+                messages.info(request, "Assignment has been created")
                 return redirect('teacher')
             else:
-                messages.error(request, form.errors)
+                messages.error(request, users.errors)
         else:
             messages.error(request, form.errors)
 
@@ -325,14 +330,15 @@ def create_assignment(request):
 
 @login_required(login_url='/login/')
 def submission(request):
+    """View presenting the details of a submission"""
     sub = StudentSubmissions.objects.get(pk = request.POST['pk'])
     if (User.objects.filter(username = request.user).first()
-        not in (User.objects.filter(type = 'STU').filter(studentsubmissions = sub) 
+        not in (User.objects.filter(type = 'STU').filter(studentsubmissions = sub)
         and User.objects.filter(type = 'TEA'))):
         # the logged in user is not a student or teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
-    
+
     context = {
         'title':f'Details {sub}',
         'submission':sub
@@ -341,22 +347,26 @@ def submission(request):
 
 @login_required(login_url='/login/')
 def reeval(request):
+    """trigger the re-evaluation of assignment(s)"""
     mode = request.POST['mode']
 
     assign = Assignments.objects.get(pk = request.session['pk'])
     if mode == 'single':
         subs = StudentSubmissions.objects.filter(pk = request.POST['subpk'])
     else:
-        subs = assign.studentsubmissions_set.exclude(result = StudentSubmissions.ResChoices.PENDING )
+        subs = assign.studentsubmissions_set.exclude(
+            result = StudentSubmissions.ResChoices.PENDING
+            )
 
     for sub in subs:
         sub.result = StudentSubmissions.ResChoices.PENDING
         sub.save()
-    
+
     return redirect(request.META.get('HTTP_REFERER', '/'))
-    
+
 @login_required(login_url='/login/')
 def stopeval(request):
+    """stop the evaluation of assignment(s)"""
     mode = request.POST['mode']
 
     assign = Assignments.objects.get(pk = request.session['pk'])
@@ -372,6 +382,7 @@ def stopeval(request):
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 def getcsv(request):
+    """extract the results of the given submissions as a csv file"""
     mode = request.POST['mode']
 
     assign = Assignments.objects.get(pk = request.session['pk'])
@@ -380,7 +391,7 @@ def getcsv(request):
         subs = stud.studentsubmissions_set.filter(assignment = assign)
     else:
         subs = assign.studentsubmissions_set.all()
-    
+
     response = HttpResponse(
         content_type = "text/csv",
         headers = {"Content-Disposition": 'attachment; filename="metadata.csv"'},
@@ -390,14 +401,15 @@ def getcsv(request):
     writer = csv.writer(response)
     writer.writerow(fields)
     for sub in subs:
-        writer.writerow([sub.student.username, 
-                         str(sub.pk), 
+        writer.writerow([sub.student.username,
+                         str(sub.pk),
                          sub.uploadtime.strftime("%d/%m/%y, %H:%M:%S"),
                          sub.get_result_display() ])
 
     return response
 
 def getzip(request):
+    """extract the logs of the given submissions as a zip file"""
     mode = request.POST['mode']
 
     assign = Assignments.objects.get(pk = request.session['pk'])
@@ -406,27 +418,30 @@ def getzip(request):
         subs = stud.studentsubmissions_set.filter(assignment = assign)
     else:
         subs = assign.studentsubmissions_set.all()
-    
+
     buffer = io.BytesIO()
-    zip = zipfile.ZipFile(buffer, mode='w')
+    zip_file = zipfile.ZipFile(buffer, mode='w')
 
     for sub in subs:
-        zip.writestr(sub.log.name, sub.log.open('r').read())
-    zip.close()
+        zip_file.writestr(sub.log.name, sub.log.open('r').read())
+    zip_file.close()
 
     response = HttpResponse(buffer.getvalue())
     response['Content-Type'] = "application/x-zip-compressed"
     response['Content-Disposition'] = 'attachment; filename="logs.zip"'
-    
+
     return response
 class AssignmentDeleteView(DeleteView, SingleObjectMixin):
+    """delete an assignment"""
     model = Assignments
     success_url = reverse_lazy('teacher')
-    
+
 class UserDeleteView(DeleteView, SingleObjectMixin):
+    """delete a user"""
     model = User
     success_url = reverse_lazy('admin')
 
 class SubDeleteView(DeleteView, SingleObjectMixin):
+    """delete a submission"""
     model = StudentSubmissions
     success_url = reverse_lazy('student')
