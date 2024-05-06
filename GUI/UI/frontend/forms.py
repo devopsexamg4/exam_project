@@ -67,6 +67,6 @@ class SubmissionForm(forms.ModelForm):
 
 class AddStudForm(forms.Form):
     """form to add students to an assignment"""
-    students = forms.MultipleChoiceField(choices = [ (u.id,u.username) 
+    students = forms.MultipleChoiceField(choices = [ (u.id,u.username)
                                                      for u in User.objects.filter(type = 'STU')],
                                                     widget = forms.CheckboxSelectMultiple())

@@ -107,7 +107,7 @@ class Assignments(models.Model):
 
     def __str__(self):
         """returns a textual representation of the assignment"""
-        return self.title
+        return str(self.title)
 
     def delete(self):
         """
@@ -147,7 +147,7 @@ class User(AbstractUser):
 
     def __str__(self):
         """A textual representation of a user"""
-        return self.username
+        return str(self.username)
 
 class StudentSubmissions(models.Model):
     """
@@ -209,9 +209,9 @@ class StudentSubmissions(models.Model):
             raise ValidationError("Submission uploaded outside of assignment time window")
 
     def _validpending(self):
-        max = self.assignment.maxsubs
+        maxsub = self.assignment.maxsubs
         current = len(self.student.studentsubmissions_set.filter(assignment = self.assignment))
-        if max <= current:
+        if maxsub <= current:
             raise ValidationError("You already have the maximum amount of pending submissions")
 
     def __str__(self):
@@ -219,7 +219,7 @@ class StudentSubmissions(models.Model):
         user who uploaded and time of upload
         """
         return f"{self.student} - {self.uploadtime.strftime('%d/%m/%y, %H:%M')}"
-    
+
     def save(self, *args, **kwargs):
         """custom save function in order to validate:
          - upload time is within assignment interval

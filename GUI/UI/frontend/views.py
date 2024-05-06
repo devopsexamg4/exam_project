@@ -123,7 +123,7 @@ def viewstudent(request):
     table = t.SubmissionTable(
         data = StudentSubmissions.objects.filter(student = stud).filter(assignment = assign)
                             )
-    table.exclude = ('delete')
+    table.exclude = 'delete'
 
     context = {
         'title':stud.username,
@@ -183,7 +183,7 @@ def signup(request):
         form = f.SignupForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.info(request, 
+            messages.info(request,
                           f"user {form.cleaned_data['username']} has been created\nPlease login")
             return redirect('login')
     else:
@@ -251,7 +251,7 @@ def edit_assignment(request):
         User.objects.filter(type = 'TEA').filter(assignments__pk = assign.pk)):
         # the logged in user is not a teacher but is trying to access the page
         messages.error(request, STRING_403)
-        return redirect('index')    
+        return redirect('index')
 
     studs_old = User.objects.filter(assignments__pk = assign.pk)
     if 'save' in request.POST.keys():
@@ -272,10 +272,10 @@ def edit_assignment(request):
                     user.assignments.add(assign)
                 messages.info(request, "Assignment has been updated")
                 return redirect('teacher')
-            else:
-                messages.error(request, studform.errors)
-        else:
-            messages.error(request, form.errors)
+            # studform was faulty
+            messages.error(request, studform.errors)
+        # form was faulty
+        messages.error(request, form.errors)
 
     # we intent to edit an existing assignment
     # get the assignment
@@ -314,10 +314,10 @@ def create_assignment(request):
                     studs.assignments.add(assign)
                 messages.info(request, "Assignment has been created")
                 return redirect('teacher')
-            else:
-                messages.error(request, users.errors)
-        else:
-            messages.error(request, form.errors)
+            # users was faulty
+            messages.error(request, users.errors)
+        # form was faulty
+        messages.error(request, form.errors)
 
     form = f.AssignmentForm()
     studform = f.AddStudForm()
@@ -420,11 +420,9 @@ def getzip(request):
         subs = assign.studentsubmissions_set.all()
 
     buffer = io.BytesIO()
-    zip_file = zipfile.ZipFile(buffer, mode='w')
-
-    for sub in subs:
-        zip_file.writestr(sub.log.name, sub.log.open('r').read())
-    zip_file.close()
+    with zipfile.ZipFile(buffer, mode='w') as zip_file:
+        for sub in subs:
+            zip_file.writestr(sub.log.name, sub.log.open('r').read())
 
     response = HttpResponse(buffer.getvalue())
     response['Content-Type'] = "application/x-zip-compressed"
