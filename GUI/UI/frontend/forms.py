@@ -1,8 +1,6 @@
 """
-TODO:
-    - create a docstring for this module
-    - make sure help text exists
-    - make sure the docstrings provide a simple how to
+This module contains all the forms used throughout the frontend 'app'
+These forms are used to create and modify database entries
 """
 from bootstrap_datepicker_plus.widgets import DateTimePickerInput, TimePickerInput
 from django import forms
@@ -51,7 +49,11 @@ class AssignmentForm(forms.ModelForm):
         }
 
 class SubmissionForm(forms.ModelForm):
-    """A form to make a submission"""
+    """
+    A form to make a submission
+    When initializing this form a user should be provided in order to
+    correctly list the assignments for which a student can upload a submission
+    """
     def __init__(self, *args, user = None, **kwargs):
         super().__init__(*args,**kwargs)
         if user is not None:
@@ -65,4 +67,6 @@ class SubmissionForm(forms.ModelForm):
 
 class AddStudForm(forms.Form):
     """form to add students to an assignment"""
-    students = forms.MultipleChoiceField(choices = [(u.id,u.username) for u in User.objects.filter(type = 'STU')], widget = forms.CheckboxSelectMultiple())
+    students = forms.MultipleChoiceField(choices = [ (u.id,u.username) 
+                                                     for u in User.objects.filter(type = 'STU')],
+                                                    widget = forms.CheckboxSelectMultiple())
