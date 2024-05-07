@@ -28,4 +28,4 @@ jobs:
         echo "done installing requirements"
     - name: Analysing the code with pylint
       run: |
-        DJANGO_SETTINGS_MODULE=GUI.UI.UI.settings pylint --load-plugins pylint_django --rcfile pylintrc --fail-under=8 $(git ls-files --recurse-submodules '*.py' ':!:*conf.py' ':!:*manage.py')
+        pylint --load-plugins pylint_django --disable=django-not-configured --rcfile pylintrc --fail-under=8 $(git ls-files --recurse-submodules '*.py' ':!:*conf.py' ':!:*manage.py')
