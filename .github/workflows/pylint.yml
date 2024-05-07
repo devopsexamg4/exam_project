@@ -27,4 +27,4 @@ jobs:
         echo "done installing requirements"
     - name: Analysing the code with pylint
       run: |
-        pylint --fail-under=8 $(git ls-files --recurse-submodules '*.py' ':!:*conf.py' ':!:*manage.py')
+        pylint --rcfile pylintrc --fail-under=8 $(git ls-files --recurse-submodules '*.py' ':!:*conf.py' ':!:*manage.py')
