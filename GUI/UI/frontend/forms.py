@@ -67,6 +67,9 @@ class SubmissionForm(forms.ModelForm):
 
 class AddStudForm(forms.Form):
     """form to add students to an assignment"""
-    students = forms.MultipleChoiceField(choices = [ (u.id,u.username)
-                                                     for u in User.objects.filter(type = 'STU')],
-                                                    widget = forms.CheckboxSelectMultiple())
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args,**kwargs)
+        self.fields['students'].choices = [ (u.id,u.username) 
+                                           for u in User.objects.filter(type = 'STU')]
+
+    students = forms.MultipleChoiceField(widget = forms.CheckboxSelectMultiple())
