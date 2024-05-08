@@ -22,6 +22,15 @@ spec:
       containers:
         - name: whoami
           image: traefik/whoami
+          # these limits and requests are examples
+          # should be adjusted based on usage
+          resources:
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+            requests:
+              cpu: "500m"
+              memory: "400Mi"
           ports:
             - containerPort: 80
 

@@ -50,6 +50,13 @@ spec:
       containers:
         - name: traefik
           image: traefik:v3.0
+          resources:
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+            requests:
+              cpu: "500m"
+              memory: "400Mi"
           args:
             - --providers.kubernetescrd
             ## certificate resolver
@@ -71,11 +78,11 @@ spec:
             ## logging config
             - --log=true
             - --log.format=json
-            - --log.level=WARNING
+            - --log.level=ERROR
           ## environment variables
           env:
             - name: DUCKDNS_TOKEN
-              value: # ask and you shall receive
+              value: # ask and you might recieve
           ## ports to use
           ports:
             - name: web
@@ -86,20 +93,6 @@ spec:
           volumeMounts:
           - mountPath: /letsencrypt
             name: traefik-data
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: traefik-web-service
-
-spec:
-  type: LoadBalancer
-  ports:
-    - targetPort: web
-      port: 80
-  selector:
-    app: traefik
 ---
 apiVersion: v1
 kind: Service
@@ -109,7 +102,11 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-    - targetPort: websecure
+    - name: https
+      targetPort: websecure
       port: 443
+    - name: http
+      targetPort: web
+      port: 80
   selector:
     app: traefik
