@@ -13,6 +13,11 @@ from decouple import config as env
 from kubernetes import client, config, utils
 from kubernetes.utils.create_from_yaml import FailToCreateError
 
+DEFAULT_RESOURCE = {'maxmemory':'100',
+                    'maxcpu':'1',
+                    'timer':'120',
+                    'sub':''}
+
 def build_kaniko(dockerfile: str, name: str, tag: str='latest') -> dict:
     """
     modify the kaniko template to build an image from the given dockerfile
@@ -51,6 +56,61 @@ def deploy_pod(manifest: dict) -> list:
         api_resp = [e]
 
     return api_resp
+
+def create_job_object(name:str, 
+                      image: str, 
+                      resources: dict=DEFAULT_RESOURCE):
+    """
+    create a job for kubernetes
+    @param image, The name of the image i.e. args[2] from build_kaniko
+    @param resources, A dictionary containing the resources
+            the resources dict must contain four(4) key:value pairs:
+            'maxcpu':int, limit to cpu
+            'maxmemory':int, limit to memory
+            'timer':int, limit runtime
+            'sub':str, path to submission
+    """
+    # Configureate Pod template container
+    container = client.V1Container(
+        name = name,
+        image = image,
+        command = ["./tester/run"],
+        resources = client.V1ResourceRequirements(
+            limits = {"cpu": resources['maxcpu'], 
+                      "memory": f"{resources['maxmemory']}Mi"},
+        ),
+        volume_mounts = [client.V1VolumeMount(mount_path = '/assignment',
+                                              name = 'assignment-data',
+                                              sub_path = resources['sub'] ),
+                         client.V1VolumeMount(mount_path = '/output',
+                                              name = 'assignment-data',
+                                              sub_path = resources['sub'] )]
+    )
+
+    # Claim containing the submissions
+    claim = client.V1PersistentVolumeClaimVolumeSource(claim_name = 'media-vol')
+    # Create and configure a spec section
+    template = client.V1PodTemplateSpec(
+        metadata = client.V1ObjectMeta(labels = {"app": name}),
+        spec = client.V1PodSpec(containers = [container], 
+                              volumes = [client.V1Volume(name = 'assignment-data', 
+                                                       persistent_volume_claim = claim)]),
+    )
+
+    # Create the specification of job
+    spec = client.V1JobSpec(template = template,
+                            active_deadline_seconds = resources['timer'],
+                            backoff_limit = 4)
+
+    # Instantiate the job object
+    job = client.V1Job(
+        api_version = "batch/v1",
+        kind = "Job",
+        metadata = client.V1ObjectMeta(name=f"{name}-{str(uuid4())[:10]}"),
+        spec = spec,
+    )
+
+    return job
 
 if __name__ == '__main__':
     import sys
