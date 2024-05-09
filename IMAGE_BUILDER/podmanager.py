@@ -62,7 +62,9 @@ def create_job_object(name:str,
                       resources: dict=DEFAULT_RESOURCE) -> tuple:
     """
     create a job for kubernetes
-    @param image, The name of the image i.e. args[2] from build_kaniko
+    @param name, initial name for the job
+            be aware an additional identifier will be appended before being returned
+    @param image, The name of the image including the url on which it is hosted
     @param resources, A dictionary containing the resources
             the resources dict must contain four(4) key:value pairs:
             'maxcpu':int, limit to cpu
@@ -104,15 +106,15 @@ def create_job_object(name:str,
                             backoff_limit = 4)
 
     # Instantiate the job object
-    name = f"{name}-{str(uuid4())[:10]}"
+    name_id = f"{name}-{str(uuid4())[:10]}"
     job = client.V1Job(
         api_version = "batch/v1",
         kind = "Job",
-        metadata = client.V1ObjectMeta(name = name),
+        metadata = client.V1ObjectMeta(name = name_id),
         spec = spec,
     )
 
-    return (job, name)
+    return (job, name_id)
 
 def create_api_instance() -> client.BatchV1Api:
     return client.BatchV1Api()
@@ -162,7 +164,8 @@ if __name__ == '__main__':
             test.append(len(uid)==len(list(set(uid))))
         print(False not in test)
 
-    batch_v1 = client.BatchV1Api()
+    api = create_api_instance()
+    (job,name) = create_job_object('GUI','europe-north1-docker.pkg.dev/devsecopsexamproject/exam-project/ui:latest')
     
     
     man = build_kaniko('df', 'awesome', tag='v4')
