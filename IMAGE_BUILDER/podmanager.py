@@ -6,8 +6,9 @@ https://github.com/GoogleContainerTools/kaniko
 images can be deployed using python-kubernetes
 https://github.com/kubernetes-client/python
 """
-import yaml
 from uuid import uuid4
+
+import yaml
 from decouple import config as env
 from kubernetes import client, config, utils
 from kubernetes.utils.create_from_yaml import FailToCreateError
@@ -38,7 +39,7 @@ def build_kaniko(dockerfile: str, name: str, tag: str='latest') -> dict:
 
     return manifest
 
-def deploy_pod(manifest: dict):
+def deploy_pod(manifest: dict) -> list:
     """
     deploy a pod to the cluster in which this module is running
     """
@@ -47,7 +48,7 @@ def deploy_pod(manifest: dict):
     try:
         api_resp = utils.create_from_dict(k8s_client, manifest)
     except FailToCreateError as e:
-        api_resp = e
+        api_resp = [e]
 
     return api_resp
 
@@ -60,7 +61,7 @@ if __name__ == '__main__':
         for _ in range(100):
             uid = [str(uuid4().hex)[:10] for _ in range(40000)]
             test.append(len(uid)==len(list(set(uid))))
-        print(not False in test)
+        print(False not in test)
 
     
     
