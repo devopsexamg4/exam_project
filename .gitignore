@@ -1,5 +1,7 @@
 # folders to ignore
 UI/env
+IMAGE_BUILDER/env
+IMAGE_BUILDER/__pycache__
 UI/UI/frontend/__pycache__/
 UI/UI/UI/__pycache__/
 UI/UI/frontend/migrations/*
