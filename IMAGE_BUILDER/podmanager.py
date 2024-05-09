@@ -59,7 +59,7 @@ def deploy_pod(manifest: dict) -> list:
 
 def create_job_object(name:str, 
                       image: str, 
-                      resources: dict=DEFAULT_RESOURCE):
+                      resources: dict=DEFAULT_RESOURCE) -> tuple:
     """
     create a job for kubernetes
     @param image, The name of the image i.e. args[2] from build_kaniko
@@ -69,6 +69,7 @@ def create_job_object(name:str,
             'maxmemory':int, limit to memory
             'timer':int, limit runtime
             'sub':str, path to submission
+    @return tuple(kubernetes.client.V1Job, str)
     """
     # Configureate Pod template container
     container = client.V1Container(
@@ -103,14 +104,52 @@ def create_job_object(name:str,
                             backoff_limit = 4)
 
     # Instantiate the job object
+    name = f"{name}-{str(uuid4())[:10]}"
     job = client.V1Job(
         api_version = "batch/v1",
         kind = "Job",
-        metadata = client.V1ObjectMeta(name=f"{name}-{str(uuid4())[:10]}"),
+        metadata = client.V1ObjectMeta(name = name),
         spec = spec,
     )
 
-    return job
+    return (job, name)
+
+def create_api_instance() -> client.BatchV1Api:
+    return client.BatchV1Api()
+
+def create_job(api_instance: client.BatchV1Api, job: client.V1Job) -> client.V1Job:
+    config.load_incluster_config()
+    api_response = api_instance.create_namespaced_job(
+        body = job,
+        namespace = "default")
+    
+    return api_response
+
+def get_job_status(api_instance: client.BatchV1Api, name: str) -> client.V1Job:
+    api_response = api_instance.read_namespaced_job_status(
+        name = name,
+        namespace = "default")
+    return api_response
+
+def update_job(api_instance: client.BatchV1Api, job: client.V1Job, name: str) -> client.V1Job:
+    api_response = api_instance.patch_namespaced_job(
+        name = name,
+        namespace = "default",
+        body = job)
+    return api_response
+
+def delete_job(api_instance: client.BatchV1Api, name:str) -> client.V1Status:
+    api_response = api_instance.delete_namespaced_job(
+        name = name,
+        namespace = "default",
+        body = client.V1DeleteOptions(
+            grace_period_seconds = 0,
+        )
+    )
+    return api_response
+
+
+
 
 if __name__ == '__main__':
     import sys
@@ -123,6 +162,7 @@ if __name__ == '__main__':
             test.append(len(uid)==len(list(set(uid))))
         print(False not in test)
 
+    batch_v1 = client.BatchV1Api()
     
     
     man = build_kaniko('df', 'awesome', tag='v4')
