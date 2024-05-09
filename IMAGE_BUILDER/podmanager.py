@@ -1,9 +1,13 @@
 """
 This module is used to interact with our kubernetes cluster.
+It is designed to run as a pod in the cluster it is performing operations in
+if a 403 error occurs refer to: 
+https://github.com/kubernetes-client/python/blob/master/examples/in_cluster_config.py
+
 images can be build from dockerfiles with kaniko
 https://github.com/GoogleContainerTools/kaniko
 
-images can be deployed using python-kubernetes
+jobs are crud'ed(?) using python-kubernetes
 https://github.com/kubernetes-client/python
 """
 from uuid import uuid4
