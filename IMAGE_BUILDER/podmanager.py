@@ -158,15 +158,32 @@ if __name__ == '__main__':
     argv = sys.argv
 
     if ('--test' or '-t') in argv:
+        # unscientific 'test' of collisions in uuid
+        # to determine the appropriate length of identifiers
         test = []
         for _ in range(100):
             uid = [str(uuid4().hex)[:10] for _ in range(40000)]
             test.append(len(uid)==len(list(set(uid))))
-        print(False not in test)
+        assert False not in test, "There was a collision in the identifier test"
 
-    api = create_api_instance()
-    (job,name) = create_job_object('GUI','europe-north1-docker.pkg.dev/devsecopsexamproject/exam-project/ui:latest')
-    
-    
+    # flow of operations 
+    # if starting from a dockerfile use kaniko
     man = build_kaniko('df', 'awesome', tag='v4')
-    deploy_pod(man)
+    res = deploy_pod(man)
+    # get the image path/name
+    img = man['spec']['containers'][0]['args'][2]
+    # job creation using the python kubernetes module
+    api = create_api_instance()
+    job,name = create_job_object('GUI','europe-north1-docker.pkg.dev/devsecopsexamproject/exam-project/ui:latest')
+    res = create_job(api,job)
+    res = get_job_status(api,name)
+    """ 
+    update image before updating job
+    if the image name changes create a new job but
+        keep the old name returned from create_job_object
+    """
+    res = update_job(api, job, name)
+    res = delete_job(api, name)
+    
+    
+    
