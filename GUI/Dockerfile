@@ -20,6 +20,8 @@ RUN --mount=type=secret,id=secret_5 \
     sed -i "s|SU_USER=|SU_USER=$(cat /run/secrets/secret_5)|" /app/.env
 RUN --mount=type=secret,id=secret_6 \
     sed -i "s|SU_EMAIL=|SU_EMAIL=$(cat /run/secrets/secret_6)|" /app/.env
+RUN --mount=type=secret,id=secret_7 \
+    sed -i "s|CSRF_TRUSTED=|CSRF_TRUSTED=$(cat /run/secrets/secret_7)|" /app/.env
 
 # COPY .env /app/.env
 
