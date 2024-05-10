@@ -1,14 +1,18 @@
 # folders to ignore
 UI/env
+IMAGE_BUILDER/env
+IMAGE_BUILDER/__pycache__
 UI/UI/frontend/__pycache__/
 UI/UI/UI/__pycache__/
 UI/UI/frontend/migrations/*
 UI/static
+traefik/andreas_askholm/
 
 # files to ignore
 db.*
 UI/.env
 clear.sh
+GUI/rm-db
 
 # files from ignored folders to include
 !UI/UI/frontend/migrations/__init__.py

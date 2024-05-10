@@ -27,6 +27,8 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS').split(',')
 
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED').split(',')
+
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
