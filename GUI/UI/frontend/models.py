@@ -11,6 +11,8 @@ from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator
 from django.core.exceptions import ValidationError
 
+import processing
+
 
 def dockerdir(instance, _):
     """generate a path to save the uploaded dockerfile"""
@@ -145,6 +147,20 @@ class User(AbstractUser):
         help_text = """The assignment(s) a user can interact with"""
     )
 
+    def delete(self):
+        """
+        custom delete function to remove a teachers assignment
+        and stop the execution of submission evaluations
+        """
+        if self.type == User.TypeChoices.TEACHER:
+            processing.stopsub(self)
+            assigns = self.assignments.all()
+            # need to do it this way to accurately call the delete function
+            for ass in assigns:
+                ass.delete()
+
+        super().delete()
+
     def __str__(self):
         """A textual representation of a user"""
         return str(self.username)
@@ -194,7 +210,8 @@ class StudentSubmissions(models.Model):
 
     assignment = models.ForeignKey(
         Assignments,
-        on_delete = models.CASCADE,
+        on_delete = models.SET_NULL,
+        null = True,
         help_text = """The assignment for which this is a submission"""
     )
 
@@ -213,6 +230,12 @@ class StudentSubmissions(models.Model):
         current = len(self.student.studentsubmissions_set.filter(assignment = self.assignment))
         if maxsub <= current:
             raise ValidationError("You already have the maximum amount of pending submissions")
+        
+    def _validateactiveteacher(self):
+        teach = self.assignment.user_set.filter(type = User.TypeChoices.TEACHER).first()
+        if not teach.is_active:
+            raise ValidationError("Teacher is marked as inactive")
+
 
     def __str__(self):
         """textual representation of a submission

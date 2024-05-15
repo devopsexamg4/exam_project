@@ -29,6 +29,8 @@ from . import tables as t
 from . import forms as f
 from .models import User, Assignments, StudentSubmissions
 
+import processing
+
 STRING_403 = "You do not have permissions to view this page"
 
 def home(request):
@@ -60,13 +62,16 @@ def admin(request):
         form = f.UserTypeForm(request.POST, instance=usr)
         if form.is_valid():
             form.save()
+            # if the update was setting a teacher as inactive stop or cancel all submissions
+            if usr.type == User.TypeChoices.TEACHER and not usr.is_active:
+                processing.stopsub(usr)
             messages.info(request, f"{usr.username} has been updated")
         else:
             messages.error(request, form.errors)
 
     # populate the user table
     filt = t.UserFilter(request.GET, queryset = User.objects.all())
-    table = t.UserTable(data=filt.qs)
+    table = t.UserTable(data = filt.qs)
     table.exclude = 'teacher'
     RequestConfig(request).configure(table)
 

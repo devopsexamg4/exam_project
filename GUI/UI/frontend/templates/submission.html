@@ -3,7 +3,11 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
+{% if submission.assignment %}
 Assignment: {{submission.assignment }}</br>
+{% else %}
+Assignment: Deleted</br>
+{% endif %}
 Uploaded: {{ submission.uploadtime }}</br>
 Result: {{ submission.result }}</br>
 {% if submission.log %}
