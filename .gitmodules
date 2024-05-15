@@ -1,4 +1,0 @@
-[submodule "DB"]
-	path = DB
-	url = https://github.com/devopsexamg4/db.git
-	branch = main
