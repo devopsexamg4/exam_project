@@ -1,37 +1,31 @@
+# Headless service running the Postgres Database
+#
+# Headless means each pod is accessed by a stable hostname, 
+# instead of an IP indicated by clusterIP:None.
+# This is prefered for stateful applications like databases. 
+# Requests go to same instance, even though IP might change
 apiVersion: v1
 kind: Service
 metadata:
-  name: pservice 
+  name: dbservice 
   labels:
-    app: postgres-service
+    app: postgresdb-service
 spec:
   selector:
     app: postgres
   ports:
     - port: 5432 
   clusterIP: None
-  # type: LoadBalancer
-
-# LoadBalancer service for external access
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: postgres-external
-# spec:
-#   selector:
-#     app: postgres
-#   ports:
-#     - port: 5432
-#   type: LoadBalancer
 
 ---
+
+# Statefulset managing the deployment and scaling of a set of Pods 
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: postgres-db
-spec:sta
-  # serviceName: postgres-service
-  serviceName: pservice
+  name: postgres-stateful
+spec:
+  serviceName: dbservice # Connects to the Headless service
   replicas: 1
   selector:
     matchLabels:
@@ -44,8 +38,15 @@ spec:sta
       containers:
         - name: postgres
           image: postgres:13
-          env:
-            # - name: POSTGRES_DB: ps_db
+          # Initialize the postgres database after the pod is ready to connect to
+          lifecycle:
+            postStart:
+              exec:       
+                command:  ["/bin/bash", "-c", "until pg_isready -h localhost -U $POSTGRES_USER; do sleep 2; done; 
+                            PGPASSWORD=$POSTGRES_PASSWORD psql -v ON_ERROR_STOP=1 --username \"$POSTGRES_USER\" --dbname \"$POSTGRES_DB\" -c 'CREATE DATABASE Database;'"]
+          
+          # Sets the postgres parameters to the values defined in the secrets
+          env:            
             - name: POSTGRES_USER 
               value: postgres
             - name: POSTGRES_PASSWORD
@@ -53,65 +54,56 @@ spec:sta
                 secretKeyRef:
                   name: postgres-secret
                   key: password
+            # identify filesystem where data is stored
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
           ports:
             - containerPort: 5432
               name: postgres
           volumeMounts:
-            - name: postgres-pv-claim
+            - name: postgres-pvc
               mountPath: /var/lib/postgresql/data
           resources:
             requests:
-            #   memory: "1Gi"
-            #   cpu: "250m"
-              memory: "100Mi"
-              cpu: "250m"
-            limits:
               memory: "2Gi"
               cpu: "500m"
+              # memory: "100Mi"
+              # cpu: "250m"
+            limits:
+              memory: "5Gi"
+              cpu: "1"
+          
+          # Checks whether pod is still alive
           livenessProbe:
             exec:
               command:
               - /usr/bin/pg_isready
               - -h
-              - localhost
+              - localhost         # localhost used, because of running inside the cluster
               - -U
               - postgres
-            initialDelaySeconds: 30
+            initialDelaySeconds: 20
             periodSeconds: 10
+          # Checks whether pod was initialized correctly
           readinessProbe:
             exec:
               command:
               - /usr/bin/pg_isready
-              # - pg_isready
               - -h
               - localhost
               - -U
               - postgres
-            initialDelaySeconds: 30
-        #     periodSeconds: 2
-        # - name: cloud-sql-proxy
-        #   image: gcr.io/cloudsql-docker/gce-proxy:1.16
-        #   command: ["/cloud_sql_proxy",
-        #             "-instances=<YOUR_PROJECT_ID>:<YOUR_REGION>:<YOUR_INSTANCE_ID>=tcp:5432",
-        #             "-credential_file=/secrets/cloudsql/credentials.json"]
-        #   volumeMounts:
-        #     - name: cloudsql-instance-credentials
-        #       mountPath: /secrets/cloudsql
-        #       readOnly: true
+            initialDelaySeconds: 20
+            periodSeconds: 2
+  # Indicates how the persistent value claim is mounted
   volumeClaimTemplates:
     - metadata:
-        name: postgres-pv-claim
+        name: postgres-pvc
       spec:
         accessModes:
           - ReadWriteOnce
+        storageClassName: ssd
         resources:
           requests:
-            # storage: 1Gi
-            storage: 250Mi
+            storage: 5Gi
 
-    # volumes:
-    #   - name: cloudsql-instance-credentials
-    #     secret:
-    #       secretName: cloudsql-instance-credentials
