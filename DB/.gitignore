@@ -5,3 +5,9 @@ test
 Dockerfile
 # createdb.py
 # dbtest.py
+/users
+confignotes.txt
+createdb.py
+notes
+startdb.yaml
+dbnotes.txt
