@@ -21,6 +21,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.generic.edit import DeleteView
 from django.views.generic.detail import SingleObjectMixin
+from django.utils.datastructures import MultiValueDictKeyError
 from django.urls import reverse_lazy
 from django_tables2 import RequestConfig
 
@@ -117,8 +118,14 @@ def student(request):
 @login_required(login_url='/login')
 def viewstudent(request):
     """Presents a detailed view of a student"""
-    stud = User.objects.get(pk = request.POST['student-pk'])
-    assign = Assignments.objects.get(pk = request.POST['assignment-pk'])
+    try:
+        stud = User.objects.get(pk = request.POST['student-pk'])
+    except MultiValueDictKeyError:
+        stud = User.objects.get(pk = request.session['student-pk'])
+    try:
+        assign = Assignments.objects.get(pk = request.POST['assignment-pk'])
+    except MultiValueDictKeyError:
+        assign = Assignments.objects.get(pk = request.session['pk'])
 
     table = t.SubmissionTable(
         data = StudentSubmissions.objects.filter(student = stud).filter(assignment = assign)
@@ -333,8 +340,8 @@ def submission(request):
     """View presenting the details of a submission"""
     sub = StudentSubmissions.objects.get(pk = request.POST['pk'])
     if (User.objects.filter(username = request.user).first()
-        not in (User.objects.filter(type = 'STU').filter(studentsubmissions = sub)
-        and User.objects.filter(type = 'TEA'))):
+        not in (User.objects.filter(type = User.TypeChoices.STUDENT).filter(studentsubmissions = sub)
+        or User.objects.filter(type = User.TypeChoices.TEACHER))):
         # the logged in user is not a student or teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
@@ -349,7 +356,7 @@ def submission(request):
 def reeval(request):
     """trigger the re-evaluation of assignment(s)"""
     mode = request.POST['mode']
-
+    request.session['student-pk'] = request.POST['student-pk']
     assign = Assignments.objects.get(pk = request.session['pk'])
     if mode == 'single':
         subs = StudentSubmissions.objects.filter(pk = request.POST['subpk'])
@@ -368,7 +375,7 @@ def reeval(request):
 def stopeval(request):
     """stop the evaluation of assignment(s)"""
     mode = request.POST['mode']
-
+    request.session['student-pk'] = request.POST['student-pk']
     assign = Assignments.objects.get(pk = request.session['pk'])
     if mode == 'single':
         subs = StudentSubmissions.objects.filter(pk = request.POST['subpk'])

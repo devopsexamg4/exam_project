@@ -6,8 +6,9 @@
 Assignment: {{submission.assignment }}</br>
 Uploaded: {{ submission.uploadtime }}</br>
 Result: {{ submission.result }}</br>
+{% if submission.log %}
 Log: <a href="{{ submission.log.url }}">{{submission.log}}</a>
-
+{% endif %}
 {% endblock %}
 
 {% block footer %}{% endblock %}

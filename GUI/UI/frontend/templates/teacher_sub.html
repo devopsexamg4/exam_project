@@ -5,6 +5,7 @@
             <button class="btn btn-secondary" type="submit" {% if record.result == 'PEN' %}disabled{% endif %}>Re-evaluate</button>
             <input type="hidden" value={{ record.pk }} name="subpk"/>
             <input type="hidden" value={{ record.assignment.pk }} name="pk"/>
+            <input type="hidden" value={{ record.student.pk }} name="student-pk"/>
             <input type="hidden" value="single" name="mode"/>
         </form>
     </div>
@@ -14,6 +15,7 @@
             <button class="btn btn-secondary" type="submit" {% if record.result != 'PEN' %}disabled{% endif %}>Stop evaluation</button>
             <input type="hidden" value={{ record.pk }} name="subpk"/>
             <input type="hidden" value={{ record.assignment.pk }} name="pk"/>
+            <input type="hidden" value={{ record.student.pk }} name="student-pk"/>
             <input type="hidden" value="single" name="mode"/>
         </form>
     </div>

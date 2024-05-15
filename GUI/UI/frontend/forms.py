@@ -72,4 +72,4 @@ class AddStudForm(forms.Form):
         self.fields['students'].choices = [ (u.id,u.username) 
                                            for u in User.objects.filter(type = 'STU')]
 
-    students = forms.MultipleChoiceField(widget = forms.CheckboxSelectMultiple())
+    students = forms.MultipleChoiceField(widget = forms.CheckboxSelectMultiple(), required=False)
