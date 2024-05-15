@@ -22,6 +22,16 @@ RUN --mount=type=secret,id=secret_6 \
     sed -i "s|SU_EMAIL=|SU_EMAIL=$(cat /run/secrets/secret_6)|" /app/.env
 RUN --mount=type=secret,id=secret_7 \
     sed -i "s|CSRF_TRUSTED=|CSRF_TRUSTED=$(cat /run/secrets/secret_7)|" /app/.env
+RUN --mount=type=secret,id=secret_7 \
+    sed -i "s|DB_ENGINE=|DB_ENGINE=$(cat /run/secrets/secret_8)|" /app/.env
+RUN --mount=type=secret,id=secret_7 \
+    sed -i "s|DB_USERNAME=|DB_USERNAME=$(cat /run/secrets/secret_7)|" /app/.env
+RUN --mount=type=secret,id=secret_7 \
+    sed -i "s|DB_PASSWORD=|DB_PASSWORD=$(cat /run/secrets/secret_7)|" /app/.env
+RUN --mount=type=secret,id=secret_7 \
+    sed -i "s|DB_HOST=|DB_HOST=$(cat /run/secrets/secret_7)|" /app/.env
+RUN --mount=type=secret,id=secret_7 \
+    sed -i "s|DB_PORT=|DB_POR=$(cat /run/secrets/secret_7)|" /app/.env
 
 # COPY .env /app/.env
 
