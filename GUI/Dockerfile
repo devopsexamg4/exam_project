@@ -25,13 +25,13 @@ RUN --mount=type=secret,id=secret_7 \
 RUN --mount=type=secret,id=secret_7 \
     sed -i "s|DB_ENGINE=|DB_ENGINE=$(cat /run/secrets/secret_8)|" /app/.env
 RUN --mount=type=secret,id=secret_7 \
-    sed -i "s|DB_USERNAME=|DB_USERNAME=$(cat /run/secrets/secret_7)|" /app/.env
+    sed -i "s|DB_USERNAME=|DB_USERNAME=$(cat /run/secrets/secret_9)|" /app/.env
 RUN --mount=type=secret,id=secret_7 \
-    sed -i "s|DB_PASSWORD=|DB_PASSWORD=$(cat /run/secrets/secret_7)|" /app/.env
+    sed -i "s|DB_PASSWORD=|DB_PASSWORD=$(cat /run/secrets/secret_10)|" /app/.env
 RUN --mount=type=secret,id=secret_7 \
-    sed -i "s|DB_HOST=|DB_HOST=$(cat /run/secrets/secret_7)|" /app/.env
+    sed -i "s|DB_HOST=|DB_HOST=$(cat /run/secrets/secret_11)|" /app/.env
 RUN --mount=type=secret,id=secret_7 \
-    sed -i "s|DB_PORT=|DB_POR=$(cat /run/secrets/secret_7)|" /app/.env
+    sed -i "s|DB_PORT=|DB_POR=$(cat /run/secrets/secret_12)|" /app/.env
 
 # COPY .env /app/.env
 
