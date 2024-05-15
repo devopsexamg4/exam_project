@@ -3,6 +3,8 @@ FROM python:3.12.2-slim
 RUN pip install --upgrade pip
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
+# install cron to setup scheduled tasks
+RUN apt-get update && apt-get install -y cron
 # copy files into container
 COPY ./UI /app
 COPY .env.prod /app/.env

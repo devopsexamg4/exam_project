@@ -46,8 +46,8 @@ INSTALLED_APPS = [
     'django_tables2',
     'django_bootstrap5',
     'django_filters',
-    'bootstrap_datepicker_plus'
-
+    'bootstrap_datepicker_plus',
+    'django_crontab',
 ]
 
 MIDDLEWARE = [
@@ -103,6 +103,11 @@ else:
         }
     }
 
+
+# cron jobs
+CRONJOBS = [
+     ('*/1 * * * *', 'frontend.tasks.scheduled_job')
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

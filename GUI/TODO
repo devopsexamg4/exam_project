@@ -1,16 +1,14 @@
 
-scheduled jobs in django (django background tasks)
+ [x] scheduled jobs in django (django cron)
+    
+    - [ ] verify that constraints are checked
+    
+    - [ ] student submission queue
 
-setup postgresql
+    - [ ] image builder integration
 
-verify that constraints are checked
+[ ] project_task.md should be filled
 
-student submission queue
+[ ] readme.md to deploy entire project
 
-image builder integration
-
-project_task.md should be filled
-
-readme.md to deploy entire project
-
-user_stories.md
+[ ] user_stories.md

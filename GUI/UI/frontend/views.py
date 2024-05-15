@@ -27,9 +27,7 @@ from django_tables2 import RequestConfig
 
 from . import tables as t
 from . import forms as f
-from .models import User, Assignments, StudentSubmissions
-
-import processing
+from .models import User, Assignments, StudentSubmissions, stopsub
 
 STRING_403 = "You do not have permissions to view this page"
 
@@ -64,7 +62,7 @@ def admin(request):
             form.save()
             # if the update was setting a teacher as inactive stop or cancel all submissions
             if usr.type == User.TypeChoices.TEACHER and not usr.is_active:
-                processing.stopsub(usr)
+                stopsub(usr)
             messages.info(request, f"{usr.username} has been updated")
         else:
             messages.error(request, form.errors)

@@ -11,8 +11,19 @@ from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator
 from django.core.exceptions import ValidationError
 
-import processing
 
+def stopsub(usr):
+    """
+    Stop submission evaluation when a teacher is set to inactive or deleted
+    """
+    assigns = usr.assignments_set.all()
+    subs = []
+    for ass in assigns:
+        subs += list(ass.studentsubmissions_set
+                        .filter(result = StudentSubmissions.ResChoices.PENDING))
+    for s in subs:
+        s.result = StudentSubmissions.ResChoices.STOP
+        s.save()
 
 def dockerdir(instance, _):
     """generate a path to save the uploaded dockerfile"""
