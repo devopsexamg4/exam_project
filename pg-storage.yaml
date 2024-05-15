@@ -1,0 +1,33 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: postgres-pv
+  labels:
+    type: google-ssd
+spec:
+  storageClassName: ssd
+  capacity:
+    storage: 1Gi # total capacity for this persistent volume
+  accessModes:
+    - ReadWriteOnce
+  gcePersistentDisk: # use a Google Persistent Disk
+    pdName: postgres-disk # replace with the name of your disk
+    fsType: ext4 # file system type
+
+---
+# apiVersion: v1
+# kind: PersistentVolumeClaim #claim a portion of persistent volume
+# metadata:
+#   labels:
+#     app: postgres
+#   name: postgres-pv-claim
+# spec:
+#   storageClassName: ssd
+#   # storageClassName: manual
+#   accessModes:
+#     - ReadWriteOnce # mount as read-write by a single node
+#   resources:
+#     requests:
+#       # storage: 1Gi # storage capacity consumed from the persistent volume
+#       storage: 100Mi
+#   volumeName: postgres-pv
