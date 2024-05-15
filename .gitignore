@@ -7,6 +7,7 @@ UI/UI/UI/__pycache__/
 UI/UI/frontend/migrations/*
 UI/static
 traefik/andreas_askholm/
+GUI/image.tar
 
 # files to ignore
 db.*
