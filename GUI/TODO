@@ -1,12 +1,13 @@
+
+scheduled jobs in django (django background tasks)
+
+setup postgresql
+
 verify that constraints are checked
 
 student submission queue
 
 image builder integration
-
-scheduled jobs in django (django background tasks)
-
-setup postgresql
 
 project_task.md should be filled
 
