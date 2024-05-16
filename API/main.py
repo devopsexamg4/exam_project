@@ -52,14 +52,26 @@ def get_assignments(student_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return db_user.assignments
 
-@app.get("/student/assignments/{assignment_id}")
-def get_assignment_status(assignment_id: int, db: Session = Depends(get_db)):
+@app.get("/student/{student_id}/assignments/{assignment_id}/submission/{submission_id}/status")
+def get_assignment_evaluation(assignment_id: int, student_id: int, submission_id: int, db: Session = Depends(get_db)):
     db_assignment = crud.get_assignment(db, ass_id=assignment_id)
     if not db_assignment:
         raise HTTPException(status_code=404, detail="Assignment not found")
-    return db_assignment.status
+    db_user = crud.get_user(db, user_id=student_id)
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if db_assignment not in db_user.assignments:
+        raise HTTPException(status_code=401, detail="User does not have access to this assignment")
+    db_submission = crud.get_submission(db, sub_id=submission_id)
+    if not db_submission:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    if db_submission.submitter_id != student_id:
+        raise HTTPException(status_code=401, detail="Submission not owned by student")
+    if db_submission not in db_assignment.submissions:
+        raise HTTPException(status_code=401, detail="Submission not submitted to this assignment")
+    return db_submission.result
 
-@app.delete("/student/assignments/{student_id}/{submission_id}")
+@app.delete("/student/{student_id}/submissions/{submission_id}")
 def delete_submission(student_id: int, submission_id: int, db: Session = Depends(get_db)):
     db_submission = crud.get_submission(db, sub_id=submission_id)
     if not db_submission:
@@ -71,7 +83,7 @@ def delete_submission(student_id: int, submission_id: int, db: Session = Depends
     crud.delete_submission(db, sub_id=submission_id)
     return {"Deleted submission: ": submission_id}
 
-@app.post("/student/assignments/sumbit/{assignment_id}/{student_id}")
+@app.post("/student/{student_id}/assignments/{assignment_id}/sumbit/")
 def submit_solution(assignment_id: int, student_id: int, submission: schemas.StudentSubmissionCreate, db: Session = Depends(get_db)):
     db_assignment = crud.get_assignment(db, ass_id=assignment_id)
     if not db_assignment:
