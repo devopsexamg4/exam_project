@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import delete, insert
 
+import datetime
+
 import models, schemas
 
 def get_user(db: Session, user_id: int):
@@ -45,9 +47,9 @@ def get_submission(db: Session, sub_id: int):
 
 def create_submission(db: Session, submission: schemas.StudentSubmissionCreate, assignment_id: int, student_id: int):
     db_submission = models.StudentSubmissions(file=submission.file, 
-                                              result=submission.result, 
-                                              log_file=submission.log_file, 
-                                              upload_time=submission.upload_time,
+                                              result=models.Result.NOTRUN, 
+                                              log_file="",
+                                              upload_time=datetime.datetime.now(),
                                               submitter_id=student_id,
                                               assignment_id=assignment_id)
     db.add(db_submission)
@@ -66,7 +68,8 @@ def create_assignment(db: Session, assignment: schemas.AssignmentCreate):
                                       max_memory=assignment.max_memory, 
                                       max_CPU=assignment.max_CPU, 
                                       start=assignment.start, 
-                                      end=assignment.end)
+                                      end=assignment.end,
+                                      max_submissions=assignment.max_submissions)
     db.add(db_assignment)
     db.commit()
     db.refresh(db_assignment)

@@ -44,7 +44,7 @@ class Assignments(database.Base):
     start = Column(TIMESTAMP)
     end = Column(TIMESTAMP)
     timer = Column(TIMESTAMP) #should this thing even be here?
-    # should there be a max amount of submissions?
+    max_submissiosn = Column(Integer)
 
     contributors = relationship("User", back_populates="assignments") # figure out how to discern between student and teacher
     submissions = relationship("StudentSubmissions", back_populates="assignment")

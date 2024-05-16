@@ -33,7 +33,7 @@ class AssignmentBase(BaseModel):
     max_CPU: int
     start: datetime
     end: datetime
-    # if assignments should have a max amount of submissions, add the cap here
+    max_submissions: int
 
 class AssignmentCreate(AssignmentBase):
     pass

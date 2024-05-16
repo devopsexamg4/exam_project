@@ -81,6 +81,12 @@ def submit_solution(assignment_id: int, student_id: int, submission: schemas.Stu
         raise HTTPException(status_code=404, detail="User not found")
     if db_assignment not in db_user.assignments:
         raise HTTPException(status_code=401, detail="User does not have access to this assignment")
+    count: int
+    for submission in db_assignment.submissions:
+        if submission.submitter_id == db_user.user_id:
+            count = count + 1
+    if count >= db_assignment.max_submissions:
+        raise HTTPException(status_code=400, detail="Submission limit reached")
     return crud.create_submission(db=db, submission=submission, assignment_id=assignment_id, student_id=student_id)
 
 # teacher endpoints: 
@@ -224,7 +230,6 @@ def get_assignment_submissions_metadata(assignment_id: int, db: Session = Depend
     csv_buffer.seek(0)
     return csv_buffer
 
-# end point that does the same as the above but for one user
 @app.get("/teacher/assignment/{assignment_id}/student/{student_id}/submissions-metadata/")
 def get_assignment_student_submissions_metadata(assignment_id: int, student_id: int, db: Session = Depends(get_db)):
     db_assignment = crud.get_assignment(db, ass_id=assignment_id)
