@@ -6,6 +6,7 @@ from frontend.models import Assignments, StudentSubmissions, User, dockerdir, su
 from datetime import timedelta
 from django.utils import timezone
 from unittest.mock import Mock
+from os.path import exists
 
 class DockerdirTest(TestCase):
     """Test the dockerdir function in models.py"""
@@ -57,11 +58,46 @@ class AssignmentModelTest(TestCase):
         self.assertEqual(self.assignment.maxsubs, 10)
         self.assertTrue(self.assignment.dockerfile)
 
+    def test_str(self):
+        self.assertEqual(str(self.assignment), "Test Assignment")
+
     def test_valid_interval(self):
         self.assignment.start = timezone.now() + timedelta(days=7)
         self.assignment.end = timezone.now()
         with self.assertRaises(ValidationError):
             self.assignment.save()
+
+    def test_delete(self):
+        file_path = self.assignment.dockerfile.path
+        self.assignment.delete()
+        self.assertFalse(exists(file_path), "File was not deleted")
+
+class UserTest(TestCase):
+    def setUp(self):
+        self.assignment = Assignments.objects.create(
+            title="Test Assignment",
+            status=Assignments.StatusChoices.ACTIVE,
+            dockerfile=SimpleUploadedFile("file.txt", b"file_content"),
+        )
+        self.user = User.objects.create(username='testuser')
+        self.user.set_password('12345')
+
+    def test_create_user(self):
+        self.assertEqual(self.user.username, 'testuser')
+        self.assertEqual(self.user.type, User.TypeChoices.STUDENT)
+
+    def test_str(self):
+        self.assertEqual(str(self.user), 'testuser')
+
+    def test_assignments(self):
+        self.user.assignments.add(self.assignment)
+        self.assertIn(self.assignment, self.user.assignments.all())
+    
+    def test_type_choices(self):
+        for choice in User.TypeChoices:
+            self.user.type = choice
+            self.user.save()
+            self.assertEqual(User.objects.get(id=self.user.id).type, choice)
 
 class StudentSubmissionModelTest(TestCase):
     def setUp(self):
@@ -85,3 +121,34 @@ class StudentSubmissionModelTest(TestCase):
         self.assertEqual(self.submission.result, StudentSubmissions.ResChoices.PENDING)
         self.assertTrue(self.submission.File)
         self.assertEqual(self.submission.assignment, self.assignment)
+
+    def test_str(self):
+        self.assertEqual(str(self.submission), f"{self.user} - {self.submission.uploadtime.strftime('%d/%m/%y, %H:%M')}")
+
+    def test_valid_time(self):
+        self.assignment.start = timezone.now() + timedelta(days=7)
+        self.assignment.end = timezone.now() + timedelta(days=14)
+        self.assignment.save()
+        with self.assertRaises(ValidationError):
+            self.submission.save()
+
+    def test_valid_pending(self):
+        self.assignment.maxsubs = 1
+        self.assignment.save()
+        with self.assertRaises(ValidationError):
+            StudentSubmissions.objects.create(
+                student=self.user,
+                assignment=self.assignment,
+                File=SimpleUploadedFile('test_file', b'file_content'),
+            )
+
+    def test_delete(self):
+        file_path = self.submission.File.path
+        self.submission.delete()
+        self.assertFalse(exists(file_path), "File was not deleted")
+
+    def test_result_choices(self):
+        for choice in StudentSubmissions.ResChoices:
+            self.submission.result = choice
+            self.submission.save()
+            self.assertEqual(StudentSubmissions.objects.get(id=self.submission.id).result, choice)

@@ -191,7 +191,7 @@ class StudentSubmissions(models.Model):
     )
 
     uploadtime = models.DateTimeField(
-        auto_now_add = True,
+        default=timezone.now,
         help_text = """The time this assignment was uploaded"""
     )
 
