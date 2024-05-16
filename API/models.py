@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, String, ForeignKey, TIMESTAMP, Enum
+from sqlalchemy import Table, Column, Integer, String, ForeignKey, TIMESTAMP, Enum, Boolean
 from sqlalchemy.orm import relationship
 
 from enum import Enum
@@ -29,7 +29,7 @@ class User(database.Base):
     user_type = Column(UserType)
     email = Column(String, index=True)
     password = Column(String) 
-    
+    is_active = Column(Boolean)
 
     submissions = relationship("StudentSubmissions", back_populates="submitter")
     assignments = relationship("Assignments", secondary="user_assignment_association", back_populates="contributor") # both teacher and student?

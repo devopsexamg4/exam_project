@@ -268,16 +268,16 @@ def add_teacher(teacher: schemas.UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="User type must be teacher")
     return crud.create_user(db=db, user=teacher)
 
-"""@app.patch("/admin/teacher/{teacher_id}/pause")
+@app.patch("/admin/teacher/{teacher_id}/pause")
 def pause_teacher(teacher_id: int, db: Session = Depends(get_db)):
     db_user = crud.get_user(db, user_id=teacher_id)
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
     if db_user.user_type != schemas.UserType.TEACHER:
         raise HTTPException(status_code=400, detail="User is not a teacher")
-    if db_user.status == models.Status.PAUSED:
+    if db_user.is_active == False:
         raise HTTPException(status_code=400, detail="User is already paused")
-    return crud.update_user(db=db, user_id=teacher_id, status=models.Status.PAUSED)"""
+    return crud.update_user(db=db, user_id=teacher_id, is_active=False)
 
 @app.delete("/admin/user/{user_id}/delete")
 def delete_user(user_id: int, db: Session = Depends(get_db)):

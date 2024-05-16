@@ -55,6 +55,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str # hash this somehow
+    is_active: bool
 
 
 class User(UserBase):

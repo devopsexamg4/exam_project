@@ -17,7 +17,8 @@ def create_user(db: Session, user: schemas.UserCreate):
     db_user = models.User(user_name=user.user_name, 
                           user_type=user.user_type, 
                           email=user.email, 
-                          password=kinda_hashed_password)
+                          password=kinda_hashed_password,
+                          is_active = True)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
