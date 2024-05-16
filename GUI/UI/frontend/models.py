@@ -3,7 +3,7 @@ All models used througout the application is defined in this file
 TODO:
     - validate the uploaded files
 """
-from datetime import datetime,timedelta
+from datetime import datetime,timedelta,timezone
 from uuid import uuid4
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -70,12 +70,12 @@ class Assignments(models.Model):
     )
 
     start = models.DateTimeField(
-        default = datetime.now(),
+        default = datetime.now(tz=timezone.utc),
         help_text = """The starting time of this assignment, must be a vaild date and time"""
     )
 
     end = models.DateTimeField(
-        default = datetime.now() + timedelta(days = 14),
+        default = datetime.now(tz=timezone.utc) + timedelta(days = 14),
         help_text = """The deadline of the assignment must be a valid date and time,
                     must be after the start time, default is 14 days after the start"""
     )
