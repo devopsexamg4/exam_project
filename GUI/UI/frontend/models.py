@@ -3,7 +3,8 @@ All models used througout the application is defined in this file
 TODO:
     - validate the uploaded files
 """
-from datetime import datetime,timedelta,timezone
+from datetime import datetime,timedelta
+from django.utils import timezone
 from uuid import uuid4
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -11,6 +12,9 @@ from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator
 from django.core.exceptions import ValidationError
 
+def get_deadline():
+    """get the default deadline for an assignment"""
+    return timezone.now() + timedelta(days = 14)
 
 def dockerdir(instance, _):
     """generate a path to save the uploaded dockerfile"""
@@ -70,12 +74,12 @@ class Assignments(models.Model):
     )
 
     start = models.DateTimeField(
-        default = datetime.now(tz=timezone.utc),
+        default = timezone.now,
         help_text = """The starting time of this assignment, must be a vaild date and time"""
     )
 
     end = models.DateTimeField(
-        default = datetime.now(tz=timezone.utc) + timedelta(days = 14),
+        default = get_deadline,
         help_text = """The deadline of the assignment must be a valid date and time,
                     must be after the start time, default is 14 days after the start"""
     )

@@ -3,7 +3,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.files import File
 from django.core.exceptions import ValidationError
 from frontend.models import Assignments, StudentSubmissions, User, dockerdir, subdir
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
+from django.utils import timezone
 from unittest.mock import Mock
 
 class DockerdirTest(TestCase):
@@ -42,8 +43,8 @@ class AssignmentModelTest(TestCase):
             maxmemory=200,
             maxcpu=2,
             timer=timedelta(seconds=300),
-            start=datetime.now(tz=timezone.utc),
-            end=datetime.now(tz=timezone.utc) + timedelta(days=7),
+            start=timezone.now(),
+            end=timezone.now() + timedelta(days=7),
             maxsubs=10,
         )
 
@@ -57,8 +58,8 @@ class AssignmentModelTest(TestCase):
         self.assertTrue(self.assignment.dockerfile)
 
     def test_valid_interval(self):
-        self.assignment.start = datetime.now(tz=timezone.utc) + timedelta(days=7)
-        self.assignment.end = datetime.now(tz=timezone.utc)
+        self.assignment.start = timezone.now() + timedelta(days=7)
+        self.assignment.end = timezone.now()
         with self.assertRaises(ValidationError):
             self.assignment.save()
 
@@ -76,7 +77,7 @@ class StudentSubmissionModelTest(TestCase):
             result=StudentSubmissions.ResChoices.PENDING,
             File=SimpleUploadedFile("file.txt", b"file_content"),
             assignment=self.assignment,
-            uploadtime=datetime.now(tz=timezone.utc)
+            uploadtime=timezone.now()
         )
 
     def test_submission_creation(self):
