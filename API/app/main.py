@@ -112,6 +112,9 @@ def submit_solution(assignment_id: int, submission: schemas.StudentSubmissionCre
         raise HTTPException(status_code=404, detail="Assignment not found")
     if db_assignment not in current_user.assignments:
         raise HTTPException(status_code=401, detail="User does not have access to this assignment", headers={"WWW-Authenticate": "Bearer"})
+    for contributor in db_assignment.contributors:
+        if contributor.user_type == schemas.UserType.TEACHER and not contributor.is_active:
+            raise HTTPException(status_code=400, detail="Teacher is not active", headers={"WWW-Authenticate": "Bearer"})
     if db.query(models.StudentSubmissions).filter(models.StudentSubmissions.assignment_id == assignment_id).count() >= db_assignment.max_submissions:
         raise HTTPException(status_code=400, detail="Submission limit reached")
     return crud.create_submission(db=db, submission=submission, assignment_id=assignment_id, student_id=current_user.user_id)
@@ -366,6 +369,7 @@ def pause_teacher(teacher_id: int, current_user: Annotated[schemas.User, Depends
         raise HTTPException(status_code=400, detail="User is not a teacher")
     if db_user.is_active == False:
         raise HTTPException(status_code=400, detail="User is already paused")
+    # pause / cancel all submissions to a teachers assignments?
     return crud.update_user(db=db, user_id=teacher_id, is_active=False)
 
 @app.delete("/admin/user/{user_id}/delete/")
@@ -377,5 +381,6 @@ def delete_user(user_id: int, current_user: Annotated[schemas.User, Depends(get_
         raise HTTPException(status_code=404, detail="User not found")
     if db_user.user_type == schemas.UserType.ADMIN:
         raise HTTPException(status_code=400, detail="Admin cannot be deleted")
+    # delete all assignments this teacher is responsible for
     crud.delete_user(db=db, user_id=user_id)
     return {"Deleted user: ": user_id}

@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from enum import Enum
 
 #from .database import Base
-import database
+from database import Base
 
 class Result(Enum):
     PASSED = 1
@@ -22,7 +22,7 @@ class UserType(Enum):
     TEACHER = 2
     ADMIN = 3
 
-class User(database.Base):
+class User(Base):
     __tablename__ = "UserTable"
     user_id = Column(Integer, primary_key=True)
     user_name = Column(String, index=True)
@@ -34,7 +34,7 @@ class User(database.Base):
     submissions = relationship("StudentSubmissions", back_populates="submitter")
     assignments = relationship("Assignments", secondary="user_assignment_association", back_populates="contributor") # both teacher and student?
 
-class Assignments(database.Base):
+class Assignments(Base):
     __tablename__ = "Assignments"
     ass_id = Column(Integer, primary_key=True)
     docker_file = Column(String) # path to docker image, is there a concrete type for this?
@@ -49,7 +49,7 @@ class Assignments(database.Base):
     contributors = relationship("User", back_populates="assignments") # figure out how to discern between student and teacher
     submissions = relationship("StudentSubmissions", back_populates="assignment")
 
-class StudentSubmissions(database.Base):
+class StudentSubmissions(Base):
     __tablename__ = "StudentSubmissions"
     sub_id = Column(Integer, primary_key=True)
     file = Column(String) # path to sourcefile
@@ -65,7 +65,7 @@ class StudentSubmissions(database.Base):
 
 user_assignment_association = Table(
     "user_assignment_association",
-    database.Base.metadata,
+    Base.metadata,
     Column("user_id", Integer, ForeignKey("UserTable.user_id")),
     Column("assignment_id", Integer, ForeignKey("Assignments.ass_id"))
 )
