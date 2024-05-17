@@ -9,7 +9,7 @@ To use the image builder:
 - In the case of the GUI application, copy the files into ```GUI/img/*``` as specified in the ```/builder_to_gui.sh``` (or simply execute the script)
 ---
 ## How to use
-All operations will be performed in namespace "default" on the cluster it is run
+All operations will be performed in namespace "default" on the cluster it is run</br>
 To build an image:
 ```python
 manifest = build_kaniko(dockerfile, image_name, tag=latest)
