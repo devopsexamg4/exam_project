@@ -80,7 +80,7 @@ def get_current_active_user(current_user: Annotated[schemas.User, Depends(get_cu
 
 # student endpoints: 
 
-@app.post("/login/")
+@app.post("/login/", status_code=201)
 def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session = Depends(get_db)) -> Token:
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
@@ -89,7 +89,7 @@ def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Sessio
     access_token = create_access_token(data={"sub": user.user_name}, expires_delta=access_token_expires)
     return Token(access_token=access_token, token_type="bearer")
 
-@app.post("/student/create/", response_model=schemas.User)
+@app.post("/student/create/", response_model=schemas.User, status_code=201)
 def create_profile_student(student: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_name(db, user_name=student.user_name)
     if db_user:
@@ -97,9 +97,7 @@ def create_profile_student(student: schemas.UserCreate, db: Session = Depends(ge
     db_user2 = crud.get_user_by_email(db, email=student.email)
     if db_user2:
         raise HTTPException(status_code=400, detail="Email already registered")
-    if student.user_type != models.UserType.STUDENT:
-        raise HTTPException(status_code=400, detail="User type must be student")
-    return crud.create_user(db=db, user=student)
+    return crud.create_user_student(db=db, user=student)
 
 @app.get("/student/assignments/")
 def get_assignments(current_user: Annotated[schemas.User, Depends(get_current_active_user)], db: Session = Depends(get_db)):
@@ -117,6 +115,7 @@ def submit_solution(assignment_id: int, submission: schemas.StudentSubmissionCre
             raise HTTPException(status_code=400, detail="Teacher is not active", headers={"WWW-Authenticate": "Bearer"})
     if db.query(models.StudentSubmissions).filter(models.StudentSubmissions.assignment_id == assignment_id).count() >= db_assignment.max_submissions:
         raise HTTPException(status_code=400, detail="Submission limit reached")
+    # if assignment is active, run submission immediately
     return crud.create_submission(db=db, submission=submission, assignment_id=assignment_id, student_id=current_user.user_id)
 
 @app.get("/student/assignments/{assignment_id}/submission/{submission_id}/status/")
@@ -355,7 +354,7 @@ def add_teacher(teacher: schemas.UserCreate, current_user: Annotated[schemas.Use
         raise HTTPException(status_code=400, detail="Username already registered")
     if teacher.user_type != models.UserType.TEACHER:
         raise HTTPException(status_code=400, detail="User type must be teacher")
-    return crud.create_user(db=db, user=teacher)
+    return crud.create_user_teacher(db=db, user=teacher)
 
 @app.patch("/admin/teacher/{teacher_id}/pause/")
 def pause_teacher(teacher_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)], db: Session = Depends(get_db)):

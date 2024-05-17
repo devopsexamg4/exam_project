@@ -50,7 +50,6 @@ class Assignment(AssignmentBase):
 
 class UserBase(BaseModel):
     user_name: str
-    user_type: UserType
     email: str
 
 class UserCreate(UserBase):
@@ -59,6 +58,7 @@ class UserCreate(UserBase):
 
 
 class User(UserBase):
+    user_type: UserType
     user_id: int
     submissions: list[StudentSubmission] = []
     assignments: list[Assignment] = []

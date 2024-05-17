@@ -23,10 +23,22 @@ def get_user_by_name(db: Session, user_name: str):
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
-def create_user(db: Session, user: schemas.UserCreate):
+def create_user_student(db: Session, user: schemas.UserCreate):
     kinda_hashed_password = hash_password(user.password)
     db_user = models.User(user_name=user.user_name, 
-                          user_type=user.user_type, 
+                          user_type=models.UserType.STUDENT, 
+                          email=user.email, 
+                          password=kinda_hashed_password,
+                          is_active = True)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def create_user_teacher(db: Session, user: schemas.UserCreate):
+    kinda_hashed_password = hash_password(user.password)
+    db_user = models.User(user_name=user.user_name, 
+                          user_type=models.UserType.TEACHER, 
                           email=user.email, 
                           password=kinda_hashed_password,
                           is_active = True)
@@ -75,7 +87,8 @@ def create_assignment(db: Session, assignment: schemas.AssignmentCreate):
                                       max_CPU=assignment.max_CPU, 
                                       start=assignment.start, 
                                       end=assignment.end,
-                                      max_submissions=assignment.max_submissions)
+                                      max_submissions=assignment.max_submissions,
+                                      timer=assignment.end - assignment.start)
     db.add(db_assignment)
     db.commit()
     db.refresh(db_assignment)
