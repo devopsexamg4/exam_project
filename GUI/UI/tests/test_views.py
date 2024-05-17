@@ -15,15 +15,9 @@ class HomeViewTest(TestCase):
 class AdminViewTest(test.MessagesTestMixin, TestCase):
     def setUp(self):
         self.client = Client()
-        self.user_student = User.objects.create(username='user_student', type=User.TypeChoices.STUDENT)
-        self.user_teacher = User.objects.create(username='user_teacher', type=User.TypeChoices.TEACHER)
-        self.user_admin = User.objects.create(username='user_admin', type=User.TypeChoices.ADMIN)
-        self.user_student.set_password('12345')
-        self.user_teacher.set_password('12345')
-        self.user_admin.set_password('12345')
-        self.user_student.save()
-        self.user_teacher.save()
-        self.user_admin.save()
+        self.user_student = User.objects.create_user(username='user_student', password='12345', type=User.TypeChoices.STUDENT)
+        self.user_teacher = User.objects.create_user(username='user_teacher', password='12345', type=User.TypeChoices.TEACHER)
+        self.user_admin = User.objects.create_user(username='user_admin', password='12345', type=User.TypeChoices.ADMIN)
 
 
     def test_admin_access(self):
@@ -54,14 +48,10 @@ class StudentViewTest(test.MessagesTestMixin, TestCase):
             dockerfile=SimpleUploadedFile("file.txt", b"file_content"),
             status=Assignments.StatusChoices.ACTIVE
         )
-        self.user_student = User.objects.create(username='user_student', type=User.TypeChoices.STUDENT)
-        self.user_teacher = User.objects.create(username='user_teacher', type=User.TypeChoices.TEACHER)
-        self.user_student.set_password('12345')
-        self.user_teacher.set_password('12345')
+        self.user_student = User.objects.create_user(username='user_student', password='12345', type=User.TypeChoices.STUDENT)
+        self.user_teacher = User.objects.create_user(username='user_teacher', password='12345', type=User.TypeChoices.TEACHER)
         self.user_student.assignments.add(self.assignment)
         self.user_student.save()
-        self.user_teacher.save()
-
 
 
     def test_student_access(self):
@@ -86,9 +76,7 @@ class StudentViewTest(test.MessagesTestMixin, TestCase):
 class ViewStudentViewTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.user_student = User.objects.create(username='user_student', type=User.TypeChoices.STUDENT)
-        self.user_student.set_password('12345')   
-        self.user_student.save() 
+        self.user_student = User.objects.create_user(username='user_student', password='12345', type=User.TypeChoices.STUDENT)
         self.assignment = Assignments.objects.create(
             title="Test Assignment",
             status=Assignments.StatusChoices.ACTIVE,
@@ -107,6 +95,31 @@ class ViewStudentViewTest(TestCase):
         self.client.login(username='user_student', password='12345')
         response = self.client.post('/studentdetails/', {'student-pk': self.user_student.pk, 'assignment-pk': self.assignment.pk})
         self.assertEqual(response.status_code, 200)
+
+class TeacherViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.teacher_user = User.objects.create_user(username='teacher', password='12345', type=User.TypeChoices.TEACHER)
+        self.student_user = User.objects.create_user(username='student', password='12345', type=User.TypeChoices.STUDENT)
+        self.assignment = Assignments.objects.create(
+            title="Test Assignment",
+            status=Assignments.StatusChoices.ACTIVE,
+            dockerfile=SimpleUploadedFile("file.txt", b"file_content"),
+        )
+        self.teacher_user.assignments.add(self.assignment)
+
+    def test_teacher_view_with_teacher_user(self):
+        self.client.login(username='teacher', password='12345')
+        response = self.client.get(reverse('teacher'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Test Assignment')
+
+    def test_teacher_view_with_student_user(self):
+        self.client.login(username='student', password='12345')
+        response = self.client.get(reverse('teacher'))
+        self.assertEqual(response.status_code, 302)  # Expecting a redirect
+
+
 
 class UserLoginViewTest(TestCase):
     def test_user_login_view(self):

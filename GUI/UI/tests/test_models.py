@@ -79,9 +79,7 @@ class UserTest(TestCase):
             status=Assignments.StatusChoices.ACTIVE,
             dockerfile=SimpleUploadedFile("file.txt", b"file_content"),
         )
-        self.user = User.objects.create(username='testuser')
-        self.user.set_password('12345')
-        self.user.save()
+        self.user = User.objects.create_user(username='testuser', password='12345', type=User.TypeChoices.STUDENT)
 
     def test_create_user(self):
         self.assertEqual(self.user.username, 'testuser')
@@ -102,8 +100,7 @@ class UserTest(TestCase):
 
 class StudentSubmissionModelTest(TestCase):
     def setUp(self):
-        self.user = User.objects.create(username='testuser')
-        self.user.set_password('12345')
+        self.user = User.objects.create_user(username='testuser', password='12345', type=User.TypeChoices.STUDENT)
         self.assignment = Assignments.objects.create(
             title="Test Assignment",
             status=Assignments.StatusChoices.ACTIVE,
