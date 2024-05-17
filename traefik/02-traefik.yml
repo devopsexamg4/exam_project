@@ -54,10 +54,10 @@ spec:
             limits:
               cpu: "1"
               memory: "1Gi"
-              ephemeral-storage: "2Gi"
+              ephemeral-storage: "150Mi"
             requests:
-              cpu: "500m"
-              memory: "400Mi"
+              cpu: "200m"
+              memory: "200Mi"
           args:
             - --providers.kubernetescrd
             ## certificate resolver
