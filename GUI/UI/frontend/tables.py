@@ -44,7 +44,7 @@ class SubmissionTable(tables.Table):
         """Meta class for the SubmissionTable."""
         model = StudentSubmissions
         template_name = TABLE_TEMPLATE
-        fields = ( 'result', 'assignment', 'uploadtime', 'File', 'log'  )
+        fields = ( 'status', 'assignment', 'uploadtime', 'File', 'log'  )
         attrs = {'ref':'SubmissionTable'}
 
 class UserFilter(FilterSet):

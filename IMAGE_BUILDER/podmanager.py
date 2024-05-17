@@ -74,7 +74,7 @@ def create_job_object(name:str,
             'maxcpu':int, limit to cpu
             'maxmemory':int, limit to memory
             'timer':int, limit runtime
-            'sub':str, path to submission
+            'sub':str, path to submission, without file name
     @return tuple(kubernetes.client.V1Job, str)
     """
     # Configureate Pod template container

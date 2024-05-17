@@ -9,7 +9,10 @@ Assignment: {{submission.assignment }}</br>
 Assignment: Deleted</br>
 {% endif %}
 Uploaded: {{ submission.uploadtime }}</br>
-Result: {{ submission.result }}</br>
+Status: {{ submission.status }}</br>
+{% if submission.result %}
+Result: <a href="{{ submission.result.url }}">{{submission.result}}</a>
+{% endif %}
 {% if submission.log %}
 Log: <a href="{{ submission.log.url }}">{{submission.log}}</a>
 {% endif %}

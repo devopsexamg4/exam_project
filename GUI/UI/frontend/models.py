@@ -10,7 +10,7 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator
 from django.core.exceptions import ValidationError
-
+from img import podmanager as pm
 
 def stopsub(usr):
     """
@@ -31,7 +31,7 @@ def dockerdir(instance, _):
 
 def subdir(instance, _):
     """Generate a path to save the uploaded submission"""
-    return f"submissions/{str(uuid4())[0:5]}{instance.File}"
+    return f"submissions/sub-{str(uuid4())[0:5]}/{instance.File}"
 
 class Assignments(models.Model):
     """
@@ -107,6 +107,11 @@ class Assignments(models.Model):
                         must be within [1,15], default is 5"""
     )
 
+    image = models.TextField(
+        default="",
+        help_text="""The image to be used for submission evaluation"""
+    )
+
     def _validinterval(self):
         end = self.end
         start = self.start
@@ -114,8 +119,18 @@ class Assignments(models.Model):
             raise ValidationError("Deadline must be later than starting time")
 
     def save(self, *args, **kwargs):
-        """Validate that the assignment has a valid interval before saving"""
+        """
+        Validate that the assignment has a valid interval before saving
+        after validation build the image used to evaluate submissions
+        """
         self._validinterval()
+        # create manifest
+        mani = pm.build_kaniko(self.dockerfile, self.title)
+        # build image with kaniko
+        pm.deploy_pod(mani)
+        # save the image name
+        self.image = mani['spec']['containers'][0]['args'][2]
+        # save the assignment object
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -164,7 +179,7 @@ class User(AbstractUser):
         and stop the execution of submission evaluations
         """
         if self.type == User.TypeChoices.TEACHER:
-            processing.stopsub(self)
+            stopsub(self)
             assigns = self.assignments.all()
             # need to do it this way to accurately call the delete function
             for ass in assigns:
@@ -184,9 +199,9 @@ class StudentSubmissions(models.Model):
     """
     class ResChoices(models.TextChoices):
         """The choices for the result field"""
-        PASSED = "PAS", _("Passed")
-        FAILED = "FAI", _("Failed")
+        FINISHED = "FIN",_("Finished")
         PENDING = "PEN", _("Pending")
+        RUNNING = "RUN",_("Running")
         STOP = "STP",_("Stopped")
 
     student = models.ForeignKey(
@@ -194,8 +209,14 @@ class StudentSubmissions(models.Model):
         on_delete=models.CASCADE,
         help_text = """The student who made this submission"""
     )
+    
+    result = models.FileField(
+        blank=True,
+        null=True,
+        help_text="""The results reported from evaluation"""
+    )
 
-    result = models.CharField(
+    status = models.CharField(
         max_length = 3,
         choices = ResChoices,
         default = ResChoices.PENDING,
@@ -218,12 +239,16 @@ class StudentSubmissions(models.Model):
         help_text = """The time this assignment was uploaded"""
     )
 
-
     assignment = models.ForeignKey(
         Assignments,
         on_delete = models.SET_NULL,
         null = True,
         help_text = """The assignment for which this is a submission"""
+    )
+
+    eval_job = models.TextField(
+        default="",
+        help_text="""the name of the evaluation job"""        
     )
 
     def _validtime(self):
@@ -264,7 +289,12 @@ class StudentSubmissions(models.Model):
         super().save(*args, **kwargs)
 
     def delete(self):
-        """custom delete function to remove the associated file
+        """custom delete function to remove the associated files
         """
         self.File.delete()
+        self.log.delete()
+        self.result.delete()
+        if self.status == StudentSubmissions.ResChoices.RUNNING:
+            api = pm.create_api_instance()
+            pm.delete_job(api, self.eval_job)
         super().delete()

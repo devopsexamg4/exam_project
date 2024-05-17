@@ -106,7 +106,8 @@ else:
 
 # cron jobs
 CRONJOBS = [
-     ('*/1 * * * *', 'frontend.tasks.scheduled_job')
+    ('*/20 * * * *', 'frontend.tasks.eval_submissions'),
+    ('*/20 * * * *', 'frontend.tasks.read_res'),
 ]
 
 # Password validation

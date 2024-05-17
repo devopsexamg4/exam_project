@@ -40,7 +40,7 @@ class AssignmentForm(forms.ModelForm):
     class Meta:
         """The model and attributes used to create a new assignment"""
         model = Assignments
-        fields = "__all__"
+        exclude = ['image']
         widgets = {
             'start':DateTimePickerInput(),
             'end':DateTimePickerInput(),
@@ -63,7 +63,7 @@ class SubmissionForm(forms.ModelForm):
     class Meta:
         """The model and atrributes to create a submission"""
         model = StudentSubmissions
-        exclude = ['result','log', 'student']
+        exclude = ['result','log', 'student', 'status', 'eval_job']
 
 class AddStudForm(forms.Form):
     """form to add students to an assignment"""

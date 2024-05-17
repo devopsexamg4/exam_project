@@ -13,6 +13,7 @@ user_login, signup and user_logout are used as their names suggest
 import csv
 import zipfile
 import io
+import pathlib
 
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -28,6 +29,8 @@ from django_tables2 import RequestConfig
 from . import tables as t
 from . import forms as f
 from .models import User, Assignments, StudentSubmissions, stopsub
+from img import podmanager as pm
+
 
 STRING_403 = "You do not have permissions to view this page"
 
@@ -365,12 +368,25 @@ def reeval(request):
         subs = StudentSubmissions.objects.filter(pk = request.POST['subpk'])
     else:
         subs = assign.studentsubmissions_set.exclude(
-            result = StudentSubmissions.ResChoices.PENDING
+            status = StudentSubmissions.ResChoices.PENDING
             )
 
     for sub in subs:
-        sub.result = StudentSubmissions.ResChoices.PENDING
+        sub.status = StudentSubmissions.ResChoices.PENDING
+        api = pm.create_api_instance()
+        path = pathlib.Path(sub.File.path)
+        job,name = pm.create_job_object(assign.title,
+                                        assign.image,
+                                        resources={
+                                            'maxmemory':assign.maxmemory,
+                                            'maxcpu':assign.maxcpu,
+                                            'timer':assign.timer,
+                                            'sub':str(path.parent)
+                                            })
+        sub.eval_job = name
         sub.save()
+        pm.create_job(api, job)
+        
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
@@ -383,11 +399,15 @@ def stopeval(request):
     if mode == 'single':
         subs = StudentSubmissions.objects.filter(pk = request.POST['subpk'])
     else:
-        subs = assign.studentsubmissions_set.filter(result = StudentSubmissions.ResChoices.PENDING )
+        subs = assign.studentsubmissions_set.filter(status = StudentSubmissions.ResChoices.RUNNING )
 
     for sub in subs:
-        sub.result = StudentSubmissions.ResChoices.STOP
+        sub.status = StudentSubmissions.ResChoices.STOP
+        name = sub.eval_job
+        sub.eval_job = ""
         sub.save()
+        api = pm.create_api_instance()
+        pm.delete_job(api, name)
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
@@ -414,7 +434,7 @@ def getcsv(request):
         writer.writerow([sub.student.username,
                          str(sub.pk),
                          sub.uploadtime.strftime("%d/%m/%y, %H:%M:%S"),
-                         sub.get_result_display() ])
+                         sub.result.open('r').read() ])
 
     return response
 
