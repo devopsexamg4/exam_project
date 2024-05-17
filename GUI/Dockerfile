@@ -6,7 +6,9 @@ COPY ../IMAGE_BUILDER/requirements.txt ./pod_req.txt
 RUN pip install -r requirements.txt
 RUN pip install -r pod_req.txt
 # install cron to setup scheduled tasks
-RUN apt-get update && apt-get install -y cron
+RUN apt-get update \
+    && apt-get --no-install-recommends install -y cron \
+    && apt-get clean
 # copy files into container
 COPY ./UI /app
 COPY .env.prod /app/.env
