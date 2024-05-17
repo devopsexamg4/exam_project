@@ -7,3 +7,4 @@ This may not work currently, unsure if env variables are set up properly
 
 For documencation go to localhost:8000/docs
 Documentation is only availalbe once api is running
+test
