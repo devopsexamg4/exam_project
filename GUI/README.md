@@ -26,3 +26,8 @@ ui module
 ## Run tests
 1. Navigate to the UI directory
 2. `./manage.py test` to run all tests
+
+For coverage run
+1. `coverage run --source='.' manage.py test` 
+1. `coverage report` for a short view in the terminal 
+1. `coverage html` to generate a detailed html report, viewable at ./htmlcov/index.html 
