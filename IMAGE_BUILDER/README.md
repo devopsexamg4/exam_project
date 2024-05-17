@@ -11,12 +11,12 @@ To use the image builder:
 ## How to use
 All operations will be performed in namespace "default" on the cluster it is run
 To build an image:
-``` 
+```python
 manifest = build_kaniko(dockerfile, image_name, tag=latest)
 api_response = deploy_pod(manifest)
 ```
 To start a job e.g. to evaluate a submission:
-```
+```python
 resource_dict = {'maxmemory':str(memory limit in Mi),
                   'maxcpu':str(cpu limit),
                   'timer':str(maximum execution time from jobstart),
@@ -27,21 +27,21 @@ api_response = create_job(api, job)
 ```
 
 To get the status of a job:
-```
+```python
 api = create_api_instance()
 name = <name returned from create_job_object>
 api_response = get_job_status(api,name)
 ```
 
 To delete a job:
-```
+```python
 api = create_api_instance()
 name = <name returned from create_job_object>
 api_response = delete_job(api,name)
 ```
 
 Update a runninng job:
-```
+```python
 old_name = <name returned from initial create_job_object>
 resource_dict = {'maxmemory':str(memory limit in Mi),
                   'maxcpu':str(cpu limit),
