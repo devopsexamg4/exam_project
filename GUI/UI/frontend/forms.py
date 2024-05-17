@@ -40,7 +40,15 @@ class AssignmentForm(forms.ModelForm):
     class Meta:
         """The model and attributes used to create a new assignment"""
         model = Assignments
-        fields = "__all__"
+        fields = ['title',
+                  'status',
+                  'maxmemory',
+                  'maxcpu',
+                  'timer',
+                  'start',
+                  'end',
+                  'dockerfile',
+                  'maxsubs',]
         widgets = {
             'start':DateTimePickerInput(),
             'end':DateTimePickerInput(),
@@ -63,7 +71,7 @@ class SubmissionForm(forms.ModelForm):
     class Meta:
         """The model and atrributes to create a submission"""
         model = StudentSubmissions
-        exclude = ['result','log', 'student']
+        fields = ['status','File','assignment']
 
 class AddStudForm(forms.Form):
     """form to add students to an assignment"""
@@ -72,4 +80,4 @@ class AddStudForm(forms.Form):
         self.fields['students'].choices = [ (u.id,u.username) 
                                            for u in User.objects.filter(type = 'STU')]
 
-    students = forms.MultipleChoiceField(widget = forms.CheckboxSelectMultiple())
+    students = forms.MultipleChoiceField(widget = forms.CheckboxSelectMultiple(), required=False)

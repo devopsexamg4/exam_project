@@ -10,6 +10,12 @@ spec:
     requests:
       storage: 1Gi
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: traefik-ingress-controller
+
+---
 kind: Deployment
 apiVersion: apps/v1
 metadata:
@@ -26,15 +32,12 @@ spec:
       labels:
         app: traefik
     spec:
-      serviceAccountName: traefik-account
-
+      serviceAccountName: traefik-ingress-controller
+      automountServiceAccountToken: true
       volumes:
       - name: traefik-data
         persistentVolumeClaim:
           claimName: traefik-vol
-      - name: gcloud-service
-        secret:
-          secretName: traefik-dns-acc
 
       initContainers:
         - name: volume-permissions
@@ -46,15 +49,23 @@ spec:
           
       containers:
         - name: traefik
-          image: traefik:v2.11
+          image: traefik:v3.0
+          resources:
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+              ephemeral-storage: "150Mi"
+            requests:
+              cpu: "200m"
+              memory: "200Mi"
           args:
-            - --providers.kubernetesingress
+            - --providers.kubernetescrd
             ## certificate resolver
             - --certificatesresolvers.myresolver.acme.email=andreas.askholm@gmail.com
-            - --certificatesresolvers.myresolver.acme.dnschallenge.provider=gcloud
+            - --certificatesResolvers.myresolver.acme.dnsChallenge.disablePropagationCheck=true
+            - --certificatesresolvers.myresolver.acme.dnschallenge.provider=duckdns
             - --certificatesresolvers.myresolver.acme.dnschallenge=true
             - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
-            # remove the staging part of this when everything is nice
             - --certificatesresolvers.myresolver.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
             ## entrypoint config
             - --entrypoints.web.http.redirections.entrypoint.to=websecure
@@ -63,21 +74,16 @@ spec:
             - --entrypoints.websecure.address=:443
             - --entrypoints.websecure.http.tls=true
             - --entrypoints.websecure.http.tls.certresolver=myresolver
-            # - --entrypoints.websecure.http.tls.domains[0].main=devg4.dk.eu.org
-            # - --entrypoints.websecure.http.tls.domains[1].sans=api.devg4.dk.eu.org
+            - --entrypoints.websecure.http.tls.domains[0].main=devg4.duckdns.org
+            - --entrypoints.websecure.http.tls.domains[1].sans=apidevg4.duckdns.org
             ## logging config
             - --log=true
             - --log.format=json
-            - --log.level=WARNING
+            - --log.level=ERROR
           ## environment variables
           env:
-            - name: GCE_SERVICE_ACCOUNT_FILE
-              value: "/etc/service-account.json"
-            - name: GCE_PROJECT
-              valueFrom:
-                secretKeyRef:
-                  key: project
-                  name: gcloud-project
+            - name: DUCKDNS_TOKEN
+              value: # ask and you might recieve
           ## ports to use
           ports:
             - name: web
@@ -88,22 +94,6 @@ spec:
           volumeMounts:
           - mountPath: /letsencrypt
             name: traefik-data
-          - mountPath: "/etc/service-account.json"
-            name: gcloud-service
-            readOnly: true
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: traefik-web-service
-
-spec:
-  type: LoadBalancer
-  ports:
-    - targetPort: web
-      port: 80
-  selector:
-    app: traefik
 ---
 apiVersion: v1
 kind: Service
@@ -113,7 +103,11 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-    - targetPort: websecure
+    - name: https
+      targetPort: websecure
       port: 443
+    - name: http
+      targetPort: web
+      port: 80
   selector:
     app: traefik
