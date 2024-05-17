@@ -1,5 +1,5 @@
 # Kaniko to build images from a dockerfile
-## How to use
+## How to include
 To use the image builder:
 - copy the files ```__init__.py, kaniko.yml, podmanager.py, requirements.txt``` into your application,</br>be sure not to overwrite any files in your application.
 - In your application set the environment variable ```CON_STORAGE``` to be the path/url to your container storage.
@@ -8,6 +8,49 @@ To use the image builder:
 ---
 - In the case of the GUI application, copy the files into ```GUI/img/*``` as specified in the ```/builder_to_gui.sh``` (or simply execute the script)
 ---
+## How to use
+All operations will be performed in namespace "default" on the cluster it is run
+To build an image:
+``` 
+manifest = build_kaniko(dockerfile, image_name, tag=latest)
+api_response = deploy_pod(manifest)
+```
+To start a job e.g. to evaluate a submission:
+```
+resource_dict = {'maxmemory':str(memory limit in Mi),
+                  'maxcpu':str(cpu limit),
+                  'timer':str(maximum execution time from jobstart),
+                  'sub':str(path to folder containing assignment)}
+api = create_api_instance()
+job, name = create_job_object(jobname, jobimage, resources=resource_dict)
+api_response = create_job(api, job)
+```
+
+To get the status of a job:
+```
+api = create_api_instance()
+name = <name returned from create_job_object>
+api_response = get_job_status(api,name)
+```
+
+To delete a job:
+```
+api = create_api_instance()
+name = <name returned from create_job_object>
+api_response = delete_job(api,name)
+```
+
+Update a runninng job:
+```
+old_name = <name returned from initial create_job_object>
+resource_dict = {'maxmemory':str(memory limit in Mi),
+                  'maxcpu':str(cpu limit),
+                  'timer':str(maximum execution time from jobstart),
+                  'sub':str(path to folder containing assignment)}
+api = create_api_instance()
+job, new_name = create_job_object(jobname, jobimage, resources=resource_dict)
+api_response = update_job(api,job,old_name)
+```
 ## Doc from [kaniko](https://raw.githubusercontent.com/GoogleContainerTools/kaniko/main/README.md)
 #### Running kaniko in a Kubernetes cluster
 
