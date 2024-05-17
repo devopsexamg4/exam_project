@@ -48,9 +48,6 @@ def delete_user(db: Session, user_id: int):
     db.query(models.User).filter(models.User.user_id == user_id).delete()
     db.commit()
 
-def get_assignment(db: Session, ass_id: int):
-    return db.query(models.Assignments).filter(models.Assignments.ass_id == ass_id).first()
-
 def get_submission(db: Session, sub_id: int):
     return db.query(models.StudentSubmissions).filter(models.StudentSubmissions.sub_id == sub_id).first()
 
