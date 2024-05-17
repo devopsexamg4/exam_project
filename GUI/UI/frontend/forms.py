@@ -63,7 +63,7 @@ class SubmissionForm(forms.ModelForm):
     class Meta:
         """The model and atrributes to create a submission"""
         model = StudentSubmissions
-        exclude = ['result','log', 'student']
+        exclude = ['uploadtime', 'result','log', 'student']
 
 class AddStudForm(forms.Form):
     """form to add students to an assignment"""

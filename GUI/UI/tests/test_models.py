@@ -81,6 +81,7 @@ class UserTest(TestCase):
         )
         self.user = User.objects.create(username='testuser')
         self.user.set_password('12345')
+        self.user.save()
 
     def test_create_user(self):
         self.assertEqual(self.user.username, 'testuser')
