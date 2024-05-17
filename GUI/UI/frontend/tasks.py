@@ -2,9 +2,9 @@
 Scheduled tasks are dedfined in this file
 """
 
-from img import podmanager as pm
-from .models import Assignments, StudentSubmissions
 import pathlib
+from img import podmanager as pm
+from .models import StudentSubmissions
 
 
 def eval_submissions():

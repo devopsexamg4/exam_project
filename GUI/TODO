@@ -1,11 +1,11 @@
 
  [x] scheduled jobs in django (django cron)
     
-    - [ ] verify that constraints are checked
+    - [x] verify that constraints are checked
     
-    - [ ] student submission queue
+    - [x] student submission queue
 
-    - [ ] image builder integration
+    - [x] image builder integration
 
 [ ] project_task.md should be filled
 

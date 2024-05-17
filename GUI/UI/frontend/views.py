@@ -5,10 +5,6 @@ home and about are info pages, viewable by all
 admin, student and teacher presents the views of those types of users
 user_login, signup and user_logout are used as their names suggest
     to login, create a user and logout
-
-    TODO:
-    - do some nice formatting and stuff for the html pages
-    - docstring and stuff
 """
 import csv
 import zipfile
@@ -25,11 +21,11 @@ from django.views.generic.detail import SingleObjectMixin
 from django.utils.datastructures import MultiValueDictKeyError
 from django.urls import reverse_lazy
 from django_tables2 import RequestConfig
+from img import podmanager as pm
 
 from . import tables as t
 from . import forms as f
 from .models import User, Assignments, StudentSubmissions, stopsub
-from img import podmanager as pm
 
 
 STRING_403 = "You do not have permissions to view this page"

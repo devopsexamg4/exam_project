@@ -1,7 +1,5 @@
 """
 All models used througout the application is defined in this file
-TODO:
-    - validate the uploaded files
 """
 from datetime import datetime,timedelta
 from uuid import uuid4
