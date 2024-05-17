@@ -1,5 +1,14 @@
 # Kaniko to build images from a dockerfile
-### doc from [kaniko](https://raw.githubusercontent.com/GoogleContainerTools/kaniko/main/README.md)
+## How to use
+To use the image builder:
+- copy the files ```__init__.py, kaniko.yml, podmanager.py, requirements.txt``` into your application,</br>be sure not to overwrite any files in your application.
+- In your application set the environment variable ```CON_STORAGE``` to be the path/url to your container storage.
+- Install the requirements with ```pip install -r requirements.txt```
+- import the functions into your applications like you would any other import in python e.g. ```import podmanager as pm```
+---
+- In the case of the GUI application, copy the files into ```GUI/img/*``` as specified in the ```/builder_to_gui.sh``` (or simply execute the script)
+---
+## Doc from [kaniko](https://raw.githubusercontent.com/GoogleContainerTools/kaniko/main/README.md)
 #### Running kaniko in a Kubernetes cluster
 
 Requirements:

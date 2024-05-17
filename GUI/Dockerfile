@@ -2,7 +2,7 @@ FROM python:3.12.2-slim
 # install requirements
 RUN pip install --upgrade pip
 COPY ./requirements.txt .
-COPY ../IMAGE_BUILDER/requirements.txt ./pod_req.txt
+COPY ./img/pod_req.txt ./pod_req.txt
 RUN pip install -r requirements.txt
 RUN pip install -r pod_req.txt
 # install cron to setup scheduled tasks
@@ -12,9 +12,9 @@ RUN apt-get update \
 # copy files into container
 COPY ./UI /app
 COPY .env.prod /app/.env
-COPY ../IMAGE_BUILDER/kaniko.yml /app/frontend/img/kaniko.yml 
-COPY ../IMAGE_BUILDER/podmanager.py /app/frontend/img/podmanager.py
-COPY ../IMAGE_BUILDER/__init__.py /app/frontend/img/__init__.py
+COPY ./img/kaniko.yml /app/frontend/img/kaniko.yml 
+COPY ./img/podmanager.py /app/frontend/img/podmanager.py
+COPY ./img/__init__.py /app/frontend/img/__init__.py
 
 # read and set secrets
 RUN --mount=type=secret,id=secret_1 \
