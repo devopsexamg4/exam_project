@@ -1,9 +1,18 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import delete, insert
+from passlib.context import CryptContext
 
 import datetime
 
 import models, schemas
+
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+
+def hash_password(password: str):
+    return pwd_context.hash(password) # temporary
+
+def verify_password(password: str, hashed_password: str):
+    return pwd_context.verify(hashed_password, password)
 
 def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.user_id == user_id).first()
@@ -15,7 +24,7 @@ def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
 def create_user(db: Session, user: schemas.UserCreate):
-    kinda_hashed_password = user.password + "hash"
+    kinda_hashed_password = hash_password(user.password)
     db_user = models.User(user_name=user.user_name, 
                           user_type=user.user_type, 
                           email=user.email, 
