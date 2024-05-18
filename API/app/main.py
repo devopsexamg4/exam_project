@@ -149,13 +149,13 @@ def delete_submission(submission_id: int, current_user: Annotated[schemas.User, 
 
 # teacher endpoints: 
 
-@app.post("/teacher/assignment/")
+@app.post("/teacher/assignment/", status_code=201)
 def add_assignment(assignment: schemas.AssignmentCreate, current_user: Annotated[schemas.User, Depends(get_current_active_user)],  db: Session = Depends(get_db)):
     if current_user.user_type == models.UserType.STUDENT:
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
     return crud.create_assignment(db=db, assignment=assignment)
 
-@app.patch("/teacher/assignment/{assignment_id}/")
+@app.patch("/teacher/assignment/{assignment_id}/", status_code=200)
 def update_assignment(current_user: Annotated[schemas.User, Depends(get_current_active_user)], assignment_id: int, dockerfile: str | None = None, status: models.Status | None = None, max_memory: int | None = None, max_CPU: int | None = None, start: datetime.datetime | None = None, end: datetime.datetime | None = None, db: Session = Depends(get_db)):
     if current_user.user_type == models.UserType.STUDENT:
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
@@ -164,7 +164,7 @@ def update_assignment(current_user: Annotated[schemas.User, Depends(get_current_
         raise HTTPException(status_code=404, detail="Assignment not found")
     return crud.update_assignment(db=db, assignment=db_assignment, dockerfile=dockerfile, status=status, max_memory=max_memory, max_CPU=max_CPU, start=start, end=end)
 
-@app.patch("/teacher/assignment/{assignment_id}/pause/")
+@app.patch("/teacher/assignment/{assignment_id}/pause/", status_code=200)
 def pause_assignment(assignment_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)],  db: Session = Depends(get_db)):
     if current_user.user_type == models.UserType.STUDENT:
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
@@ -175,7 +175,7 @@ def pause_assignment(assignment_id: int, current_user: Annotated[schemas.User, D
         raise HTTPException(status_code=400, detail="Assignment is already paused")
     return crud.update_assignment(db=db, ass_id=assignment_id, status=models.Status.PAUSED)
 
-@app.delete("/teacher/assignment/{assignment_id}/delete/")
+@app.delete("/teacher/assignment/{assignment_id}/delete/", status_code=204)
 def delete_assignment(assignment_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)],  db: Session = Depends(get_db)):
     if current_user.user_type == models.UserType.STUDENT:
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
@@ -185,7 +185,7 @@ def delete_assignment(assignment_id: int, current_user: Annotated[schemas.User, 
     crud.delete_assignment(db, ass_id=assignment_id)
     return {"Deleted assignment: ": assignment_id}
 
-@app.patch("/teacher/assignment/{assignment_id}/remove-student/")
+@app.patch("/teacher/assignment/{assignment_id}/remove-student/", status_code=204)
 def remove_student_from_assignment(assignment_id: int, student_ids: conlist(int, min_length=1), current_user: Annotated[schemas.User, Depends(get_current_active_user)],  db: Session = Depends(get_db)):
     if current_user.user_type == models.UserType.STUDENT:
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
@@ -201,7 +201,7 @@ def remove_student_from_assignment(assignment_id: int, student_ids: conlist(int,
         crud.remove_student_from_assignment(db=db, ass_id=assignment_id, user_id=id)
     return {"Removed student(s) from assignment: ": assignment_id}
 
-@app.patch("/teacher/assignment/{assignment_id}/add-student/")
+@app.patch("/teacher/assignment/{assignment_id}/add-student/", status_code=204)
 def add_student_to_assignment(assignment_id: int, student_ids: conlist(int, min_length=1), current_user: Annotated[schemas.User, Depends(get_current_active_user)],  db: Session = Depends(get_db)):
     if current_user.user_type == models.UserType.STUDENT:
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
@@ -217,7 +217,7 @@ def add_student_to_assignment(assignment_id: int, student_ids: conlist(int, min_
         crud.add_student_to_assignment(db=db, ass_id=assignment_id, user_id=id)
     return {"Added student(s) to assignment: ": assignment_id}
 
-@app.get("/teacher/assignmnet/{assignment_id}/student-submissions/{student_id}/")
+@app.get("/teacher/assignmnet/{assignment_id}/student-submissions/{student_id}/", status_code=200)
 def get_student_submissions(assignment_id: int, student_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)],  db: Session = Depends(get_db)):
     if current_user.user_type == models.UserType.STUDENT:
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
@@ -231,7 +231,7 @@ def get_student_submissions(assignment_id: int, student_id: int, current_user: A
         raise HTTPException(status_code=401, detail="User does not have access to this assignment", headers={"WWW-Authenticate": "Bearer"})
     return db.query(models.StudentSubmissions).filter(models.StudentSubmissions.submitter_id == student_id).filter(models.StudentSubmissions.assignment_id == assignment_id).all()
 
-@app.get("/teacher/submission/{submission_id}/outcome/")
+@app.get("/teacher/submission/{submission_id}/outcome/", status_code=200)
 def get_submission_outcome(submission_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)],  db: Session = Depends(get_db)):
     if current_user.user_type == models.UserType.STUDENT:
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
@@ -247,7 +247,7 @@ def get_submission_outcome(submission_id: int, current_user: Annotated[schemas.U
 
 # here should be an endpoint for the teacher to stop evaluations of all submissions under an assignment
 
-@app.get("/teacher/assignment/{assignment_id}/submission-logs/")
+@app.get("/teacher/assignment/{assignment_id}/submission-logs/", status_code=200)
 def get_assignment_submission_logs(assignment_id: int,  current_user: Annotated[schemas.User, Depends(get_current_active_user)], db: Session = Depends(get_db)):
     if current_user.user_type == models.UserType.STUDENT:
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
@@ -262,7 +262,7 @@ def get_assignment_submission_logs(assignment_id: int,  current_user: Annotated[
     zip_buffer.seek(0)
     return zip_buffer
 
-@app.get("/teacher/assignment/{assignment_id}/student/{student_id}/submission-logs/")
+@app.get("/teacher/assignment/{assignment_id}/student/{student_id}/submission-logs/", status_code=200)
 def get_assignment_student_submission_logs(assignment_id: int, student_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)],  db: Session = Depends(get_db)):
     if current_user.user_type == models.UserType.STUDENT:
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
@@ -283,7 +283,7 @@ def get_assignment_student_submission_logs(assignment_id: int, student_id: int, 
     zip_buffer.seek(0)
     return zip_buffer
 
-@app.get("/teacher/assignment/{assignment_id}/submissions-metadata/")
+@app.get("/teacher/assignment/{assignment_id}/submissions-metadata/", status_code=200)
 def get_assignment_submissions_metadata(assignment_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)],  db: Session = Depends(get_db)):
     if current_user.user_type == models.UserType.STUDENT:
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
@@ -310,7 +310,7 @@ def get_assignment_submissions_metadata(assignment_id: int, current_user: Annota
     csv_buffer.seek(0)
     return csv_buffer
 
-@app.get("/teacher/assignment/{assignment_id}/student/{student_id}/submissions-metadata/")
+@app.get("/teacher/assignment/{assignment_id}/student/{student_id}/submissions-metadata/", status_code=200)
 def get_assignment_student_submissions_metadata(assignment_id: int, student_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)], db: Session = Depends(get_db)):
     if current_user.user_type == models.UserType.STUDENT:
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
@@ -343,7 +343,7 @@ def get_assignment_student_submissions_metadata(assignment_id: int, student_id: 
 
 # administrator endpoints: 
 
-@app.post("/admin/add-teacher/", response_model=schemas.User)
+@app.post("/admin/add-teacher/", response_model=schemas.User, status_code=201)
 def add_teacher(teacher: schemas.UserCreate, current_user: Annotated[schemas.User, Depends(get_current_active_user)], db: Session = Depends(get_db)):
     if current_user.user_type != models.UserType.ADMIN:
         raise HTTPException(status_code=401, detail="User is not an admin", headers={"WWW-Authenticate": "Bearer"})
@@ -357,7 +357,7 @@ def add_teacher(teacher: schemas.UserCreate, current_user: Annotated[schemas.Use
         raise HTTPException(status_code=400, detail="User type must be teacher")
     return crud.create_user_teacher(db=db, user=teacher)
 
-@app.patch("/admin/teacher/{teacher_id}/pause/")
+@app.patch("/admin/teacher/{teacher_id}/pause/", status_code=200)
 def pause_teacher(teacher_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)], db: Session = Depends(get_db)):
     if current_user.user_type != models.UserType.ADMIN:
         raise HTTPException(status_code=401, detail="User is not an admin", headers={"WWW-Authenticate": "Bearer"})
@@ -371,7 +371,7 @@ def pause_teacher(teacher_id: int, current_user: Annotated[schemas.User, Depends
     # pause / cancel all submissions to a teachers assignments?
     return crud.update_user(db=db, user_id=teacher_id, is_active=False)
 
-@app.delete("/admin/user/{user_id}/delete/")
+@app.delete("/admin/user/{user_id}/delete/", status_code=204)
 def delete_user(user_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)], db: Session = Depends(get_db)):
     if current_user.user_type != models.UserType.ADMIN:
         raise HTTPException(status_code=401, detail="User is not an admin", headers={"WWW-Authenticate": "Bearer"})
