@@ -6,7 +6,7 @@ To use the image builder:
 - Install the requirements with ```pip install -r requirements.txt```
 - import the functions into your applications like you would any other import in python e.g. ```import podmanager as pm```
 ---
-- In the case of the GUI application, copy the files into ```GUI/img/*``` as specified in the ```/builder_to_gui.sh``` (or simply execute the script)
+- In the case of the GUI application, copy the files into ```GUI/UI/frontend/img/*``` as specified in the ```/builder_to_gui.sh``` (or simply execute the script)
 ---
 ## How to use
 All operations will be performed in namespace "default" on the cluster it is run</br>
