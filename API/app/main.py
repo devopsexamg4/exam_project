@@ -11,6 +11,7 @@ import csv
 from zipfile import ZipFile
 
 import crud, models, schemas
+import podmanager as pm
 from .database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
@@ -118,7 +119,7 @@ def submit_solution(assignment_id: int, submission: schemas.StudentSubmissionCre
     # if assignment is active, run submission immediately
     return crud.create_submission(db=db, submission=submission, assignment_id=assignment_id, student_id=current_user.user_id)
 
-@app.get("/student/assignments/{assignment_id}/submission/{submission_id}/status/")
+@app.get("/student/assignments/{assignment_id}/submission/{submission_id}/status/", status_code=200)
 def get_assignment_evaluation(assignment_id: int, submission_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)], db: Session = Depends(get_db)):
     db_assignment = crud.get_assignment(db, ass_id=assignment_id)
     if not db_assignment:
@@ -134,7 +135,7 @@ def get_assignment_evaluation(assignment_id: int, submission_id: int, current_us
         raise HTTPException(status_code=401, detail="Submission not submitted to this assignment", headers={"WWW-Authenticate": "Bearer"})
     return db_submission.result
 
-@app.delete("/student/submissions/{submission_id}/")
+@app.delete("/student/submissions/{submission_id}/", status_code=204)
 def delete_submission(submission_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)],  db: Session = Depends(get_db)):
     db_submission = crud.get_submission(db, sub_id=submission_id)
     if not db_submission:
