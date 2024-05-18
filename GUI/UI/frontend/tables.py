@@ -69,7 +69,7 @@ class SubmissionFilter(FilterSet):
     class Meta:
         """Meta class for the SubmissionFilter."""
         model = StudentSubmissions
-        fields = {'result':["contains"],
+        fields = {'status':["contains"],
                   'uploadtime':["contains"]}
 
 

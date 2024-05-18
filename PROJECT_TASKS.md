@@ -31,13 +31,15 @@
     - [x] submit submission(?)
     - [x] cancel submission if unprocessed/not started
     - [x] view results of evaluation
-- [ ] integrate imagebuilder
+- [x] integrate imagebuilder
+    - [x] schedule tasks to start evaluations
+    - [x] schedule tasks to stop evaluations and read results
 - [ ] connect to production db
 - [ ] unittests for database queries
 - [ ] beautify pages
 - [x] make distributable
 
-## backend
+## Deployment
 
 ## Pipeline
 

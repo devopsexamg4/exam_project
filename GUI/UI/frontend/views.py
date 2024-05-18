@@ -21,8 +21,9 @@ from django.views.generic.detail import SingleObjectMixin
 from django.utils.datastructures import MultiValueDictKeyError
 from django.urls import reverse_lazy
 from django_tables2 import RequestConfig
-from img import podmanager as pm
 
+
+from .img import podmanager as pm
 from . import tables as t
 from . import forms as f
 from .models import User, Assignments, StudentSubmissions, stopsub

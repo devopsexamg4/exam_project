@@ -8,7 +8,7 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator
 from django.core.exceptions import ValidationError
-from img import podmanager as pm
+from .img import podmanager as pm
 
 def stopsub(usr):
     """
