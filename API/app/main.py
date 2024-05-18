@@ -29,11 +29,11 @@ def get_db():
     finally:
         db.close()
 
-class Token(crud.BaseModel):
+class Token(schemas.BaseModel):
     access_token: str
     token_type: str
 
-class TokenData(crud.BaseModel):
+class TokenData(schemas.BaseModel):
     username: str | None = None
 
 def authenticate_user(db: Session, username: str, password: str):
@@ -80,7 +80,7 @@ def get_current_active_user(current_user: Annotated[schemas.User, Depends(get_cu
 
 # student endpoints: 
 
-@app.post("/login/", status_code=201)
+@app.post("/login/", response_model = Token, status_code=201)
 def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session = Depends(get_db)) -> Token:
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
@@ -99,11 +99,11 @@ def create_profile_student(student: schemas.UserCreate, db: Session = Depends(ge
         raise HTTPException(status_code=400, detail="Email already registered")
     return crud.create_user_student(db=db, user=student)
 
-@app.get("/student/assignments/")
+@app.get("/student/assignments/", response_model=list[schemas.Assignment], status_code=200)
 def get_assignments(current_user: Annotated[schemas.User, Depends(get_current_active_user)], db: Session = Depends(get_db)):
     return current_user.assignments
 
-@app.post("/student/assignments/{assignment_id}/sumbit/")
+@app.post("/student/assignments/{assignment_id}/sumbit/", response_model=schemas.StudentSubmission, status_code=201)
 def submit_solution(assignment_id: int, submission: schemas.StudentSubmissionCreate, current_user: Annotated[schemas.User, Depends(get_current_active_user)], db: Session = Depends(get_db)):
     db_assignment = crud.get_assignment(db, ass_id=assignment_id)
     if not db_assignment:
