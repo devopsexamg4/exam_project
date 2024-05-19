@@ -11,7 +11,7 @@
 - [Python helper module to interact with the cluster -> IMAGE_BUILDER](IMAGE_BUILDER)
 
 # A guide to deployment
-## deploying the reverse proxy
+## Deploying the reverse proxy
 1. Configure your certificate resolver ([Documentation](https://doc.traefik.io/traefik/https/acme/#providers))
     - In `MANIFESTS/02-traefik.yml` set:
         - your email on line 64 (`- --certificatesresolvers.myresolver.acme.email=<your email>`)
@@ -24,8 +24,8 @@
         - (optional) `spec.tls.domains.sans`
 1. Apply manifests 00 - 03
 
-## building and deploying the GUI
-2. Give a value to the secrects in `GUI/UI/.env.prod`
+## Building and deploying the GUI
+1. Give a value to the secrects in `GUI/UI/.env.prod`
     - SECRET_KEY: from django [documentation](https://docs.djangoproject.com/en/5.0/topics/signing/) "This value is the key to securing signed data"
     - DEBUG: [Documentation](https://docs.djangoproject.com/en/5.0/ref/settings/#debug)
     - ALLOWED_HOSTS: [Documentation](https://docs.djangoproject.com/en/5.0/ref/settings/#allowed-hosts)
@@ -39,10 +39,10 @@
     - DB_HOST: Where the database is hosted
     - DB_PORT: on which port the database can be accessed
     - CON_STORE: url to a container registry, images for assignments will be pushed to this registry
-2. Build the image defined in `GUI/Dockerfile`
-2. Push the image to your container registry
-2. In the file `MANIFESTS/04-gui.yml` set the image to be the one just build
-2. Apply manifest 04
+1. Build the image defined in `GUI/Dockerfile`
+1. Push the image to your container registry
+1. In the file `MANIFESTS/04-gui.yml` set the image to be the one just build
+1. Apply manifest 04
 
 
 ## But what if I want to run this locally?
