@@ -371,9 +371,7 @@ def reeval(request):
 
     for sub in subs:
         sub.status = StudentSubmissions.ResChoices.PENDING
-        # test are run with the debug set to false
-        # podmanager has to run in a cluster
-        if not settings.DEBUG:
+        if settings.CLUSTER:
             api = pm.create_api_instance()
             path = pathlib.Path(sub.File.path)
             job,name = pm.create_job_object(assign.title,
@@ -404,9 +402,7 @@ def stopeval(request):
 
     for sub in subs:
         sub.status = StudentSubmissions.ResChoices.STOP
-        # test are run with the debug set to false
-        # podmanager has to run in a cluster
-        if settings.DEBUG:
+        if settings.CLUSTER:
             name = sub.eval_job
             sub.eval_job = ""
             sub.save()

@@ -47,6 +47,7 @@
     - DB_HOST: Where the database is hosted
     - DB_PORT: on which port the database can be accessed
     - CON_STORE: url to a container registry, images for assignments will be pushed to this registry
+    - CLUSTER: Boolean to indicate whether or not the application is running in a cluster
 1. Build the image defined in `GUI/Dockerfile`
 1. Push the image to your container registry
 1. In the file `MANIFESTS/04-gui.yml` set the image to be the one just build

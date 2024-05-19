@@ -1,12 +1,12 @@
 """
 All models used througout the application is defined in this file
 """
-from datetime import datetime,timedelta
 from uuid import uuid4
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from django.utils.timezone import timedelta
 from django.core.validators import MaxValueValidator
 from django.core.exceptions import ValidationError
 from django.conf import settings
@@ -33,6 +33,9 @@ def dockerdir(instance, _):
 def subdir(instance, _):
     """Generate a path to save the uploaded submission"""
     return f"submissions/sub-{str(uuid4())[0:5]}/{instance.File}"
+
+def offset():
+    return timezone.now() + timedelta(days = 14)
 
 class Assignments(models.Model):
     """
@@ -84,12 +87,12 @@ class Assignments(models.Model):
     )
 
     start = models.DateTimeField(
-        default = timezone.now(),
+        default = timezone.now,
         help_text = """The starting time of this assignment, must be a vaild date and time"""
     )
 
     end = models.DateTimeField(
-        default = timezone.now() + timedelta(days = 14),
+        default = offset(),
         help_text = """The deadline of the assignment must be a valid date and time,
                     must be after the start time, default is 14 days after the start"""
     )
@@ -127,7 +130,7 @@ class Assignments(models.Model):
         self._validinterval()
         # test are run with the debug set to false
         # podmanager has to run in a cluster
-        if settings.DEBUG:
+        if settings.CLUSTER:
             # create manifest
             mani = pm.build_kaniko(self.dockerfile.name, self.title)
             # build image with kaniko
