@@ -3,6 +3,10 @@
 # A map of the repo
 #### i.e. What goes where
 - [link text](IMAGE_BUILDER)
+- [link text](DB)
+- [link text](GUI)
+- [link text](API)
+- [link text](Manifests)
 
 # A guide to deployment
 
