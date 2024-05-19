@@ -81,7 +81,8 @@ def create_submission(db: Session, submission: schemas.StudentSubmissionCreate, 
                                               log_file="",
                                               upload_time=datetime.datetime.now(),
                                               submitter_id=student_id,
-                                              assignment_id=assignment_id)
+                                              assignment_id=assignment_id,
+                                              eval_job=submission.eval_job)
     db.add(db_submission)
     db.commit()
     db.refresh(db_submission)
@@ -92,8 +93,8 @@ def delete_submission(db: Session, sub_id: int):
     db.query(models.StudentSubmissions).filter(models.StudentSubmissions.sub_id == sub_id).delete()
     db.commit()
 
-def create_assignment(db: Session, assignment: schemas.AssignmentCreate):
-    db_assignment = models.Assignments(docker_file=assignment.docker_file, 
+def create_assignment(db: Session, assignment: schemas.AssignmentCreate, docker_image: bytes):
+    db_assignment = models.Assignments(docker_file=docker_image, 
                                       status=assignment.status, 
                                       max_memory=assignment.max_memory, 
                                       max_CPU=assignment.max_CPU, 

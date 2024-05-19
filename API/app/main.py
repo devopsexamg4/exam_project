@@ -1,10 +1,11 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from pydantic import conlist
 from typing import Annotated
 from jose import JWTError, jwt
 from contextlib import asynccontextmanager
+from kubernetes.client.rest import ApiException
 
 import datetime
 import io
@@ -121,15 +122,28 @@ def submit_solution(assignment_id: int, submission: schemas.StudentSubmissionCre
         raise HTTPException(status_code=404, detail="Assignment not found")
     if db_assignment not in current_user.assignments:
         raise HTTPException(status_code=401, detail="User does not have access to this assignment", headers={"WWW-Authenticate": "Bearer"})
-    for contributor in db_assignment.contributors:
-        if contributor.user_type == models.UserType.TEACHER and not contributor.is_active:
-            raise HTTPException(status_code=400, detail="Teacher is not active", headers={"WWW-Authenticate": "Bearer"})
+    if db_assignment.status == models.Status.PAUSED:
+        raise HTTPException(status_code=400, detail="Assignment is paused", headers={"WWW-Authenticate": "Bearer"})
     if db.query(models.StudentSubmissions).filter(models.StudentSubmissions.assignment_id == assignment_id).count() >= db_assignment.max_submissions:
         raise HTTPException(status_code=400, detail="Submission limit reached")
-    # if assignment is active, run submission immediately
-    return crud.create_submission(db=db, submission=submission, assignment_id=assignment_id, student_id=current_user.user_id)
+    name: str
+    if db_assignment.status == models.Status.ACTIVE:
+        manifest = pm.build_kaniko(db_submission.file, db_submission.sub_id)
+        docker_image = manifest["spec"]["containers"][0]["args"][2]
+        resource_dict = {
+            "maxmemory": str(db_assignment.max_memory),
+            "maxcpu": str(db_assignment.max_CPU),
+            "timer": str(db_assignment.timer),
+            "sub": "./"}
+        api = pm.create_api_instance()
+        job, name = pm.create_job_object(str(db_submission.sub_id), docker_image, resource_dict)
+        try:
+            api_response = pm.create_job(api, job)
+        except ApiException as e:
+            raise HTTPException(status_code=500, detail="Error: " + str(e))
+    db_submission = crud.create_submission(db=db, submission=submission, assignment_id=assignment_id, student_id=current_user.user_id, eval_job=name)
+    return db_submission
 
-# Working under assumption that submission_id is a valid name for a submission job
 @app.get("/student/assignments/{assignment_id}/submission/{submission_id}/status/", status_code=200)
 def get_assignment_evaluation(assignment_id: int, submission_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)], db: Session = Depends(get_db)):
     db_assignment = crud.get_assignment(db, ass_id=assignment_id)
@@ -145,7 +159,7 @@ def get_assignment_evaluation(assignment_id: int, submission_id: int, current_us
     if db_submission not in db_assignment.submissions:
         raise HTTPException(status_code=401, detail="Submission not submitted to this assignment", headers={"WWW-Authenticate": "Bearer"})
     api = pm.create_api_instance()
-    api_response = pm.get_job_status(api, str(submission_id))
+    api_response = pm.get_job_status(api, db_submission.eval_job)
     return {"Status": api_response}
 
 @app.delete("/student/submissions/{submission_id}/", status_code=204)
@@ -157,27 +171,30 @@ def delete_submission(submission_id: int, current_user: Annotated[schemas.User, 
         raise HTTPException(status_code=401, detail="Submission not owned by student", headers={"WWW-Authenticate": "Bearer"})
     if db_submission.result != models.Result.NOTRUN:
         raise HTTPException(status_code=400, detail="Submission being, or already has been processed")
+    job_status = pm.get_job_status(pm.create_api_instance(), db_submission.eval_job)
+    if job_status.status.active > 0 or job_status.succeeded > 0:
+        raise HTTPException(status_code=400, detail="Submission being, or already has been processed")
     crud.delete_submission(db, sub_id=submission_id)
     return {"Deleted submission: ": submission_id}
 
 # teacher endpoints: 
 
-@app.post("/teacher/assignment/", status_code=201)
-def add_assignment(assignment: schemas.AssignmentCreate, current_user: Annotated[schemas.User, Depends(get_current_active_user)],  db: Session = Depends(get_db)):
+@app.post("/teacher/assignment/", response_model=schemas.Assignment, status_code=201)
+def add_assignment(current_user: Annotated[schemas.User, Depends(get_current_active_user)], assignment: schemas.AssignmentCreate, docker_image: UploadFile = File(...), db: Session = Depends(get_db)):
     if current_user.user_type == models.UserType.STUDENT:
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
-    return crud.create_assignment(db=db, assignment=assignment)
+    return crud.create_assignment(db=db, assignment=assignment, docker_image=docker_image)
 
-@app.patch("/teacher/assignment/{assignment_id}/", status_code=200)
-def update_assignment(current_user: Annotated[schemas.User, Depends(get_current_active_user)], assignment_id: int, dockerfile: str | None = None, status: models.Status | None = None, max_memory: int | None = None, max_CPU: int | None = None, start: datetime.datetime | None = None, end: datetime.datetime | None = None, db: Session = Depends(get_db)):
+@app.patch("/teacher/assignment/{assignment_id}/", response_model=schemas.Assignment, status_code=200)
+def update_assignment(current_user: Annotated[schemas.User, Depends(get_current_active_user)], assignment_id: int, docker_image: UploadFile = File(...), status: models.Status | None = None, max_memory: int | None = None, max_CPU: int | None = None, start: datetime.datetime | None = None, end: datetime.datetime | None = None, db: Session = Depends(get_db)):
     if current_user.user_type == models.UserType.STUDENT:
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
     db_assignment = crud.get_assignment(db, ass_id=assignment_id)
     if not db_assignment:
         raise HTTPException(status_code=404, detail="Assignment not found")
-    return crud.update_assignment(db=db, assignment=db_assignment, dockerfile=dockerfile, status=status, max_memory=max_memory, max_CPU=max_CPU, start=start, end=end)
+    return crud.update_assignment(db=db, assignment=db_assignment, dockerfile=docker_image, status=status, max_memory=max_memory, max_CPU=max_CPU, start=start, end=end)
 
-@app.patch("/teacher/assignment/{assignment_id}/pause/", status_code=200)
+@app.patch("/teacher/assignment/{assignment_id}/pause/", response_model=schemas.Assignment, status_code=200)
 def pause_assignment(assignment_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)],  db: Session = Depends(get_db)):
     if current_user.user_type == models.UserType.STUDENT:
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
@@ -230,7 +247,7 @@ def add_student_to_assignment(assignment_id: int, student_ids: conlist(int, min_
         crud.add_student_to_assignment(db=db, ass_id=assignment_id, user_id=id)
     return {"Added student(s) to assignment: ": assignment_id}
 
-@app.get("/teacher/assignmnet/{assignment_id}/student-submissions/{student_id}/", status_code=200)
+@app.get("/teacher/assignmnet/{assignment_id}/student-submissions/{student_id}/", response_model=list[schemas.StudentSubmission], status_code=200)
 def get_student_submissions(assignment_id: int, student_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)],  db: Session = Depends(get_db)):
     if current_user.user_type == models.UserType.STUDENT:
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
@@ -252,7 +269,7 @@ def get_submission_outcome(submission_id: int, current_user: Annotated[schemas.U
     if not db_submission:
         raise HTTPException(status_code=404, detail="Submission not found")
     db_assignment = crud.get_assignment(db, ass_id=db_submission.assignment_id)
-    return {db_assignment.status, db_submission.log_file, db_submission.result}
+    return {"status": db_assignment.status, "log_file": db_submission.log_file, "result": db_submission.result}
 
 @app.patch("/teacher/submission/{submission_id}/re-evaluate/", status_code=204)
 def re_evaluate_submission(submission_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)],  db: Session = Depends(get_db)):
@@ -268,7 +285,7 @@ def re_evaluate_submission(submission_id: int, current_user: Annotated[schemas.U
         "timer": db_assignment.timer,
         "sub": "./"}
     api = pm.create_api_instance()
-    job, name = pm.create_job_object(str(submission_id), db_submission.file, resource_dict)
+    job, name = pm.create_job_object(db_submission.eval_job, db_submission.file, resource_dict)
     api_response = pm.create_job(api, job)
     return {"Job name: ": name}
 
@@ -281,8 +298,8 @@ def stop_submission_evaluation(submission_id: int, current_user: Annotated[schem
     if not db_submission:
         raise HTTPException(status_code=404, detail="Submission not found")
     api = pm.create_api_instance()
-    api_response = pm.delete_job(api, str(submission_id))
-    return {"Stopped evaluation of submission: ": submission_id}
+    api_response = pm.delete_job(api, db_submission.eval_job)
+    return {"Stopped evaluation of submission: ": submission_id, "api_response": api_response}
 
 # Same comment as above
 @app.patch("/teacher/assignment/{assignment_id}/stop-evaluation/", status_code=204)
@@ -294,7 +311,7 @@ def stop_assignment_submissions_evaluations(assignment_id: int, current_user: An
         raise HTTPException(status_code=404, detail="Assignment not found")
     for submission in db_assignment.submissions:
         api = pm.create_api_instance()
-        api_response = pm.delete_job(api, str(submission.sub_id))
+        api_response = pm.delete_job(api, submission.eval_job)
     return {"Stopped evaluation of all submissions under assignment: ": assignment_id}
 
 @app.get("/teacher/assignment/{assignment_id}/submission-logs/", status_code=200)
@@ -308,7 +325,7 @@ def get_assignment_submission_logs(assignment_id: int,  current_user: Annotated[
     zip_buffer = io.BytesIO()
     with ZipFile(zip_buffer, "w") as zip_file:
         for submission in db_assignment.submissions:
-            zip_file.write(submission.log_file, arcname=str(submission.sub_id) + submission.log_file)
+            zip_file.write(submission.log_file, arcname=submission.eval_job + submission.log_file)
     zip_buffer.seek(0)
     return zip_buffer
 
@@ -405,7 +422,7 @@ def add_teacher(teacher: schemas.UserCreate, current_user: Annotated[schemas.Use
         raise HTTPException(status_code=400, detail="Username already registered")
     return crud.create_user_teacher(db=db, user=teacher)
 
-@app.patch("/admin/teacher/{teacher_id}/pause/", status_code=200)
+@app.patch("/admin/teacher/{teacher_id}/pause/", response_model=schemas.User, status_code=200)
 def pause_teacher(teacher_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)], db: Session = Depends(get_db)):
     if current_user.user_type != models.UserType.ADMIN:
         raise HTTPException(status_code=401, detail="User is not an admin", headers={"WWW-Authenticate": "Bearer"})
@@ -416,7 +433,8 @@ def pause_teacher(teacher_id: int, current_user: Annotated[schemas.User, Depends
         raise HTTPException(status_code=400, detail="User is not a teacher")
     if db_user.is_active == False:
         raise HTTPException(status_code=400, detail="User is already paused")
-    # pause / cancel all submissions to a teachers assignments?
+    for assignment in db_user.assignments:
+        crud.update_assignment(db=db, ass_id=assignment.ass_id, status=models.Status.PAUSED)
     return crud.update_user(db=db, user_id=teacher_id, is_active=False)
 
 @app.delete("/admin/user/{user_id}/delete/", status_code=204)
@@ -428,6 +446,7 @@ def delete_user(user_id: int, current_user: Annotated[schemas.User, Depends(get_
         raise HTTPException(status_code=404, detail="User not found")
     if db_user.user_type == models.UserType.ADMIN:
         raise HTTPException(status_code=400, detail="Admin cannot be deleted")
-    # delete all assignments this teacher is responsible for
+    for assignment in db_user.assignments:
+        crud.delete_assignment(db=db, ass_id=assignment.ass_id)
     crud.delete_user(db=db, user_id=user_id)
     return {"Deleted user: ": user_id}

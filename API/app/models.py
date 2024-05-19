@@ -52,6 +52,7 @@ class Assignments(Base):
 class StudentSubmissions(Base):
     __tablename__ = "StudentSubmissions"
     sub_id = Column(Integer, primary_key=True)
+    eval_job: Column(String)
     file = Column(String) # path to sourcefile
     result = Column(Result)
     log_file = Column(String)

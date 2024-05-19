@@ -10,7 +10,8 @@ from .models import Result
 # the third type, the 'actual' class, contains data that can only be returned by reading from database
 
 class StudentSubmissionBase(BaseModel):
-    file: str # path to file? Return here with answer
+    file: str # docker file
+    eval_job: str
 
 class StudentSubmissionCreate(StudentSubmissionBase):
     pass
@@ -18,7 +19,7 @@ class StudentSubmissionCreate(StudentSubmissionBase):
 class StudentSubmission(StudentSubmissionBase):
     sub_id: int
     result: Result
-    log_file: str # perhaps name of file? Return here with answer
+    log_file: str # path to file?
     upload_time: datetime
     submitter_id: int
     assignment_id: int
@@ -27,7 +28,6 @@ class StudentSubmission(StudentSubmissionBase):
         orm_mode = True
 
 class AssignmentBase(BaseModel):
-    docker_file: str # path to file? Return here with answer
     status: Status
     max_memory: int
     max_CPU: int
@@ -40,6 +40,7 @@ class AssignmentCreate(AssignmentBase):
     pass
 
 class Assignment(AssignmentBase):
+    docker_file: bytes # docker image
     ass_id: int
     contributors: list['User'] = []
     submissions: list[StudentSubmission] = []
