@@ -60,9 +60,9 @@ In this document all the tasks regarding the project is listed and marked done o
 - [ ] Extract metadata about all submissions from a given student to an assignment
 
 #### Admin
-- [ ] Add a teacher
-- [ ] Pause a teacher
-- [ ] Delete a student or teacher
+- [x] Add a teacher
+- [x] Pause a teacher
+- [x] Delete a student or teacher
 
 ### 
 
