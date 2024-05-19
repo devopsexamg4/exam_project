@@ -57,5 +57,5 @@
 ---
 ## But what if I want to run this locally?
 [This](https://youtu.be/Ef9QnZVpVd8?si=GJXBrbplXsq9dCLL)</br>
-Running API in development mode: ![Guide](API/README.md)</br>
-Running GUI in development mode: ![Guide](GUI/README.md)</br>
+Running API in development mode: [Guide](API/README.md)</br>
+Running GUI in development mode: [Guide](GUI/README.md)</br>
