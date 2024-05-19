@@ -11,3 +11,4 @@
 # A guide to deployment
 
 ## But what if I want to run this locally?
+[This](https://youtu.be/Ef9QnZVpVd8?si=GJXBrbplXsq9dCLL)
