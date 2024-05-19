@@ -44,6 +44,8 @@
 1. In the file `MANIFESTS/04-gui.yml` set the image to be the one just build
 1. Apply manifest 04
 
-
+---
 ## But what if I want to run this locally?
-[This](https://youtu.be/Ef9QnZVpVd8?si=GJXBrbplXsq9dCLL)
+[This](https://youtu.be/Ef9QnZVpVd8?si=GJXBrbplXsq9dCLL)</br>
+Running API in development mode: [Guide](https://github.com/devopsexamg4/exam_project/blob/main/API/README.md)</br>
+Running GUI in development mode: [Guide](https://github.com/devopsexamg4/exam_project/blob/main/GUI/README.md)</br>
