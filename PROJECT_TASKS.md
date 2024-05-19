@@ -1,33 +1,70 @@
 # Tasks
 In this document all the tasks regarding the project is listed and marked done or not.</br>
 ## API
-- [ ] sketch features
-- [ ] decide on a framework
-- [ ] make login/user creation
-- [ ] make admin endpoint
-    - [ ] allow admin the change type of user
-    - [ ] allow admin to delete user
-    - [ ] allow admin to set user inactive
-- [ ] make teacher endpoint
-    - [ ] add assignment
-    - [ ] stop and or remove assignment
-    - [ ] pause assignment
-    - [ ] edit assignment
-    - [ ] add/remove students from an assignment
-    - [ ] list student assignments (all and individual students)
-    - [ ] stop/restart evaluation of assignment
-    - [ ] extract logs of submissions
-    - [ ] extract results of submissions
-- [ ] make student endpoint
-    - [ ] list submissions
-    - [ ] submit submission
-    - [ ] cancel submission if unprocessed/not started
-    - [ ] view results of evaluation
-- [ ] integrate imagebuilder
-    - [ ] schedule tasks to start evaluations
-    - [ ] schedule tasks to stop evaluations and read results
-- [ ] connect to production db
-- [ ] unittests for database queries
+### Endpoints
+#### Student
+- [x] Create profile
+- [x] Log into the system
+- [x] Get list of own assignments
+- [ ] Submit a solution to an assignment
+- [x] Check evaluation of assignment
+- [x] Cancel submission if not processed
+- [x] See results of assignment
+
+#### Teacher
+- [x] Add an assignment
+- [x] Update configuration information of assignment
+- [x] Pause an assignment
+- [x] Delete an assignment
+- [x] Add or remove student(s) from assignment
+- [x] Get list of submissions from given student & assignment
+- [x] Get metadata about a submission
+- [ ] Trigger re-evaluation of assignment
+- [ ] Stop evaluation of assignment
+- [ ] Stop evaluation of all submissions to an assignment
+- [x] Get all logs of all submissions to an assignment
+- [x] Extract metadata about all submissions to an assignment
+- [x] Extract all submission logs for a single student from an assignment in a zip file
+- [x] Extract metadata about all submissions from a given student to an assignment
+
+#### Admin
+- [x] Add a teacher
+- [ ] Pause a teacher
+    - Teacher can be paused, but currently it does not pause their assignments
+- [x] Delete a student or teacher
+
+### Testing
+#### Student
+- [x] Create profile
+- [x] Log into the system
+- [x] Get list of own assignments
+- [ ] Submit a solution to an assignment
+- [ ] Check evaluation of assignment
+- [ ] Cancel submission if not processed
+- [ ] See results of assignment
+
+#### Teacher
+- [ ] Add an assignment
+- [ ] Update configuration information of assignment
+- [ ] Pause an assignment
+- [ ] Delete an assignment
+- [ ] Add or remove student(s) from assignment
+- [ ] Get list of submissions from given student & assignment
+- [ ] Get metadata about a submission
+- [ ] Trigger re-evaluation of assignment
+- [ ] Stop evaluation of assignment
+- [ ] Stop evaluation of all submissions to an assignment
+- [ ] Get all logs of all submissions to an assignment
+- [ ] Extract metadata about all submissions to an assignment
+- [ ] Extract all submission logs for a single student from an assignment in a zip file
+- [ ] Extract metadata about all submissions from a given student to an assignment
+
+#### Admin
+- [ ] Add a teacher
+- [ ] Pause a teacher
+- [ ] Delete a student or teacher
+
+### 
 
 ## Database
 - [x] Design entities and relations
