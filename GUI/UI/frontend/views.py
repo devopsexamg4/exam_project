@@ -21,6 +21,7 @@ from django.views.generic.detail import SingleObjectMixin
 from django.utils.datastructures import MultiValueDictKeyError
 from django.urls import reverse_lazy
 from django_tables2 import RequestConfig
+from django.conf import settings
 
 
 from .img import podmanager as pm
@@ -370,19 +371,22 @@ def reeval(request):
 
     for sub in subs:
         sub.status = StudentSubmissions.ResChoices.PENDING
-        api = pm.create_api_instance()
-        path = pathlib.Path(sub.File.path)
-        job,name = pm.create_job_object(assign.title,
-                                        assign.image,
-                                        resources={
-                                            'maxmemory':assign.maxmemory,
-                                            'maxcpu':assign.maxcpu,
-                                            'timer':assign.timer,
-                                            'sub':str(path.parent)
-                                            })
-        sub.eval_job = name
+        # test are run with the debug set to false
+        # podmanager has to run in a cluster
+        if not settings.DEBUG:
+            api = pm.create_api_instance()
+            path = pathlib.Path(sub.File.path)
+            job,name = pm.create_job_object(assign.title,
+                                            assign.image,
+                                            resources={
+                                                'maxmemory':assign.maxmemory,
+                                                'maxcpu':assign.maxcpu,
+                                                'timer':assign.timer,
+                                                'sub':str(path.parent)
+                                                })
+            sub.eval_job = name
+            pm.create_job(api, job)
         sub.save()
-        pm.create_job(api, job)
         
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
@@ -400,11 +404,14 @@ def stopeval(request):
 
     for sub in subs:
         sub.status = StudentSubmissions.ResChoices.STOP
-        name = sub.eval_job
-        sub.eval_job = ""
-        sub.save()
-        api = pm.create_api_instance()
-        pm.delete_job(api, name)
+        # test are run with the debug set to false
+        # podmanager has to run in a cluster
+        if settings.DEBUG:
+            name = sub.eval_job
+            sub.eval_job = ""
+            sub.save()
+            api = pm.create_api_instance()
+            pm.delete_job(api, name)
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
 

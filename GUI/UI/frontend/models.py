@@ -6,15 +6,18 @@ from uuid import uuid4
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 from django.core.validators import MaxValueValidator
 from django.core.exceptions import ValidationError
+from django.conf import settings
+
 from .img import podmanager as pm
 
 def stopsub(usr):
     """
     Stop submission evaluation when a teacher is set to inactive or deleted
     """
-    assigns = usr.assignments_set.all()
+    assigns = usr.assignments.all()
     subs = []
     for ass in assigns:
         subs += list(ass.studentsubmissions_set
@@ -81,12 +84,12 @@ class Assignments(models.Model):
     )
 
     start = models.DateTimeField(
-        default = datetime.now(),
+        default = timezone.now(),
         help_text = """The starting time of this assignment, must be a vaild date and time"""
     )
 
     end = models.DateTimeField(
-        default = datetime.now() + timedelta(days = 14),
+        default = timezone.now() + timedelta(days = 14),
         help_text = """The deadline of the assignment must be a valid date and time,
                     must be after the start time, default is 14 days after the start"""
     )
@@ -122,12 +125,15 @@ class Assignments(models.Model):
         after validation build the image used to evaluate submissions
         """
         self._validinterval()
-        # create manifest
-        mani = pm.build_kaniko(self.dockerfile, self.title)
-        # build image with kaniko
-        pm.deploy_pod(mani)
-        # save the image name
-        self.image = mani['spec']['containers'][0]['args'][2]
+        # test are run with the debug set to false
+        # podmanager has to run in a cluster
+        if settings.DEBUG:
+            # create manifest
+            mani = pm.build_kaniko(self.dockerfile.name, self.title)
+            # build image with kaniko
+            pm.deploy_pod(mani)
+            # save the image name
+            self.image = mani['spec']['containers'][0]['args'][2]
         # save the assignment object
         super().save(*args, **kwargs)
 
@@ -255,7 +261,7 @@ class StudentSubmissions(models.Model):
         """
         end = self.assignment.end
         start = self.assignment.start
-        upl = self.uploadtime
+        upl = timezone.now()
         if (upl < start) or (end < upl):
             raise ValidationError("Submission uploaded outside of assignment time window")
 
