@@ -1,8 +1,8 @@
 DB/test/test/psycopg2/*
 DB/test
 test
-*.sql
-Dockerfile
+# *.sql
+# Dockerfile
 # createdb.py
 # dbtest.py
 /users
@@ -11,3 +11,4 @@ createdb.py
 notes
 startdb.yaml
 dbnotes.txt
+/docker
