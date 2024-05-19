@@ -2,7 +2,7 @@
 In this document all the tasks regarding the project is listed and marked done or not.</br>
 ## API
 ### Endpoints
-#### Student½
+#### Student
 - [x] Create profile
 - [x] Log into the system
 - [x] Get list of own assignments
