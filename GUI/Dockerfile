@@ -40,6 +40,8 @@ RUN --mount=type=secret,id=secret_12 \
     sed -i "s|DB_PORT=|DB_POR=$(cat /run/secrets/secret_12)|" /app/.env
 RUN --mount=type=secret,id=secret_13 \
     sed -i "s|CON_STORE=|CON_STORE=$(cat /run/secrets/secret_13)|" /app/.env
+RUN --mount=type=secret,id=secret_14 \
+    sed -i "s|CLUSTER=|CLUSTER=$(cat /run/secrets/secret_14)|" /app/.env
 
 # COPY .env /app/.env
 
