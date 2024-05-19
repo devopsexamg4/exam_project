@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from pydantic import conlist
 from typing import Annotated
 from jose import JWTError, jwt
+from contextlib import asynccontextmanager
 
 import datetime
 import io
@@ -14,14 +15,10 @@ import crud, models, schemas
 import podmanager as pm
 from .database import SessionLocal, engine
 
+ADMIN_USERNAME = "admin"
+ADMIN_PASSWORD = "admin"
+
 models.Base.metadata.create_all(bind=engine)
-
-app = FastAPI()
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-SECRET_KEY = "a6e9d63fce8d1f7ec31f625ea2affe18fa447beca84ac8ea9f818f4e3bf3aaec"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 def get_db():
     db = SessionLocal()
@@ -29,6 +26,19 @@ def get_db():
         yield db
     finally:
         db.close()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    db_admin = crud.create_user_admin(db=next(get_db()), user=schemas.UserCreate(user_name=ADMIN_USERNAME, email="admin@localhost", password=ADMIN_PASSWORD, is_active=True))
+    yield
+    crud.delete_user(db=next(get_db()), user_id=db_admin.user_id)
+
+app = FastAPI(lifespan=lifespan)
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+SECRET_KEY = "a6e9d63fce8d1f7ec31f625ea2affe18fa447beca84ac8ea9f818f4e3bf3aaec"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 class Token(schemas.BaseModel):
     access_token: str
@@ -119,6 +129,7 @@ def submit_solution(assignment_id: int, submission: schemas.StudentSubmissionCre
     # if assignment is active, run submission immediately
     return crud.create_submission(db=db, submission=submission, assignment_id=assignment_id, student_id=current_user.user_id)
 
+# Working under assumption that submission_id is a valid name for a submission job
 @app.get("/student/assignments/{assignment_id}/submission/{submission_id}/status/", status_code=200)
 def get_assignment_evaluation(assignment_id: int, submission_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)], db: Session = Depends(get_db)):
     db_assignment = crud.get_assignment(db, ass_id=assignment_id)
@@ -133,7 +144,9 @@ def get_assignment_evaluation(assignment_id: int, submission_id: int, current_us
         raise HTTPException(status_code=401, detail="Submission not owned by student", headers={"WWW-Authenticate": "Bearer"})
     if db_submission not in db_assignment.submissions:
         raise HTTPException(status_code=401, detail="Submission not submitted to this assignment", headers={"WWW-Authenticate": "Bearer"})
-    return db_submission.result
+    api = pm.create_api_instance()
+    api_response = pm.get_job_status(api, str(submission_id))
+    return {"Status": api_response}
 
 @app.delete("/student/submissions/{submission_id}/", status_code=204)
 def delete_submission(submission_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)],  db: Session = Depends(get_db)):
@@ -143,7 +156,7 @@ def delete_submission(submission_id: int, current_user: Annotated[schemas.User, 
     if db_submission.submitter_id != current_user.user_id:
         raise HTTPException(status_code=401, detail="Submission not owned by student", headers={"WWW-Authenticate": "Bearer"})
     if db_submission.result != models.Result.NOTRUN:
-        raise HTTPException(status_code=400, detail="Submission being processed")
+        raise HTTPException(status_code=400, detail="Submission being, or already has been processed")
     crud.delete_submission(db, sub_id=submission_id)
     return {"Deleted submission: ": submission_id}
 
@@ -241,11 +254,48 @@ def get_submission_outcome(submission_id: int, current_user: Annotated[schemas.U
     db_assignment = crud.get_assignment(db, ass_id=db_submission.assignment_id)
     return {db_assignment.status, db_submission.log_file, db_submission.result}
 
-# here should be an endpoint for the teacher to 'trigger the re-evaluation of the submission'
+@app.patch("/teacher/submission/{submission_id}/re-evaluate/", status_code=204)
+def re_evaluate_submission(submission_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)],  db: Session = Depends(get_db)):
+    if current_user.user_type == models.UserType.STUDENT:
+        raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
+    db_submission = crud.get_submission(db, sub_id=submission_id)
+    if not db_submission:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    db_assignment = crud.get_assignment(db, ass_id=db_submission.assignment_id)
+    resource_dict: dict = {
+        "maxmemory": db_assignment.max_memory,
+        "maxcpu": db_assignment.max_CPU,
+        "timer": db_assignment.timer,
+        "sub": "./"}
+    api = pm.create_api_instance()
+    job, name = pm.create_job_object(str(submission_id), db_submission.file, resource_dict)
+    api_response = pm.create_job(api, job)
+    return {"Job name: ": name}
 
-# here should be an endpoint for the teacher to stop evaluation of submission
+# This is working under the assumption that 'name' returned from create_job_object is equal to the name given to the function
+@app.patch("/teacher/submission/{submission_id}/stop-evaluation/", status_code=204)
+def stop_submission_evaluation(submission_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)],  db: Session = Depends(get_db)):
+    if current_user.user_type == models.UserType.STUDENT:
+        raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
+    db_submission = crud.get_submission(db, sub_id=submission_id)
+    if not db_submission:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    api = pm.create_api_instance()
+    api_response = pm.delete_job(api, str(submission_id))
+    return {"Stopped evaluation of submission: ": submission_id}
 
-# here should be an endpoint for the teacher to stop evaluations of all submissions under an assignment
+# Same comment as above
+@app.patch("/teacher/assignment/{assignment_id}/stop-evaluation/", status_code=204)
+def stop_assignment_submissions_evaluations(assignment_id: int, current_user: Annotated[schemas.User, Depends(get_current_active_user)],  db: Session = Depends(get_db)):
+    if current_user.user_type == models.UserType.STUDENT:
+        raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
+    db_assignment = crud.get_assignment(db, ass_id=assignment_id)
+    if not db_assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+    for submission in db_assignment.submissions:
+        api = pm.create_api_instance()
+        api_response = pm.delete_job(api, str(submission.sub_id))
+    return {"Stopped evaluation of all submissions under assignment: ": assignment_id}
 
 @app.get("/teacher/assignment/{assignment_id}/submission-logs/", status_code=200)
 def get_assignment_submission_logs(assignment_id: int,  current_user: Annotated[schemas.User, Depends(get_current_active_user)], db: Session = Depends(get_db)):
@@ -353,8 +403,6 @@ def add_teacher(teacher: schemas.UserCreate, current_user: Annotated[schemas.Use
     db_user2 = crud.get_user_by_name(db, user_name=teacher.user_name)
     if db_user2:
         raise HTTPException(status_code=400, detail="Username already registered")
-    if teacher.user_type != models.UserType.TEACHER:
-        raise HTTPException(status_code=400, detail="User type must be teacher")
     return crud.create_user_teacher(db=db, user=teacher)
 
 @app.patch("/admin/teacher/{teacher_id}/pause/", status_code=200)

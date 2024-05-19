@@ -47,6 +47,18 @@ def create_user_teacher(db: Session, user: schemas.UserCreate):
     db.refresh(db_user)
     return db_user
 
+def create_user_admin(db: Session, user: schemas.UserCreate):
+    kinda_hashed_password = hash_password(user.password)
+    db_user = models.User(user_name=user.user_name, 
+                          user_type=models.UserType.ADMIN, 
+                          email=user.email, 
+                          password=kinda_hashed_password,
+                          is_active = True)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
 def update_user(db: Session, user_id: int, **kwargs):
     db_user = db.query(models.User).filter(models.User.user_id == user_id).first()
     for key, value in kwargs.items():
@@ -88,7 +100,7 @@ def create_assignment(db: Session, assignment: schemas.AssignmentCreate):
                                       start=assignment.start, 
                                       end=assignment.end,
                                       max_submissions=assignment.max_submissions,
-                                      timer=assignment.end - assignment.start)
+                                      timer=assignment.timer)
     db.add(db_assignment)
     db.commit()
     db.refresh(db_assignment)

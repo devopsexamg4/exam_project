@@ -34,13 +34,13 @@ class AssignmentBase(BaseModel):
     start: datetime
     end: datetime
     max_submissions: int
+    timer: datetime
 
 class AssignmentCreate(AssignmentBase):
     pass
 
 class Assignment(AssignmentBase):
     ass_id: int
-    timer: datetime
     contributors: list['User'] = []
     submissions: list[StudentSubmission] = []
 
