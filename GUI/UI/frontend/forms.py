@@ -40,7 +40,15 @@ class AssignmentForm(forms.ModelForm):
     class Meta:
         """The model and attributes used to create a new assignment"""
         model = Assignments
-        fields = "__all__"
+        fields = ['title',
+                  'status',
+                  'maxmemory',
+                  'maxcpu',
+                  'timer',
+                  'start',
+                  'end',
+                  'dockerfile',
+]
         widgets = {
             'start':DateTimePickerInput(),
             'end':DateTimePickerInput(),
