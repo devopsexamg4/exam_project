@@ -1,6 +1,33 @@
 # Tasks
-
+In this document all the tasks regarding the project is listed and marked done or not.</br>
 ## API
+- [ ] sketch features
+- [ ] decide on a framework
+- [ ] make login/user creation
+- [ ] make admin endpoint
+    - [ ] allow admin the change type of user
+    - [ ] allow admin to delete user
+    - [ ] allow admin to set user inactive
+- [ ] make teacher endpoint
+    - [ ] add assignment
+    - [ ] stop and or remove assignment
+    - [ ] pause assignment
+    - [ ] edit assignment
+    - [ ] add/remove students from an assignment
+    - [ ] list student assignments (all and individual students)
+    - [ ] stop/restart evaluation of assignment
+    - [ ] extract logs of submissions
+    - [ ] extract results of submissions
+- [ ] make student endpoint
+    - [ ] list submissions
+    - [ ] submit submission
+    - [ ] cancel submission if unprocessed/not started
+    - [ ] view results of evaluation
+- [ ] integrate imagebuilder
+    - [ ] schedule tasks to start evaluations
+    - [ ] schedule tasks to stop evaluations and read results
+- [ ] connect to production db
+- [ ] unittests for database queries
 
 ## Database
 - [x] Design entities and relations
@@ -37,10 +64,22 @@
 - [ ] connect to production db
 - [ ] unittests for database queries
 - [ ] beautify pages
-- [x] make distributable
 
 ## Deployment
+- [ ] containerize API
+- [x] containerize GUI
+- [x] containerize DB
+- [x] configure persistent storage
+- [x] configure reverse proxy
+    - [x] (optional) get domain
+        - [x] get certificate
+    - [x] install reverse proxy
+- [ ] store secrets in a safe manner
 
 ## Pipeline
+- [ ] set up automatic deployment
+- [ ] set up automatic unittests
+- [ ] set up automatic integration tests
+- [ ] set up automatic code analysis
 
 ## Cluster
