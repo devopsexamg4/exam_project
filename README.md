@@ -22,7 +22,11 @@
         - `spec.routes.match`
         - `spec.tls.domains.main`
         - (optional) `spec.tls.domains.sans`
-1. Apply manifests 00 - 03
+1. Apply manifests to your kubernetes cluster
+    - `MANIFESTS/00-rdef.yml`
+    - `MANIFESTS/01-rbac.yml`
+    - `MANIFESTS/02-traefik.yml`
+    - `MANIFESTS/03-ingressroutes.yml`
 
 ## Building and deploying the GUI
 1. Give a value to the secrects in `GUI/UI/.env.prod`
@@ -42,7 +46,7 @@
 1. Build the image defined in `GUI/Dockerfile`
 1. Push the image to your container registry
 1. In the file `MANIFESTS/04-gui.yml` set the image to be the one just build
-1. Apply manifest 04
+1. Apply `MANIFESTS/04-gui.yml` to your kubernetes cluster
 
 ---
 ## But what if I want to run this locally?
