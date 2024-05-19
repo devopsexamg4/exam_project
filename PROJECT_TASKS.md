@@ -2,11 +2,11 @@
 In this document all the tasks regarding the project is listed and marked done or not.</br>
 ## API
 ### Endpoints
-#### Student
+#### Student½
 - [x] Create profile
 - [x] Log into the system
 - [x] Get list of own assignments
-- [ ] Submit a solution to an assignment
+- [x] Submit a solution to an assignment
 - [x] Check evaluation of assignment
 - [x] Cancel submission if not processed
 - [x] See results of assignment
@@ -19,9 +19,9 @@ In this document all the tasks regarding the project is listed and marked done o
 - [x] Add or remove student(s) from assignment
 - [x] Get list of submissions from given student & assignment
 - [x] Get metadata about a submission
-- [ ] Trigger re-evaluation of assignment
-- [ ] Stop evaluation of assignment
-- [ ] Stop evaluation of all submissions to an assignment
+- [x] Trigger re-evaluation of assignment
+- [x] Stop evaluation of assignment
+- [x] Stop evaluation of all submissions to an assignment
 - [x] Get all logs of all submissions to an assignment
 - [x] Extract metadata about all submissions to an assignment
 - [x] Extract all submission logs for a single student from an assignment in a zip file
@@ -29,8 +29,7 @@ In this document all the tasks regarding the project is listed and marked done o
 
 #### Admin
 - [x] Add a teacher
-- [ ] Pause a teacher
-    - Teacher can be paused, but currently it does not pause their assignments
+- [x] Pause a teacher
 - [x] Delete a student or teacher
 
 ### Testing
