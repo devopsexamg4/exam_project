@@ -29,8 +29,7 @@ jobs:
           pip install tox
           pip install pytest
       - name: run tox
-        run: echo "this is where i would run tox" 
-        # tox -e py
+        run: tox -e py
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
