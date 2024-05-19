@@ -28,6 +28,10 @@
     - `MANIFESTS/02-traefik.yml`
     - `MANIFESTS/03-ingressroutes.yml`
 
+## Deploying the database
+
+## Deploying the API
+
 ## Building and deploying the GUI
 1. Give a value to the secrects in `GUI/UI/.env.prod`
     - SECRET_KEY: from django [documentation](https://docs.djangoproject.com/en/5.0/topics/signing/) "This value is the key to securing signed data"
@@ -48,8 +52,10 @@
 1. In the file `MANIFESTS/04-gui.yml` set the image to be the one just build
 1. Apply `MANIFESTS/04-gui.yml` to your kubernetes cluster
 
+
+
 ---
 ## But what if I want to run this locally?
 [This](https://youtu.be/Ef9QnZVpVd8?si=GJXBrbplXsq9dCLL)</br>
-Running API in development mode: [Guide](API/README.md)</br>
-Running GUI in development mode: [Guide](GUI/README.md)</br>
+Running API in development mode: ![Guide](API/README.md)</br>
+Running GUI in development mode: ![Guide](GUI/README.md)</br>
