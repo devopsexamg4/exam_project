@@ -26,5 +26,5 @@ ui module
 1. `./UI/manage.py runserver` to start development server
 
 ## Run tests
-1. Navigate to the UI directory
+1. Navigate to the GUI/UI/ directory
 2. `./manage.py test` to run all tests

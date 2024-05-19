@@ -98,7 +98,7 @@ In this document all the tasks regarding the project is listed and marked done o
 - [x] integrate imagebuilder
     - [x] schedule tasks to start evaluations
     - [x] schedule tasks to stop evaluations and read results
-- [ ] connect to production db
+- [x] connect to production db
 - [ ] unittests for database queries
 - [ ] beautify pages
 
@@ -120,3 +120,8 @@ In this document all the tasks regarding the project is listed and marked done o
 - [ ] set up automatic code analysis
 
 ## Cluster
+
+## Documentation
+- [ ] User stories
+- [ ] README detailing the deployment on a public cloud
+- [ ] this list
