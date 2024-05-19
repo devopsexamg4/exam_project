@@ -2,11 +2,11 @@
 
 # A map of the repo
 #### i.e. What goes where
-- [Configuration of database](DB)
-- [Code for the GUI service build with django](GUI)
-- [Code for the API service build with FastAPI](API)
-- [Manifests for the deployment of the system](Manifests)
-- [Python helper module to interact with the cluster](IMAGE_BUILDER)
+- [Configuration of the database -> DB](DB)
+- [Code for the GUI service build with django -> GUI](GUI)
+- [Code for the API service build with FastAPI -> API](API)
+- [Manifests for the deployment of the system -> MANIFESTS](MANIFESTS)
+- [Python helper module to interact with the cluster -> IMAGE_BUILDER](IMAGE_BUILDER)
 
 # A guide to deployment
 

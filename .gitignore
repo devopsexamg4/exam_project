@@ -6,7 +6,7 @@ UI/UI/frontend/__pycache__/
 UI/UI/UI/__pycache__/
 UI/UI/frontend/migrations/*
 UI/static
-Manifests/andreas_askholm/
+MANIFESTS/andreas_askholm/
 GUI/image.tar
 
 # files to ignore
