@@ -6,7 +6,11 @@
 Assignment: {{submission.assignment }}</br>
 Uploaded: {{ submission.uploadtime }}</br>
 Result: {{ submission.result }}</br>
+{% if submission.log %} <!-- Check if a log file has been uploaded -->
 Log: <a href="{{ submission.log.url }}">{{submission.log}}</a>
+{% else %}
+Log: No log created yet.
+{% endif %}
 
 {% endblock %}
 

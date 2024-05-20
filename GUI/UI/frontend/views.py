@@ -332,9 +332,8 @@ def create_assignment(request):
 def submission(request):
     """View presenting the details of a submission"""
     sub = StudentSubmissions.objects.get(pk = request.POST['pk'])
-    if (User.objects.filter(username = request.user).first()
-        not in (User.objects.filter(type = 'STU').filter(studentsubmissions = sub)
-        and User.objects.filter(type = 'TEA'))):
+    user = User.objects.filter(username = request.user).first()
+    if user not in User.objects.filter(type = 'STU').filter(studentsubmissions = sub) and user not in User.objects.filter(type = 'TEA'):
         # the logged in user is not a student or teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')

@@ -320,9 +320,15 @@ class SubmissionViewTest(TestCase):
             'password': 'secret',
             'type': User.TypeChoices.STUDENT
         }
+        self.admin_credentials = {
+            'username': 'admin',
+            'password': 'secret',
+            'type': User.TypeChoices.ADMIN
+        }
         self.client = Client()
         self.teacher = User.objects.create_user(**self.teacher_credentials)
         self.student = User.objects.create_user(**self.student_credentials)
+        self.admin = User.objects.create_user(**self.admin_credentials)
         self.assignment = Assignments.objects.create(
             title="Test Assignment",
             status=Assignments.StatusChoices.ACTIVE,
@@ -336,21 +342,19 @@ class SubmissionViewTest(TestCase):
             uploadtime=timezone.now()
         )
 
-
     def test_submission_view_student(self):
         self.client.login(username='student', password='secret') 
         response = self.client.post(reverse('sub_details'), {'pk': self.submission.pk})
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Details')  # replace with expected content
+        self.assertContains(response, 'Details')
 
     def test_submission_view_teacher(self):
         self.client.login(username='teacher', password='secret')
         response = self.client.post(reverse('sub_details'), {'pk': self.submission.pk})
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Details')  # replace with expected content
+        self.assertContains(response, 'Details')
 
     def test_submission_view_unauthorized(self):
-        self.client.login(username='unauthorized', password='secret')
+        self.client.login(username='admin', password='secret')
         response = self.client.post(reverse('sub_details'), {'pk': self.submission.pk}, follow=True)
-        self.assertEqual(response.status_code, 302)  # redirect
-        self.assertRedirects(response, reverse('index'))  # redirected to index page
+        self.assertRedirects(response, reverse('index'), status_code=302)
