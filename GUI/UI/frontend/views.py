@@ -349,7 +349,7 @@ def reeval(request):
     """trigger the re-evaluation of assignment(s)"""
     mode = request.POST['mode']
 
-    assign = Assignments.objects.get(pk = request.session['pk'])
+    assign = Assignments.objects.get(pk = request.POST['pk'])
     if mode == 'single':
         subs = StudentSubmissions.objects.filter(pk = request.POST['subpk'])
     else:
@@ -368,7 +368,7 @@ def stopeval(request):
     """stop the evaluation of assignment(s)"""
     mode = request.POST['mode']
 
-    assign = Assignments.objects.get(pk = request.session['pk'])
+    assign = Assignments.objects.get(pk = request.POST['pk'])
     if mode == 'single':
         subs = StudentSubmissions.objects.filter(pk = request.POST['subpk'])
     else:

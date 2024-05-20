@@ -358,3 +358,30 @@ class SubmissionViewTest(TestCase):
         self.client.login(username='admin', password='secret')
         response = self.client.post(reverse('sub_details'), {'pk': self.submission.pk}, follow=True)
         self.assertRedirects(response, reverse('index'), status_code=302)
+
+class ReevalViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.teacher_credentials = {
+            'username': 'teacher',
+            'password': 'secret',
+            'type': User.TypeChoices.TEACHER
+        }
+        self.teacher = User.objects.create_user(**self.teacher_credentials)
+        self.student = User.objects.create_user(username='student', password='secret', type=User.TypeChoices.STUDENT)
+        self.assignment = Assignments.objects.create(title="Test Assignment", dockerfile=SimpleUploadedFile("file.txt", b"file_content"))
+        self.submission = StudentSubmissions.objects.create(
+            student=self.student,
+            result=StudentSubmissions.ResChoices.PASSED,
+            File=SimpleUploadedFile("file.txt", b"file_content"),
+            assignment=self.assignment,
+            uploadtime=timezone.now()
+        )
+
+    def test_reeval_view(self):
+        self.client.login(username='teacher', password='secret')
+        response = self.client.post(reverse('reeval'), {'mode': 'single', 'pk': self.assignment.pk, 'subpk': self.submission.pk})
+        self.assertEqual(response.status_code, 302)
+        self.submission.refresh_from_db()
+        # Assuming that the reeval view updates the result to PASSED
+        self.assertEqual(self.submission.result, StudentSubmissions.ResChoices.PENDING)
