@@ -12,9 +12,9 @@ RUN apt-get update \
 # copy files into container
 COPY ./UI /app
 COPY .env.prod /app/.env
-COPY ../IMAGE_BUILDER/kaniko.yml /app/frontend/img/kaniko.yml 
-COPY ../IMAGE_BUILDER/podmanager.py /app/frontend/img/podmanager.py
-COPY ../IMAGE_BUILDER/__init__.py /app/frontend/img/__init__.py
+COPY /IMAGE_BUILDER/kaniko.yml /app/frontend/img/kaniko.yml 
+COPY /IMAGE_BUILDER/podmanager.py /app/frontend/img/podmanager.py
+COPY /IMAGE_BUILDER/__init__.py /app/frontend/img/__init__.py
 
 # read and set secrets
 RUN --mount=type=secret,id=secret_1 \
