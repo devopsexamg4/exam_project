@@ -3,11 +3,16 @@
 export $(grep -v '^#' .env | xargs)
 
 
+service cron start
+
 python manage.py collectstatic --no-input
 python manage.py makemigrations --no-input
 python manage.py migrate --no-input
 
 DJANGO_SUPERUSER_PASSWORD=$SU_PASSWORD python manage.py createsuperuser --username $SU_USER --email $SU_EMAIL --noinput
+
+python manage.py crontab add
+
 
 gunicorn -c config/gunicorn/conf.py
 
