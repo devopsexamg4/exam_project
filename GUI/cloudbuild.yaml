@@ -1,7 +1,7 @@
 steps:
 - name: 'alpine'
   entrypoint: 'sed'
-  args: ['s/^RUN --mount=type=secret/#&/', '-i', 'GUI/Dockerfile']
+  args: ['/^RUN --mount=type=secret/,+1 s/^/#/', '-i', 'GUI/Dockerfile']
 - name: 'gcr.io/cloud-builders/docker'
   args: ['build', '-t', 'europe-north1-docker.pkg.dev/devsecopsexamproject/exam-project/ui', 'GUI/']
 images: ['europe-north1-docker.pkg.dev/devsecopsexamproject/exam-project/ui']
