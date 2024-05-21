@@ -2,7 +2,7 @@ FROM python:3.12.2-slim
 # install requirements
 RUN pip install --upgrade pip
 COPY ./requirements.txt .
-COPY ../IMAGE_BUILDER/requirements.txt ./pod_req.txt
+COPY /IMAGE_BUILDER/requirements.txt ./pod_req.txt
 RUN pip install -r requirements.txt
 RUN pip install -r pod_req.txt
 # install cron to setup scheduled tasks
