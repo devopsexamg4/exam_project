@@ -33,6 +33,8 @@ jobs:
           echo "done installing requirements"
       - name: coverage
         run: |
+          python ./GUI/UI/manage.py makemigrations --no-input
+          python ./GUI/UI/manage.py migrate --no-input
           coverage run ./GUI/UI/manage.py test tests
           coverage xml
         env:
