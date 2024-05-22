@@ -33,7 +33,7 @@ jobs:
           echo "done installing requirements"
       - name: coverage
         run: |
-          coverage run ./GUI/UI/manage.py
+          coverage run ./GUI/UI/manage.py test
           coverage xml
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
