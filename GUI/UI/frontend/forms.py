@@ -68,10 +68,12 @@ class SubmissionForm(forms.ModelForm):
             self.fields['assignment'].queryset = user.assignments.all()
         else:
             self.fields['assignment'].queryset = Assignments.objects.none()
+        self.fields['status'].required = False
     class Meta:
         """The model and atrributes to create a submission"""
         model = StudentSubmissions
         fields = ['status','File','assignment']
+
 
 class AddStudForm(forms.Form):
     """form to add students to an assignment"""

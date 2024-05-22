@@ -1,0 +1,169 @@
+// User stories
+// This document contains the user stories, describing the uses of the assignment evaluation system.
+// Teacher
+[
+	{
+		"As_a":"Teacher",
+		"I_want":"to login",
+		"such_that":"I can use the project service"
+	},
+	{
+		"As_a":"Teacher",
+		"I_want":"to start a new assignment for my students",
+		"such_that":"I can evaluate their knowledge of a subject"
+	},
+	{
+		"As_a":"Teacher",
+		"I_want":"add students to an assignment",
+		"such_that":"I can ensure all students are evaluated"
+	},
+	{
+		"As_a":"Teacher",
+		"I_want":"remove a student from an assignment",
+		"such_that":"a student who is no longer following the course, is not evaluated"
+	},
+	{
+		"As_a":"Teacher",
+		"I_want":"add a single student to an assignment",
+		"such_that":"a student who joined later can still be evaluated"
+	},
+	{
+		"As_a":"Teacher",
+		"I_want":"prepare assignments",
+		"such_that":"it is ready when the students expect"
+	},
+	{
+		"As_a":"Teacher",
+		"I_want":"have a GUI",
+		"such_that":"i can easily use the system"
+	},
+	{
+		"As_a":"Teacher",
+		"I_want":"to extract data with a script",
+		"such_that":"i can easily retrieve all data of an assignment"
+	},
+	{
+		"As_a":"Teacher",
+		"I_want":"to view submissions of individual students",
+		"such_that":"i can quickly evaluate a student"
+	},
+	{
+		"As_a":"Teacher",
+		"I_want":"to not rely on a GUI to access the system",
+		"such_that":"i can automate all my interactions with it"
+	},
+	{
+		"As_a":"Teacher",
+		"I_want":"edit an assignment",
+		"such_that":"misconfiguration of an assignment does not persist throughout the assignment duration"
+	},
+	{
+		"As_a":"Teacher",
+		"I_want":"get a list of students assigned to a project",
+		"such_that":"i can verify that all students are enrolled"
+	},
+	{
+		"As_a":"Teacher",
+		"I_want":"re-evaluate individual submissions",
+		"such_that":"if a student complains, the complaint can be addressed immediately"
+	},
+	{
+		"As_a":"Teacher",
+		"I_want":"stop the evaluation of a submission",
+		"such_that":"a malformed submission does not block the evaluation of other submissions"
+	},
+	{
+		"As_a":"Teacher",
+		"I_want":"automatic evaluation of submissions",
+		"such_that":"manual labour is reduced"
+	},
+
+// Student
+    {
+        "As_a": "Student",
+        "I_want": "the ability to create my own profile with username and password",
+        "such_that": "I can sign up to courses"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to login to my profile using username and password",
+        "such_that": "I can continue working on my courses"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to view my assignments",
+        "such_that": "I can complete them"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to view the status of my assignments",
+        "such_that": "I can see if they are paused, in progress or completed"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to view the deadline of my assignments",
+        "such_that": "I can plan my time"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to view the description of my assignments",
+        "such_that": "I can understand what is expected from me"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to view the detailed results of my assignments",
+        "such_that": "I can see what I did wrong"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to view the feedback of my assignments",
+        "such_that": "I can understand what I did wrong"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to submit solutions to my assignments, by uploading a file",
+        "such_that": "I can get feedback"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to check if my solution has been evaluated",
+        "such_that": "I can see my feedback"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to cancel the submission of my solution if it has not been evaluated",
+        "such_that": "I can make changes to my solution"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "the ability to view the detailed results of my solution",
+        "such_that": "I can see what I did wrong"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "my solutions be processed fairly among the other students",
+        "such_that": "I can trust the system in evaluating my solutions"
+    },
+    {
+        "As_a": "Student",
+        "I_want": "a visual web interface",
+        "such_that": "I can easily navigate through the system"
+    },
+// Admin
+	{
+		"As_a":"Administrator",
+		"I_want":"A graphical user interface",
+		"such_that":"I can easily use the system"
+	},
+	{
+		"As_a":"Administrator",
+		"I_want":"To change the type of a user",
+		"such_that":"both teacher and students have the necessary access"
+	},
+// Other services
+	{
+		"As_a":"GUI service",
+		"I_want":"to access the database",
+		"such_that":"I can present data to the users"
+	}
+]

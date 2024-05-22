@@ -3,7 +3,7 @@ Scheduled tasks are dedfined in this file
 """
 
 import pathlib
-from img import podmanager as pm
+from .img import podmanager as pm
 from .models import StudentSubmissions
 
 
