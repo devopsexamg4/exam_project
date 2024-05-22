@@ -26,14 +26,15 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: install requirements
         run: |
-          pip install tox
-          pip install pytest
+          pip install coverage
            # get all requirement.txt files and call pip install on them
           echo "installing requirements"
           git ls-files --full-name | grep -E *requirements.txt 2>/dev/null  | while read line; do echo installing requirements from $line ; pip install -r $line ; done
           echo "done installing requirements"
-      - name: run tox
-        run: tox -e py
+      - name: coverage
+        run: |
+          coverage run ./GUI/UI/manage.py
+          coverage xml
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
