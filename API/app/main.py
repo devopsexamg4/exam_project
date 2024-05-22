@@ -12,14 +12,14 @@ import io
 import csv
 from zipfile import ZipFile
 
-import crud, models, schemas
-import podmanager as pm
+from . import crud, models, schemas, database
+from . import podmanager as pm
 from .database import SessionLocal, engine
 
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "admin"
 
-models.Base.metadata.create_all(bind=engine)
+database.Base.metadata.create_all(bind=engine)
 
 def get_db():
     db = SessionLocal()
@@ -30,7 +30,8 @@ def get_db():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    db_admin = crud.create_user_admin(db=next(get_db()), user=schemas.UserCreate(user_name=ADMIN_USERNAME, email="admin@localhost", password=ADMIN_PASSWORD, is_active=True))
+    admin_user = schemas.UserCreate(user_name=ADMIN_USERNAME, email="admin@localhost", password=ADMIN_PASSWORD, is_active=True)
+    db_admin = crud.create_user_admin(db=next(get_db()), user=admin_user)
     yield
     crud.delete_user(db=next(get_db()), user_id=db_admin.user_id)
 
@@ -183,11 +184,11 @@ def delete_submission(submission_id: int, current_user: Annotated[schemas.User, 
 def add_assignment(current_user: Annotated[schemas.User, Depends(get_current_active_user)], assignment: schemas.AssignmentCreate, docker_image: UploadFile = File(...), db: Session = Depends(get_db)):
     if current_user.user_type == models.UserType.STUDENT:
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
-    return crud.create_assignment(db=db, assignment=assignment, docker_image=docker_image)
+    return crud.create_assignment(db=db, assignment=assignment, docker_image=docker_image.read())
 
 @app.patch("/teacher/assignment/{assignment_id}/", response_model=schemas.Assignment, status_code=200)
-def update_assignment(current_user: Annotated[schemas.User, Depends(get_current_active_user)], assignment_id: int, docker_image: UploadFile = File(...), status: models.Status | None = None, max_memory: int | None = None, max_CPU: int | None = None, start: datetime.datetime | None = None, end: datetime.datetime | None = None, db: Session = Depends(get_db)):
-    if current_user.user_type == models.UserType.STUDENT:
+def update_assignment(current_user: Annotated[schemas.User, Depends(get_current_active_user)], assignment_id: int, docker_image: UploadFile = File(...), status: str | None = None, max_memory: int | None = None, max_CPU: int | None = None, start: datetime.datetime | None = None, end: datetime.datetime | None = None, db: Session = Depends(get_db)):
+    if current_user.user_type == "STUDENT" : # RET
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
     db_assignment = crud.get_assignment(db, ass_id=assignment_id)
     if not db_assignment:

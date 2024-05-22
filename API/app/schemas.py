@@ -1,9 +1,10 @@
 from pydantic import BaseModel
-import datetime
+from datetime import datetime
 
-from .models import UserType
-from .models import Status
-from .models import Result
+# from .models import UserType
+# from .models import Status
+# from .models import Result
+from . import models
 
 # base classes contain data common to creating and reading
 # create classes contain data unique to creating
@@ -18,23 +19,23 @@ class StudentSubmissionCreate(StudentSubmissionBase):
 
 class StudentSubmission(StudentSubmissionBase):
     sub_id: int
-    result: Result
+    result: str
     log_file: str # path to file?
     upload_time: datetime
     submitter_id: int
     assignment_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class AssignmentBase(BaseModel):
-    status: Status
+    status: str
     max_memory: int
     max_CPU: int
     start: datetime
     end: datetime
     max_submissions: int
-    timer: datetime
+    timer: int # minutes
 
 class AssignmentCreate(AssignmentBase):
     pass
@@ -46,8 +47,7 @@ class Assignment(AssignmentBase):
     submissions: list[StudentSubmission] = []
 
     class Config:
-        orm_mode = True
-
+        from_attributes = True
 
 class UserBase(BaseModel):
     user_name: str
@@ -59,10 +59,10 @@ class UserCreate(UserBase):
 
 
 class User(UserBase):
-    user_type: UserType
+    user_type: str
     user_id: int
     submissions: list[StudentSubmission] = []
     assignments: list[Assignment] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True

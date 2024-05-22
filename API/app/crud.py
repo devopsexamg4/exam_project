@@ -4,7 +4,7 @@ from passlib.context import CryptContext
 
 import datetime
 
-import models, schemas
+from . import models, schemas
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
@@ -24,11 +24,11 @@ def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
 def create_user_student(db: Session, user: schemas.UserCreate):
-    kinda_hashed_password = hash_password(user.password)
+    hashed_password = hash_password(user.password)
     db_user = models.User(user_name=user.user_name, 
-                          user_type=models.UserType.STUDENT, 
+                          user_type="STUDENT", 
                           email=user.email, 
-                          password=kinda_hashed_password,
+                          password=hashed_password,
                           is_active = True)
     db.add(db_user)
     db.commit()
@@ -36,11 +36,11 @@ def create_user_student(db: Session, user: schemas.UserCreate):
     return db_user
 
 def create_user_teacher(db: Session, user: schemas.UserCreate):
-    kinda_hashed_password = hash_password(user.password)
+    hashed_password = hash_password(user.password)
     db_user = models.User(user_name=user.user_name, 
-                          user_type=models.UserType.TEACHER, 
+                          user_type="TEACHER", 
                           email=user.email, 
-                          password=kinda_hashed_password,
+                          password=hashed_password,
                           is_active = True)
     db.add(db_user)
     db.commit()
@@ -48,11 +48,11 @@ def create_user_teacher(db: Session, user: schemas.UserCreate):
     return db_user
 
 def create_user_admin(db: Session, user: schemas.UserCreate):
-    kinda_hashed_password = hash_password(user.password)
+    hashed_password = hash_password(user.password)
     db_user = models.User(user_name=user.user_name, 
-                          user_type=models.UserType.ADMIN, 
+                          user_type="ADMIN", 
                           email=user.email, 
-                          password=kinda_hashed_password,
+                          password=hashed_password,
                           is_active = True)
     db.add(db_user)
     db.commit()
@@ -77,7 +77,7 @@ def get_submission(db: Session, sub_id: int):
 
 def create_submission(db: Session, submission: schemas.StudentSubmissionCreate, assignment_id: int, student_id: int):
     db_submission = models.StudentSubmissions(file=submission.file, 
-                                              result=models.Result.NOTRUN, 
+                                              result="NOTRUN", 
                                               log_file="",
                                               upload_time=datetime.datetime.now(),
                                               submitter_id=student_id,
