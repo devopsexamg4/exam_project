@@ -1,4 +1,4 @@
 [run]
-source=./GUI
+source=.
 omit=**/manage.py,config/*
 relative_files=true
