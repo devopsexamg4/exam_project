@@ -1,7 +1,7 @@
 // Kubernetes Cluster Role for Traefik
 resource "kubernetes_cluster_role" "traefik_role" {
     metadata {
-        name = "traefik-role"
+        name = "traefik-ingress-controller"
     }
 
     rule {
@@ -21,20 +21,18 @@ resource "kubernetes_cluster_role" "traefik_role" {
         resources  = ["ingresses/status"]
         verbs      = ["update"]
     }
-}
 
-// Kubernetes Service Account for Traefik
-resource "kubernetes_service_account" "traefik_account" {
-    metadata {
-        name      = "traefik-account"
-        namespace = "default"
+    rule {
+        api_groups = ["traefik.io"]
+        resources  = ["middlewares", "middlewaretcps", "ingressroutes", "traefikservices", "ingressroutetcps", "ingressrouteudps", "tlsoptions", "tlsstores", "serverstransports", "serverstransporttcps"]
+        verbs      = ["get", "list", "watch"]
     }
 }
 
 // Kubernetes Cluster Role Binding for Traefik
 resource "kubernetes_cluster_role_binding" "traefik_role_binding" {
     metadata {
-        name = "traefik-role-binding"
+        name = "traefik-ingress-controller"
     }
 
     role_ref {
@@ -45,26 +43,7 @@ resource "kubernetes_cluster_role_binding" "traefik_role_binding" {
 
     subject {
         kind      = "ServiceAccount"
-        name      = kubernetes_service_account.traefik_account.metadata[0].name
-        namespace = "default"
-    }
-}
-
-// Kubernetes Cluster Role Binding for Default Role
-resource "kubernetes_cluster_role_binding" "default_role_binding" {
-    metadata {
-        name = "default-role-binding"
-    }
-
-    role_ref {
-        api_group = "rbac.authorization.k8s.io"
-        kind      = "ClusterRole"
-        name      = kubernetes_cluster_role.traefik_role.metadata[0].name
-    }
-
-    subject {
-        kind      = "ServiceAccount"
-        name      = "default"
-        namespace = "default"
+        name      = "traefik-ingress-controller"
+        namespace = "NAMESPACE_NAME"
     }
 }

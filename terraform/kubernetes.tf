@@ -23,25 +23,9 @@ provider "google" {
   region      = "europe-north1-a"
 }
 
-resource "kubernetes_service_account" "pipeline" {
-  metadata {
-    name      = "pipeline"
-    namespace = "default"
-  }
-}
-
-resource "google_container_cluster" "primary" {
-  name     =  "terraform-test"
+data "google_container_cluster" "primary" {
+  name     =  "CLUSTER_NAME"
   location =  "europe-north1-a"
-
-  remove_default_node_pool = true
-  initial_node_count       = 1
-
-  master_auth {
-    client_certificate_config {
-      issue_client_certificate = false
-    }
-  }
 }
 
 resource "kubernetes_secret" "docker_registry" {
@@ -66,6 +50,7 @@ resource "kubernetes_secret" "docker_registry" {
 resource "kubernetes_secret" "traefik_dns_acc" {
   metadata {
     name = "traefik-dns-acc"
+    namespace = "NAMESPACE_NAME"
   }
 
   data = {
@@ -79,6 +64,7 @@ data "google_project" "current" {}
 resource "kubernetes_secret" "gcloud_project" {
   metadata {
     name = "gcloud-project"
+    namespace = "NAMESPACE_NAME"
   }
 
   data = {
@@ -89,15 +75,24 @@ resource "kubernetes_secret" "gcloud_project" {
 }
 
 provider "kubernetes" {
-  host                   = google_container_cluster.primary.endpoint
-  token                  = data.google_client_config.default.access_token
-  cluster_ca_certificate = base64decode(google_container_cluster.primary.master_auth[0].cluster_ca_certificate)
+  config_path = null
+
+  host  = "https://${data.google_container_cluster.primary.endpoint}"
+  token = data.google_client_config.default.access_token
+
+  client_certificate     = base64decode(data.google_container_cluster.primary.master_auth[0].client_certificate)
+  client_key             = base64decode(data.google_container_cluster.primary.master_auth[0].client_key)
+  cluster_ca_certificate = base64decode(data.google_container_cluster.primary.master_auth[0].cluster_ca_certificate)
+
+  experiments {
+    manifest_resource = true
+  }
 }
 
 resource "google_container_node_pool" "primary_preemptible_nodes" {
-  name       = "terraform-test"
+  name       = "CLUSTER_NAME"
   location   = "europe-north1-a"
-  cluster    = google_container_cluster.primary.name
+  cluster    = data.google_container_cluster.primary.name
   node_count = 1
 
   node_config {
@@ -116,6 +111,24 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
       disable-legacy-endpoints = "true"
     }
 
-    tags = ["terraform-test"]
+    tags = ["CLUSTER_NAME"]
   }
+}
+
+
+resource "kubernetes_cluster_role" "traefik_default" {
+  metadata {
+    name = "traefik-default"
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["endpoints", "services", "secrets"]
+    verbs      = ["get", "list", "watch"]
+  }
+}
+
+variable "namespace_name" {
+    description = "Namespace name to append to each secret"
+    type        = string
+    default     = "NAMESPACE_NAME"
 }
