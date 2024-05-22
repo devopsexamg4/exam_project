@@ -31,6 +31,10 @@ jobs:
           echo "installing requirements"
           git ls-files --full-name | grep -E *requirements.txt 2>/dev/null  | while read line; do echo installing requirements from $line ; pip install -r $line ; done
           echo "done installing requirements"
+      - name: coverage
+        run: |
+          coverage run ./GUI/UI/manage.py
+          coverage xml
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           DEBUG: ${{ secrets.DEBUG }}
@@ -40,11 +44,6 @@ jobs:
           SU_USER: ${{ secrets.SU_USER }}
           SU_EMAIL: ${{ secrets.SU_EMAIL }}
           DB_ENGINE: 'django.db.backends.sqlite3'
-          
-      - name: coverage
-        run: |
-          coverage run ./GUI/UI/manage.py
-          coverage xml
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
