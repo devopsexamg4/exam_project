@@ -49,8 +49,9 @@ def about(request):
 @login_required(login_url='/login/')
 def admin(request):
     """collect data to show on the admin page"""
-    if (User.objects.filter(username = request.user).first()
-        not in User.objects.filter(type = 'ADM')) and (not request.user.is_staff):
+    if ((User.objects.filter(username = request.user).first()
+        not in User.objects.filter(user_type = User.TypeChoices.ADMIN))
+        and (not request.user.is_staff)):
         # the logged in user is not a teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
@@ -62,7 +63,7 @@ def admin(request):
         if form.is_valid():
             form.save()
             # if the update was setting a teacher as inactive stop or cancel all submissions
-            if usr.type == User.TypeChoices.TEACHER and not usr.is_active:
+            if usr.user_type == User.TypeChoices.TEACHER and not usr.is_active:
                 stopsub(usr)
             messages.info(request, f"{usr.username} has been updated")
         else:
@@ -89,7 +90,7 @@ def admin(request):
 def student(request):
     """collect data to show on the student page"""
     if (User.objects.filter(username = request.user).first()
-        not in User.objects.filter(type = 'STU')):
+        not in User.objects.filter(user_type = User.TypeChoices.STUDENT)):
         # the logged in user is not a student but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
@@ -148,7 +149,7 @@ def viewstudent(request):
 def teacher(request):
     """collect data to show on the teacher page"""
     if (User.objects.filter(username = request.user).first()
-        not in User.objects.filter(type = 'TEA')):
+        not in User.objects.filter(user_type = User.TypeChoices.TEACHER)):
         # the logged in user is not a teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
@@ -222,14 +223,15 @@ def assignment(request):
     assign = Assignments.objects.get(pk=request.session['pk'])
     # make sure the user is a teacher who is associated with the assignment
     if (User.objects.filter(username = request.user).first() not in
-        User.objects.filter(type = 'TEA').filter(assignments__pk = assign.pk)):
+        (User.objects.filter(user_type = User.TypeChoices.TEACHER)
+         .filter(assignments__pk = assign.pk))):
         # the logged in user is not a teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
-    studs = assign.user_set.filter(type = 'STU')
+    studs = assign.user_set.filter(user_type = User.TypeChoices.STUDENT)
     filter = t.UserFilter(request.GET, queryset = studs)
     table = t.UserTable(data = filter.qs)
-    table.exclude = ('type','is_active','action')
+    table.exclude = ('user_type','is_active','action')
     table._orderable = False
 
     subfilter = t.SubmissionFilter(request.GET, queryset =
@@ -259,7 +261,8 @@ def edit_assignment(request):
     assign = Assignments.objects.get(pk = request.POST['pk'])
 
     if (User.objects.filter(username = request.user).first() not in
-        User.objects.filter(type = 'TEA').filter(assignments__pk = assign.pk)):
+        (User.objects.filter(user_type = User.TypeChoices.TEACHER)
+        .filter(assignments__pk = assign.pk))):
         # the logged in user is not a teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
@@ -304,7 +307,7 @@ def edit_assignment(request):
 def create_assignment(request):
     """view presents the form to create a new assignment"""
     if (User.objects.filter(username = request.user).first() not in
-        User.objects.filter(type = 'TEA')):
+        User.objects.filter(user_type = User.TypeChoices.TEACHER)):
         # the logged in user is not a teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
@@ -344,8 +347,8 @@ def submission(request):
     """View presenting the details of a submission"""
     sub = StudentSubmissions.objects.get(pk = request.POST['pk'])
     if (User.objects.filter(username = request.user).first()
-        not in (User.objects.filter(type = User.TypeChoices.STUDENT).filter(studentsubmissions = sub)
-        or User.objects.filter(type = User.TypeChoices.TEACHER))):
+        not in (User.objects.filter(user_type = User.TypeChoices.STUDENT).filter(studentsubmissions = sub)
+                | User.objects.filter(user_type = User.TypeChoices.TEACHER))):
         # the logged in user is not a student or teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
@@ -373,7 +376,7 @@ def reeval(request):
         sub.status = StudentSubmissions.ResChoices.PENDING
         if settings.CLUSTER:
             api = pm.create_api_instance()
-            path = pathlib.Path(sub.File.path)
+            path = pathlib.Path(sub.file.path)
             job,name = pm.create_job_object(assign.title,
                                             assign.image,
                                             resources={
@@ -408,6 +411,8 @@ def stopeval(request):
             sub.save()
             api = pm.create_api_instance()
             pm.delete_job(api, name)
+        else:
+            sub.save()
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
 

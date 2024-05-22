@@ -42,6 +42,8 @@ RUN --mount=type=secret,id=secret_13 \
     sed -i "s|CON_STORE=|CON_STORE=$(cat /run/secrets/secret_13)|" /app/.env
 RUN --mount=type=secret,id=secret_14 \
     sed -i "s|CLUSTER=|CLUSTER=$(cat /run/secrets/secret_14)|" /app/.env
+RUN --mount=type=secret,id=secret_15 \
+    sed -i "s|MEDIA_PATH=|MEDIA_PATH=$(cat /run/secrets/secret_15)|" /app/.env
 
 # COPY .env /app/.env
 
