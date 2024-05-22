@@ -31,6 +31,16 @@ jobs:
           echo "installing requirements"
           git ls-files --full-name | grep -E *requirements.txt 2>/dev/null  | while read line; do echo installing requirements from $line ; pip install -r $line ; done
           echo "done installing requirements"
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DEBUG: ${{ secrets.DEBUG }}
+          ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+          CSRF_TRUSTED: ${{ secrets.CSRF_TRUSTED }}
+          SU_PASSWORD: ${{ secrets.SU_PASSWORD }}
+          SU_USER: ${{ secrets.SU_USER }}
+          SU_EMAIL: ${{ secrets.SU_EMAIL }}
+          DB_ENGINE: 'django.db.backends.sqlite3'
+          
       - name: coverage
         run: |
           coverage run ./GUI/UI/manage.py
