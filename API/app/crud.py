@@ -15,21 +15,21 @@ def verify_password(password: str, hashed_password: str):
     return pwd_context.verify(hashed_password, password)
 
 def get_user(db: Session, user_id: int):
-    return db.query(models.User).filter(models.User.user_id == user_id).first()
+    return db.query(models.User).filter(models.User.id == user_id).first()
 
 def get_user_by_name(db: Session, user_name: str):
-    return db.query(models.User).filter(models.User.user_name == user_name).first()
+    return db.query(models.User).filter(models.User.username == user_name).first()
 
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
 def create_user_student(db: Session, user: schemas.UserCreate):
     hashed_password = hash_password(user.password)
-    db_user = models.User(user_name=user.user_name, 
-                          user_type="STUDENT", 
+    db_user = models.User(user_name=user.username, 
+                          user_type="STU", 
                           email=user.email, 
                           password=hashed_password,
-                          is_active = True)
+                          is_active=True)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -37,8 +37,8 @@ def create_user_student(db: Session, user: schemas.UserCreate):
 
 def create_user_teacher(db: Session, user: schemas.UserCreate):
     hashed_password = hash_password(user.password)
-    db_user = models.User(user_name=user.user_name, 
-                          user_type="TEACHER", 
+    db_user = models.User(user_name=user.username, 
+                          user_type="TEA", 
                           email=user.email, 
                           password=hashed_password,
                           is_active = True)
@@ -49,8 +49,8 @@ def create_user_teacher(db: Session, user: schemas.UserCreate):
 
 def create_user_admin(db: Session, user: schemas.UserCreate):
     hashed_password = hash_password(user.password)
-    db_user = models.User(user_name=user.user_name, 
-                          user_type="ADMIN", 
+    db_user = models.User(username=user.username, 
+                          user_type="ADM", 
                           email=user.email, 
                           password=hashed_password,
                           is_active = True)
@@ -60,7 +60,7 @@ def create_user_admin(db: Session, user: schemas.UserCreate):
     return db_user
 
 def update_user(db: Session, user_id: int, **kwargs):
-    db_user = db.query(models.User).filter(models.User.user_id == user_id).first()
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
     for key, value in kwargs.items():
         setattr(db_user, key, value)
     db.add(db_user)
@@ -69,15 +69,15 @@ def update_user(db: Session, user_id: int, **kwargs):
     return db_user
 
 def delete_user(db: Session, user_id: int):
-    db.query(models.User).filter(models.User.user_id == user_id).delete()
+    db.query(models.User).filter(models.User.id == user_id).delete()
     db.commit()
 
 def get_submission(db: Session, sub_id: int):
-    return db.query(models.StudentSubmissions).filter(models.StudentSubmissions.sub_id == sub_id).first()
+    return db.query(models.StudentSubmissions).filter(models.StudentSubmissions.id == sub_id).first()
 
 def create_submission(db: Session, submission: schemas.StudentSubmissionCreate, assignment_id: int, student_id: int):
     db_submission = models.StudentSubmissions(file=submission.file, 
-                                              result="NOTRUN", 
+                                              result="PEN", # set to RUN if can be run right away?
                                               log_file="",
                                               upload_time=datetime.datetime.now(),
                                               submitter_id=student_id,
@@ -90,17 +90,17 @@ def create_submission(db: Session, submission: schemas.StudentSubmissionCreate, 
     
 
 def delete_submission(db: Session, sub_id: int):
-    db.query(models.StudentSubmissions).filter(models.StudentSubmissions.sub_id == sub_id).delete()
+    db.query(models.StudentSubmissions).filter(models.StudentSubmissions.id == sub_id).delete()
     db.commit()
 
 def create_assignment(db: Session, assignment: schemas.AssignmentCreate, docker_image: bytes):
     db_assignment = models.Assignments(docker_file=docker_image, 
                                       status=assignment.status, 
-                                      max_memory=assignment.max_memory, 
-                                      max_CPU=assignment.max_CPU, 
+                                      max_memory=assignment.maxmemory, 
+                                      max_CPU=assignment.maxcpu, 
                                       start=assignment.start, 
-                                      end=assignment.end,
-                                      max_submissions=assignment.max_submissions,
+                                      end=assignment.endtime,
+                                      max_submissions=assignment.maxsubs,
                                       timer=assignment.timer)
     db.add(db_assignment)
     db.commit()
@@ -108,10 +108,10 @@ def create_assignment(db: Session, assignment: schemas.AssignmentCreate, docker_
     return db_assignment
 
 def get_assignment(db: Session, ass_id: int):
-    return db.query(models.Assignments).filter(models.Assignments.ass_id == ass_id).first()
+    return db.query(models.Assignments).filter(models.Assignments.id == ass_id).first()
 
 def update_assignment(db: Session, ass_id: int, **kwargs):
-    db_assignment = db.query(models.Assignments).filter(models.Assignments.ass_id == ass_id).first()
+    db_assignment = db.query(models.Assignments).filter(models.Assignments.id == ass_id).first()
     for key, value in kwargs.items():
         setattr(db_assignment, key, value)
     db.add(db_assignment)
@@ -120,7 +120,7 @@ def update_assignment(db: Session, ass_id: int, **kwargs):
     return db_assignment
 
 def delete_assignment(db: Session, ass_id: int):
-    db.query(models.Assignments).filter(models.Assignments.ass_id == ass_id).delete()
+    db.query(models.Assignments).filter(models.Assignments.id == ass_id).delete()
     db.commit()
 
 def remove_student_from_assignment(db: Session, ass_id: int, user_id: int):

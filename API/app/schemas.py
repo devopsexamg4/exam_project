@@ -18,23 +18,24 @@ class StudentSubmissionCreate(StudentSubmissionBase):
     pass
 
 class StudentSubmission(StudentSubmissionBase):
-    sub_id: int
-    result: str
-    log_file: str # path to file?
-    upload_time: datetime
-    submitter_id: int
+    id: int
+    result: str # path to result file
+    status: str # FIN, PEN, RUN, STP
+    log: str # path to file?
+    uploadtime: datetime
+    student_id: int
     assignment_id: int
 
     class Config:
         from_attributes = True
 
 class AssignmentBase(BaseModel):
-    status: str
-    max_memory: int
-    max_CPU: int
+    status: str # HID, ACT, PAU, FIN
+    maxmemory: int
+    maxcpu: int
     start: datetime
-    end: datetime
-    max_submissions: int
+    endtime: datetime
+    maxsubs: int
     timer: int # minutes
 
 class AssignmentCreate(AssignmentBase):
@@ -42,7 +43,7 @@ class AssignmentCreate(AssignmentBase):
 
 class Assignment(AssignmentBase):
     docker_file: bytes # docker image
-    ass_id: int
+    id: int
     contributors: list['User'] = []
     submissions: list[StudentSubmission] = []
 
@@ -50,17 +51,16 @@ class Assignment(AssignmentBase):
         from_attributes = True
 
 class UserBase(BaseModel):
-    user_name: str
+    username: str
     email: str
 
 class UserCreate(UserBase):
     password: str # hash this somehow
-    is_active: bool
-
 
 class User(UserBase):
-    user_type: str
-    user_id: int
+    is_active: bool
+    user_type: str # STU, TEA, ADM
+    id: int
     submissions: list[StudentSubmission] = []
     assignments: list[Assignment] = []
 
