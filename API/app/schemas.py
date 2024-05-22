@@ -37,6 +37,7 @@ class AssignmentBase(BaseModel):
     endtime: datetime
     maxsubs: int
     timer: int # minutes
+    title: str # title of assignment
 
 class AssignmentCreate(AssignmentBase):
     pass

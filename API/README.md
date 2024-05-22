@@ -9,3 +9,5 @@ The API is meant to use environment variables to determine the database URL, but
 For documencation go to localhost:8000/docs
 
 Documentation is only availalbe once api is running
+
+To test the API, run command: ```pytest```

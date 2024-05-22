@@ -12,7 +12,7 @@ def hash_password(password: str):
     return pwd_context.hash(password)
 
 def verify_password(password: str, hashed_password: str):
-    return pwd_context.verify(hashed_password, password)
+    return pwd_context.verify(password, hashed_password)
 
 def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
@@ -25,7 +25,7 @@ def get_user_by_email(db: Session, email: str):
 
 def create_user_student(db: Session, user: schemas.UserCreate):
     hashed_password = hash_password(user.password)
-    db_user = models.User(user_name=user.username, 
+    db_user = models.User(username=user.username, 
                           user_type="STU", 
                           email=user.email, 
                           password=hashed_password,
@@ -37,7 +37,7 @@ def create_user_student(db: Session, user: schemas.UserCreate):
 
 def create_user_teacher(db: Session, user: schemas.UserCreate):
     hashed_password = hash_password(user.password)
-    db_user = models.User(user_name=user.username, 
+    db_user = models.User(username=user.username, 
                           user_type="TEA", 
                           email=user.email, 
                           password=hashed_password,
@@ -77,10 +77,11 @@ def get_submission(db: Session, sub_id: int):
 
 def create_submission(db: Session, submission: schemas.StudentSubmissionCreate, assignment_id: int, student_id: int):
     db_submission = models.StudentSubmissions(file=submission.file, 
-                                              result="PEN", # set to RUN if can be run right away?
-                                              log_file="",
-                                              upload_time=datetime.datetime.now(),
-                                              submitter_id=student_id,
+                                              status="PEN", # set to RUN if can be run right away?
+                                              result="",
+                                              log="",
+                                              uploadtime=datetime.datetime.now(),
+                                              student_id=student_id,
                                               assignment_id=assignment_id,
                                               eval_job=submission.eval_job)
     db.add(db_submission)
@@ -96,12 +97,13 @@ def delete_submission(db: Session, sub_id: int):
 def create_assignment(db: Session, assignment: schemas.AssignmentCreate, docker_image: bytes):
     db_assignment = models.Assignments(docker_file=docker_image, 
                                       status=assignment.status, 
-                                      max_memory=assignment.maxmemory, 
-                                      max_CPU=assignment.maxcpu, 
+                                      maxmemory=assignment.maxmemory, 
+                                      maxcpu=assignment.maxcpu, 
                                       start=assignment.start, 
-                                      end=assignment.endtime,
-                                      max_submissions=assignment.maxsubs,
-                                      timer=assignment.timer)
+                                      endtime=assignment.endtime,
+                                      maxsubs=assignment.maxsubs,
+                                      timer=assignment.timer,
+                                      title=assignment.title)
     db.add(db_assignment)
     db.commit()
     db.refresh(db_assignment)
