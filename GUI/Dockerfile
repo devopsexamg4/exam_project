@@ -8,6 +8,7 @@ RUN pip install -r pod_req.txt
 # install cron to setup scheduled tasks
 RUN apt-get update \
     && apt-get --no-install-recommends install -y cron \
+    && apt-get install -y coreutils \
     && apt-get clean
 # copy files into container
 COPY ./UI /app
