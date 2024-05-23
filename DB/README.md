@@ -1,2 +1,3 @@
 # db
-repo containg database services
+Contains the Files neccesary for the initialization of a postgresql database through a docker container. 
+

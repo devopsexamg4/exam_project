@@ -12,3 +12,5 @@ notes
 startdb.yaml
 dbnotes.txt
 /docker
+.gitignore
+/kuber
