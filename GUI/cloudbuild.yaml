@@ -2,6 +2,10 @@ steps:
 - name: 'alpine'
   dir: 'GUI'
   entrypoint: 'sed'
+  args: ['s/COPY .env.prod \/app\/.env/RUN touch \/app\/env/', '-i', 'Dockerfile']
+- name: 'alpine'
+  dir: 'GUI'
+  entrypoint: 'sed'
   args: ['/^RUN --mount=type=secret/,+1 s/^/#/', '-i', 'Dockerfile']
 - name: 'gcr.io/cloud-builders/docker'
   dir: 'GUI'
