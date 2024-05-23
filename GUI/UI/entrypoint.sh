@@ -1,7 +1,10 @@
 #!/bin/bash
 
 export $(grep -v '^#' .env | xargs)
-
+# Iterate over all environment variables and strip '\r' and '\n' characters
+for var in $(compgen -e); do
+    export $var=$(echo -n "${!var}" | tr -d '\r\n')
+done
 
 service cron start
 
