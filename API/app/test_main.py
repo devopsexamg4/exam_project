@@ -150,57 +150,6 @@ def test_get_assignments_success(client: TestClient):
 
 # Teacher endpoints
 
-# def test_add_assignment_success(client: TestClient):
-#     admin_token = admin_get_access_token(client)
-#     start_time = datetime.now()
-#     end_time = start_time + timedelta(hours=1)
-#     assignment_dict: dict = {
-#         "status": "ACT",
-#         "maxmemory": 500,
-#         "maxcpu": 1,
-#         "start": start_time.isoformat(),
-#         "endtime": end_time.isoformat(),
-#         "maxsubs": 3,
-#         "timer": 10,
-#         "title": "test assignment"
-#     }
-#     image = ""
-
-#     admin_response = client.post("/teacher/assignment/", data=assignment_dict, headers={"Authorization": f"Bearer {admin_token}"}, files={"docker_image":image})
-#     assert admin_response.status_code == 201
-
-# return here after finishing add assignment
-# def test_submit_solution_success(client: TestClient): # return to this later, how does one pass the file to be tested to the endpoint?
-#     admin_token = admin_get_access_token(client)
-#     admin_headers = {"Authorization": f"Bearer {admin_token}"}
-#     start_time: datetime = datetime.now()
-#     assignment_dict: dict = {
-#         "status": "ACT",
-#         "maxmemory": 500,
-#         "maxcpu": 1,
-#         "start": start_time,
-#         "endtime": start_time + datetime.timedelta(hours=1),
-#         "maxsubs": 3,
-#         "timer": 10
-#     }
-#     docker_image: bytes # here, find out how to get a docker image
-#     admin_response = client.post("/teacher/assignment/", json=assignment_dict, headers=admin_headers)
-
-#     student_token = get_access_token()
-#     headers = {"Authorization": f"Bearer {student_token}"}
-#     dockerfile_content: str = '''
-#     FROM ubuntu:latest
-#     RUN apt-get update
-#     RUN apt-get install -y python3
-#     CMD ["python3", "-c", "print('Hello World')"]
-#     '''
-#     submission_dict: dict = {
-#         "file": dockerfile_content,
-#         "eval_job": ""
-#     }
-#     get_admin_id = admin_response.json()["id"]
-#     response = client.post(f"/student/assignments/{get_admin_id}/submit/", json=submission_dict, headers=headers)
-
 # Admin endpoints
 
 def test_add_teacher_success(client: TestClient):
