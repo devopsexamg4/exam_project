@@ -20,7 +20,7 @@ class Assignments(Base):
     __tablename__ = "frontend_assignments"
     id = Column(Integer, primary_key=True)
     docker_file = Column(String) # path to docker image, dockerfile
-    # image, path to docker image
+    image = Column(String) # path to docker image
     status = Column(String) # "HID", "ACT", "PAU", "FIN"
     maxmemory = Column(Integer)
     maxcpu = Column(Integer)

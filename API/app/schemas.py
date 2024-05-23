@@ -43,7 +43,8 @@ class AssignmentCreate(AssignmentBase):
     pass
 
 class Assignment(AssignmentBase):
-    docker_file: bytes # docker image
+    docker_file: str # docker file, path
+    image: str # docker image, path
     id: int
     contributors: list['User'] = []
     submissions: list[StudentSubmission] = []

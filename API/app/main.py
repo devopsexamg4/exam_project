@@ -18,7 +18,7 @@ from . import podmanager as pm
 from .database import SessionLocal, engine
 
 ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "admin"
+ADMIN_PASSWORD = "pass"
 
 database.Base.metadata.create_all(bind=engine)
 
@@ -30,7 +30,7 @@ def get_db():
         db.close()
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI):    
     admin_user = schemas.UserCreate(username=ADMIN_USERNAME, email="admin@localhost.com", password=ADMIN_PASSWORD)
     db_admin = crud.create_user_admin(db=next(get_db()), user=admin_user)
     yield
@@ -188,7 +188,7 @@ def delete_submission(submission_id: int, current_user: Annotated[schemas.User, 
 # teacher endpoints: 
 
 @app.post("/teacher/assignment/", response_model=schemas.Assignment, status_code=201)
-def add_assignment(current_user: Annotated[schemas.User, Depends(get_current_active_user)], assignment: schemas.AssignmentCreate, docker_image: UploadFile = File(...), db: Session = Depends(get_db)):
+def add_assignment(current_user: Annotated[schemas.User, Depends(get_current_active_user)], assignment: schemas.AssignmentCreate, docker_image: UploadFile, db: Session = Depends(get_db)):
     if current_user.user_type == "STU":
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
     return crud.create_assignment(db=db, assignment=assignment, docker_image=docker_image.read())
