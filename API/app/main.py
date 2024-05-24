@@ -11,6 +11,7 @@ import re
 import datetime
 import io
 import csv
+import os
 from zipfile import ZipFile
 
 from . import crud, models, schemas, database
@@ -19,6 +20,7 @@ from .database import SessionLocal, engine
 
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "pass"
+pvc_file_path = "/var/www/api" # append name of file to look for, path as well if needed
 
 database.Base.metadata.create_all(bind=engine)
 
@@ -136,7 +138,7 @@ def submit_solution(assignment_id: int, submission: schemas.StudentSubmissionCre
         raise HTTPException(status_code=400, detail="Submission limit reached")
     name: str
     if db_assignment.status == "ACT":
-        manifest = pm.build_kaniko(db_submission.file, db_submission.id)
+        manifest = pm.build_kaniko(submission.file, submission.eval_job)
         docker_image = manifest["spec"]["containers"][0]["args"][2]
         resource_dict = {
             "maxmemory": str(db_assignment.maxmemory),
@@ -144,12 +146,14 @@ def submit_solution(assignment_id: int, submission: schemas.StudentSubmissionCre
             "timer": str(db_assignment.timer),
             "sub": "./"}
         api = pm.create_api_instance()
-        job, name = pm.create_job_object(str(db_submission.id), docker_image, resource_dict)
+        job, name = pm.create_job_object(submission.eval_job, docker_image, resource_dict)
         try:
             api_response = pm.create_job(api, job)
         except ApiException as e:
             raise HTTPException(status_code=500, detail="Error: " + str(e))
-    db_submission = crud.create_submission(db=db, submission=submission, assignment_id=assignment_id, student_id=current_user.id, eval_job=name)
+    with open(pvc_file_path+name, 'w') as file:
+        file.write(submission.file)
+    db_submission = crud.create_submission(db=db, submission=submission, file=pvc_file_path+submission.file, assignment_id=assignment_id, student_id=current_user.id, eval_job=name)
     return db_submission
 
 @app.get("/student/assignments/{assignment_id}/submission/{submission_id}/status/", status_code=200)
@@ -191,15 +195,22 @@ def delete_submission(submission_id: int, current_user: Annotated[schemas.User, 
 def add_assignment(current_user: Annotated[schemas.User, Depends(get_current_active_user)], assignment: schemas.AssignmentCreate, docker_image: UploadFile, db: Session = Depends(get_db)):
     if current_user.user_type == "STU":
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
+    with open(pvc_file_path+assignment.title, 'w') as file:
+        file.write(assignment.docker_file)
     return crud.create_assignment(db=db, assignment=assignment, docker_image=docker_image.read())
 
 @app.patch("/teacher/assignment/{assignment_id}/", response_model=schemas.Assignment, status_code=200)
-def update_assignment(current_user: Annotated[schemas.User, Depends(get_current_active_user)], assignment_id: int, docker_image: UploadFile = File(...), status: str | None = None, max_memory: int | None = None, max_CPU: int | None = None, start: datetime.datetime | None = None, end: datetime.datetime | None = None, db: Session = Depends(get_db)):
+def update_assignment(current_user: Annotated[schemas.User, Depends(get_current_active_user)], assignment_id: int, docker_image: UploadFile | None = None, status: str | None = None, max_memory: int | None = None, max_CPU: int | None = None, start: datetime.datetime | None = None, end: datetime.datetime | None = None, db: Session = Depends(get_db)):
     if current_user.user_type == "STU" :
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
     db_assignment = crud.get_assignment(db, ass_id=assignment_id)
     if not db_assignment:
         raise HTTPException(status_code=404, detail="Assignment not found")
+    if docker_image:
+        if os.path.exists(pvc_file_path+db_assignment.title):
+            os.remove(pvc_file_path+db_assignment.title)
+        with open(pvc_file_path+db_assignment.title, 'w') as file:
+            file.write(docker_image)
     return crud.update_assignment(db=db, assignment=db_assignment, dockerfile=docker_image, status=status, max_memory=max_memory, max_CPU=max_CPU, start=start, end=end)
 
 @app.patch("/teacher/assignment/{assignment_id}/pause/", response_model=schemas.Assignment, status_code=200)
@@ -220,6 +231,8 @@ def delete_assignment(assignment_id: int, current_user: Annotated[schemas.User, 
     db_assignment = crud.get_assignment(db, ass_id=assignment_id)
     if not db_assignment:
         raise HTTPException(status_code=404, detail="Assignment not found")
+    if os.path.exists(pvc_file_path+db_assignment.title):
+        os.remove(pvc_file_path+db_assignment.title)
     crud.delete_assignment(db, ass_id=assignment_id)
     return {"Deleted assignment: ": assignment_id}
 
