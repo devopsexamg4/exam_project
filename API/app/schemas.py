@@ -55,13 +55,17 @@ class Assignment(AssignmentBase):
 class UserBase(BaseModel):
     username: str
     email: str
+    first_name: str
+    last_name: str
 
 class UserCreate(UserBase):
     password: str # hash this somehow
 
 class User(UserBase):
+    date_joined: datetime
     is_active: bool
     is_superuser: bool
+    is_staff: bool
     user_type: str # STU, TEA, ADM
     id: int
     submissions: list[StudentSubmission] = []

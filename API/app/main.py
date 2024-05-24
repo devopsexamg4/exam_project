@@ -33,7 +33,7 @@ def get_db():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):    
-    admin_user = schemas.UserCreate(username=ADMIN_USERNAME, is_superuser=True, email="admin@localhost.com", password=ADMIN_PASSWORD)
+    admin_user = schemas.UserCreate(username=ADMIN_USERNAME, is_superuser=True, email="admin@localhost.com", password=ADMIN_PASSWORD, first_name="admin", last_name="admin")
     db_admin = crud.create_user_admin(db=next(get_db()), user=admin_user)
     yield
     crud.delete_user(db=next(get_db()), user_id=db_admin.id)

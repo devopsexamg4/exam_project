@@ -8,11 +8,15 @@ class User(Base):
     __tablename__ = "frontend_user" 
     id = Column(Integer, primary_key=True)
     username = Column(String, index=True)
+    first_name = Column(String)
+    last_name = Column(String)
     user_type = Column(String) # "STU", "TEA", "ADM"
     email = Column(String, index=True)
     password = Column(String) 
     is_active = Column(Boolean)
     is_superuser = Column(Boolean)
+    is_staff = Column(Boolean)
+    date_joined = Column(TIMESTAMP)
 
     submissions = relationship("StudentSubmissions", back_populates="submitter")
     assignments = relationship("Assignments", secondary="user_assignment_association", back_populates="contributors") # both teacher and student?

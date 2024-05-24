@@ -26,10 +26,15 @@ def get_user_by_email(db: Session, email: str):
 def create_user_student(db: Session, user: schemas.UserCreate):
     hashed_password = hash_password(user.password)
     db_user = models.User(username=user.username, 
-                          user_type="STU", 
+                          user_type="STU",
+                          first_name=user.first_name,
+                          last_name=user.last_name,
                           email=user.email, 
                           password=hashed_password,
-                          is_active=True)
+                          is_active=True,
+                          is_superuser = False,
+                          is_staff = False,
+                          date_join = datetime.datetime.now())
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -39,9 +44,14 @@ def create_user_teacher(db: Session, user: schemas.UserCreate):
     hashed_password = hash_password(user.password)
     db_user = models.User(username=user.username, 
                           user_type="TEA", 
+                          first_name=user.first_name,
+                          last_name=user.last_name,
                           email=user.email, 
                           password=hashed_password,
-                          is_active = True)
+                          is_active = True,
+                          is_superuser = False,
+                          is_staff = True,
+                          date_join = datetime.datetime.now())
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -51,10 +61,14 @@ def create_user_admin(db: Session, user: schemas.UserCreate):
     hashed_password = hash_password(user.password)
     db_user = models.User(username=user.username, 
                           user_type="ADM", 
+                          first_name=user.first_name,
+                          last_name=user.last_name,
                           email=user.email, 
                           password=hashed_password,
                           is_active = True,
-                         is_superuser = True)
+                          is_superuser = True,
+                          is_staff = True,
+                          date_join = datetime.datetime.now())
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
