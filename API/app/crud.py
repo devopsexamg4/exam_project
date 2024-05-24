@@ -34,7 +34,7 @@ def create_user_student(db: Session, user: schemas.UserCreate):
                           is_active=True,
                           is_superuser = False,
                           is_staff = False,
-                          date_join = datetime.datetime.now())
+                          date_joined = datetime.datetime.now())
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
