@@ -17,9 +17,9 @@ class HomeViewTest(TestCase):
 class AdminViewTest(test.MessagesTestMixin, TestCase):
     def setUp(self):
         self.client = Client()
-        self.user_student = User.objects.create_user(username='user_student', password='12345', type=User.TypeChoices.STUDENT)
-        self.user_teacher = User.objects.create_user(username='user_teacher', password='12345', type=User.TypeChoices.TEACHER)
-        self.user_admin = User.objects.create_user(username='user_admin', password='12345', type=User.TypeChoices.ADMIN)
+        self.user_student = User.objects.create_user(username='user_student', password='12345', user_type=User.TypeChoices.STUDENT)
+        self.user_teacher = User.objects.create_user(username='user_teacher', password='12345', user_type=User.TypeChoices.TEACHER)
+        self.user_admin = User.objects.create_user(username='user_admin', password='12345', user_type=User.TypeChoices.ADMIN)
 
 
     def test_admin_access(self):
@@ -34,13 +34,13 @@ class AdminViewTest(test.MessagesTestMixin, TestCase):
 
     def test_post_request(self):
         self.client.login(username='user_admin', password='12345')
-        response = self.client.post(reverse('admin'), {'pk': self.user_student.pk, 'type': User.TypeChoices.TEACHER})
+        response = self.client.post(reverse('admin'), {'pk': self.user_student.pk, 'user_type': User.TypeChoices.TEACHER})
         self.user_student.refresh_from_db()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(self.user_student.type, User.TypeChoices.TEACHER)
+        self.assertEqual(self.user_student.user_type, User.TypeChoices.TEACHER)
 
-        response2 = self.client.post(reverse('admin'), {'pk': self.user_student.pk, 'type': "invalid"})
-        self.assertMessages(response2, [Message(level=40, message={'type': ['Select a valid choice. invalid is not one of the available choices.']})])
+        response2 = self.client.post(reverse('admin'), {'pk': self.user_student.pk, 'user_type': "invalid"})
+        self.assertMessages(response2, [Message(level=40, message={'user_type': ['Select a valid choice. invalid is not one of the available choices.']})])
 
 class StudentViewTest(test.MessagesTestMixin, TestCase):
     def setUp(self):
@@ -50,8 +50,8 @@ class StudentViewTest(test.MessagesTestMixin, TestCase):
             dockerfile=SimpleUploadedFile("file.txt", b"file_content"),
             status=Assignments.StatusChoices.ACTIVE
         )
-        self.user_student = User.objects.create_user(username='user_student', password='12345', type=User.TypeChoices.STUDENT)
-        self.user_teacher = User.objects.create_user(username='user_teacher', password='12345', type=User.TypeChoices.TEACHER)
+        self.user_student = User.objects.create_user(username='user_student', password='12345', user_type=User.TypeChoices.STUDENT)
+        self.user_teacher = User.objects.create_user(username='user_teacher', password='12345', user_type=User.TypeChoices.TEACHER)
         self.user_student.assignments.add(self.assignment)
         self.user_student.save()
 
@@ -70,7 +70,7 @@ class StudentViewTest(test.MessagesTestMixin, TestCase):
         self.client.login(username='user_student', password='12345')
         response = self.client.post(reverse('student'), {'student-pk' : self.user_student.pk, 
                                                          'assignment' : self.assignment.pk, 
-                                                         'File' : SimpleUploadedFile("file.txt", b"file_content")})
+                                                         'file' : SimpleUploadedFile("file.txt", b"file_content")})
         self.assertEqual(response.status_code, 200)
         self.assertMessages(response, [Message(level=20, message='submission received')])
 
@@ -78,7 +78,7 @@ class StudentViewTest(test.MessagesTestMixin, TestCase):
 class ViewStudentViewTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.user_student = User.objects.create_user(username='user_student', password='12345', type=User.TypeChoices.STUDENT)
+        self.user_student = User.objects.create_user(username='user_student', password='12345', user_type=User.TypeChoices.STUDENT)
         self.assignment = Assignments.objects.create(
             title="Test Assignment",
             status=Assignments.StatusChoices.ACTIVE,
@@ -87,7 +87,7 @@ class ViewStudentViewTest(TestCase):
         self.submission = StudentSubmissions.objects.create(
             student=self.user_student,
             result=StudentSubmissions.ResChoices.PENDING,
-            File=SimpleUploadedFile("file.txt", b"file_content"),
+            file=SimpleUploadedFile("file.txt", b"file_content"),
             assignment=self.assignment,
             uploadtime=timezone.now()
         )
@@ -101,8 +101,8 @@ class ViewStudentViewTest(TestCase):
 class TeacherViewTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.teacher_user = User.objects.create_user(username='teacher', password='12345', type=User.TypeChoices.TEACHER)
-        self.student_user = User.objects.create_user(username='student', password='12345', type=User.TypeChoices.STUDENT)
+        self.teacher_user = User.objects.create_user(username='teacher', password='12345', user_type=User.TypeChoices.TEACHER)
+        self.student_user = User.objects.create_user(username='student', password='12345', user_type=User.TypeChoices.STUDENT)
         self.assignment = Assignments.objects.create(
             title="Test Assignment",
             status=Assignments.StatusChoices.ACTIVE,
@@ -199,12 +199,12 @@ class AssignmentViewTest(TestCase):
         self.teacher_credentials = {
             'username': 'teacher',
             'password': 'secret',
-            'type': User.TypeChoices.TEACHER
+            'user_type': User.TypeChoices.TEACHER
         }
         self.student_credentials = {
             'username': 'student',
             'password': 'secret',
-            'type': User.TypeChoices.STUDENT
+            'user_type': User.TypeChoices.STUDENT
         }
         self.teacher = User.objects.create_user(**self.teacher_credentials)
         self.student = User.objects.create_user(**self.student_credentials)
@@ -234,12 +234,12 @@ class EditAssignmentViewTest(TestCase):
         self.teacher_credentials = {
             'username': 'teacher',
             'password': 'secret',
-            'type': User.TypeChoices.TEACHER
+            'user_type': User.TypeChoices.TEACHER
         }
         self.student_credentials = {
             'username': 'student',
             'password': 'secret',
-            'type': User.TypeChoices.STUDENT
+            'user_type': User.TypeChoices.STUDENT
         }
         self.teacher = User.objects.create_user(**self.teacher_credentials)
         self.student = User.objects.create_user(**self.student_credentials)
@@ -271,12 +271,12 @@ class CreateAssignmentViewTest(TestCase):
         self.teacher_credentials = {
             'username': 'teacher',
             'password': 'secret',
-            'type': User.TypeChoices.TEACHER
+            'user_type': User.TypeChoices.TEACHER
         }
         self.student_credentials = {
             'username': 'student',
             'password': 'secret',
-            'type': User.TypeChoices.STUDENT
+            'user_type': User.TypeChoices.STUDENT
         }
         self.teacher = User.objects.create_user(**self.teacher_credentials)
         self.student = User.objects.create_user(**self.student_credentials)
@@ -288,7 +288,7 @@ class CreateAssignmentViewTest(TestCase):
             'maxcpu':2,
             'timer':timedelta(seconds=300),
             'start':timezone.now(),
-            'end':timezone.now() + timedelta(days=7),
+            'endtime':timezone.now() + timedelta(days=7),
             'students': [self.student.pk]
         }
 
@@ -315,17 +315,17 @@ class SubmissionViewTest(TestCase):
         self.teacher_credentials = {
             'username': 'teacher',
             'password': 'secret',
-            'type': User.TypeChoices.TEACHER
+            'user_type': User.TypeChoices.TEACHER
         }
         self.student_credentials = {
             'username': 'student',
             'password': 'secret',
-            'type': User.TypeChoices.STUDENT
+            'user_type': User.TypeChoices.STUDENT
         }
         self.admin_credentials = {
             'username': 'admin',
             'password': 'secret',
-            'type': User.TypeChoices.ADMIN
+            'user_type': User.TypeChoices.ADMIN
         }
         self.client = Client()
         self.teacher = User.objects.create_user(**self.teacher_credentials)
@@ -339,7 +339,7 @@ class SubmissionViewTest(TestCase):
         self.submission = StudentSubmissions.objects.create(
             student=self.student,
             result=StudentSubmissions.ResChoices.PENDING,
-            File=SimpleUploadedFile("file2.txt", b"file_content"),
+            file=SimpleUploadedFile("file2.txt", b"file_content"),
             assignment=self.assignment,
             uploadtime=timezone.now()
         )
@@ -367,15 +367,15 @@ class ReevalViewTest(TestCase):
         self.teacher_credentials = {
             'username': 'teacher',
             'password': 'secret',
-            'type': User.TypeChoices.TEACHER
+            'user_type': User.TypeChoices.TEACHER
         }
         self.teacher = User.objects.create_user(**self.teacher_credentials)
-        self.student = User.objects.create_user(username='student', password='secret', type=User.TypeChoices.STUDENT)
+        self.student = User.objects.create_user(username='student', password='secret', user_type=User.TypeChoices.STUDENT)
         self.assignment = Assignments.objects.create(title="Test Assignment", dockerfile=SimpleUploadedFile("file.txt", b"file_content"))
         self.submission = StudentSubmissions.objects.create(
             student=self.student,
             result=StudentSubmissions.ResChoices.FINISHED,
-            File=SimpleUploadedFile("file.txt", b"file_content"),
+            file=SimpleUploadedFile("file.txt", b"file_content"),
             assignment=self.assignment,
             uploadtime=timezone.now()
         )

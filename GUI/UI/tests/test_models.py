@@ -45,7 +45,7 @@ class AssignmentModelTest(TestCase):
             maxcpu=2,
             timer=timedelta(seconds=300),
             start=timezone.now(),
-            end=timezone.now() + timedelta(days=7),
+            endtime=timezone.now() + timedelta(days=7),
             maxsubs=10,
         )
 
@@ -63,7 +63,7 @@ class AssignmentModelTest(TestCase):
 
     def test_valid_interval(self):
         self.assignment.start = timezone.now() + timedelta(days=7)
-        self.assignment.end = timezone.now()
+        self.assignment.endtime = timezone.now()
         with self.assertRaises(ValidationError):
             self.assignment.save()
 
@@ -79,11 +79,11 @@ class UserTest(TestCase):
             status=Assignments.StatusChoices.ACTIVE,
             dockerfile=SimpleUploadedFile("file.txt", b"file_content"),
         )
-        self.user = User.objects.create_user(username='testuser', password='12345', type=User.TypeChoices.STUDENT)
+        self.user = User.objects.create_user(username='testuser', password='12345', user_type=User.TypeChoices.STUDENT)
 
     def test_create_user(self):
         self.assertEqual(self.user.username, 'testuser')
-        self.assertEqual(self.user.type, User.TypeChoices.STUDENT)
+        self.assertEqual(self.user.user_type, User.TypeChoices.STUDENT)
 
     def test_str(self):
         self.assertEqual(str(self.user), 'testuser')
@@ -94,13 +94,13 @@ class UserTest(TestCase):
     
     def test_type_choices(self):
         for choice in User.TypeChoices:
-            self.user.type = choice
+            self.user.user_type = choice
             self.user.save()
-            self.assertEqual(User.objects.get(id=self.user.id).type, choice)
+            self.assertEqual(User.objects.get(id=self.user.id).user_type, choice)
 
 class StudentSubmissionModelTest(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='testuser', password='12345', type=User.TypeChoices.STUDENT)
+        self.user = User.objects.create_user(username='testuser', password='12345', user_type=User.TypeChoices.STUDENT)
         self.assignment = Assignments.objects.create(
             title="Test Assignment",
             status=Assignments.StatusChoices.ACTIVE,
@@ -108,7 +108,7 @@ class StudentSubmissionModelTest(TestCase):
         )
         self.submission = StudentSubmissions.objects.create(
             student=self.user,
-            result=StudentSubmissions.ResChoices.PENDING,
+            status=StudentSubmissions.ResChoices.PENDING,
             File=SimpleUploadedFile("file.txt", b"file_content"),
             assignment=self.assignment,
             uploadtime=timezone.now()
@@ -125,7 +125,7 @@ class StudentSubmissionModelTest(TestCase):
 
     def test_valid_time(self):
         self.assignment.start = timezone.now() + timedelta(days=7)
-        self.assignment.end = timezone.now() + timedelta(days=14)
+        self.assignment.endtime = timezone.now() + timedelta(days=14)
         self.assignment.save()
         with self.assertRaises(ValidationError):
             self.submission.save()
