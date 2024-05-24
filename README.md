@@ -5,8 +5,8 @@
 # A map of the repo
 ### i.e. What goes where
 - [Configuration of the database -> DB](DB)
-- [Code for the GUI service build with django -> GUI](GUI)
-- [Code for the API service build with FastAPI -> API](API)
+- [Code for the GUI service built with django -> GUI](GUI)
+- [Code for the API service built with FastAPI -> API](API)
 - [Manifests for the deployment of the system -> MANIFESTS](MANIFESTS)
 - [Python helper module to interact with the cluster -> IMAGE_BUILDER](IMAGE_BUILDER)
 
@@ -14,11 +14,11 @@
 ## Deploying the entire project on google cloud
 1. Use terraform to deploy on google cloud
 1. Go to `terraform` directory
-    2. Create a file `credentials.json` storing your google cloud service account credentials
-    2. (optional) Create a file `secrets.json` storing all the secrets described in the next sections
-    2. In `setup.sh` set ZONE and PROJECT_ID
-    2. Execute `setup.sh clustername namespace`
-        3. If a `secrets.json` is not found the script will ask for the values
+    - Create a file `credentials.json` storing your google cloud service account credentials
+    - (optional) Create a file `secrets.json` storing all the secrets described in the next sections
+    - In `setup.sh` set ZONE and PROJECT_ID
+1. Execute `setup.sh clustername namespace`
+    - If a `secrets.json` is not found the script will ask for the values
 
 ### Deploying the entire project on another cloud provider
 To deploy on a generic cloud 2 options exist:
