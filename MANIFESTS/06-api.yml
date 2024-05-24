@@ -1,45 +1,30 @@
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: media-vol
-spec:
-  accessModes:
-    - ReadWriteMany
-  storageClassName: standard
-  resources:
-    requests:
-      storage: 1Gi
----
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: gui
+  name: api
   namespace: default
   labels:
-    app: django
-    name: gui
-
+    app: FastAPI
+    name: api
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: django
-      task: gui
+      app: FastAPI
+      task: api
   template:
     metadata:
       labels:
-        app: django
-        task: gui
+        app: FastAPI
+        task: api
     spec:
-      ## volume(s) available to the gui
       volumes:
         - name: media-data
           persistentVolumeClaim:
             claimName: media-vol
-      ## the container running the gui
       containers:
-        - name: gui
-          image: # should this be secret or does it not matter
+        - name: api
+          image: # Image build from dockerfile
           resources:
             limits:
               cpu: "1"
@@ -49,22 +34,22 @@ spec:
               cpu: "500m"
               memory: "400Mi"
           ports:
-            - name: incomming
+            - name: incoming
               containerPort: 8000
           volumeMounts:
-            - mountPath: /var/www/media
+            - mountPath: /var/www/api
               name: media-data
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: gui
+  name: api
   namespace: default
-
 spec:
   ports:
-    - name: gui-access
+    - name: api-access
       port: 8000
   selector:
-    app: django
-    task: gui
+    app: FastAPI
+    task: api

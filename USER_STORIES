@@ -160,10 +160,35 @@
 		"I_want":"To change the type of a user",
 		"such_that":"both teacher and students have the necessary access"
 	},
+	{
+		"As_a":"Administrator",
+		"I_want":"To delete a user",
+		"such_that":"I can remove inactive users"
+	},
+	{
+		"As_a":"Administrator",
+		"I_want":"To set a user to be inactive",
+		"such_that":"To indicate a user is unavailble at the moment"
+	},
 // Other services
 	{
 		"As_a":"GUI service",
 		"I_want":"to access the database",
 		"such_that":"I can present data to the users"
+	},
+	{
+		"As_a":"Database User",
+		"I_want":"access the data at all times",
+		"such_that":"I can work with the application at all times"
+	},
+    {
+		"As_a":"Database User",
+		"I_want":"the database to be persistent",
+		"such_that":"my data is not lost"
+	},
+    {
+		"As_a":"Database User",
+		"I_want":"the credentials for accessing the database being secrets",
+		"such_that":"no one can access the database without permission"
 	}
 ]

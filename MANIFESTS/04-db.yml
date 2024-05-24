@@ -1,0 +1,93 @@
+# StorageClass used for the PersistenVolume
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ssd
+provisioner: kubernetes.io/gce-pd   # Google cloud specific, change when using other provider
+parameters:
+  type: pd-ssd
+volumeBindingMode: WaitForFirstConsumer
+---
+# Persistent Volume, claimed by the pods for storing the database
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: postgres-pv
+spec:
+  storageClassName: ssd     # class created in sc.yaml
+  capacity:
+    storage: 6Gi            # total capacity for this persistent volume
+  accessModes:
+    - ReadWriteOnce
+  # when running on google cloud
+  gcePersistentDisk:        # Google persistent disk, change when using other provider
+    pdName: postgres-disk   # replace with the name of your disk
+    fsType: ext4            # file system type
+
+---
+# Headless service running the Postgres Database
+#
+# Headless means each pod is accessed by a stable hostname, 
+# instead of an IP indicated by clusterIP:None.
+# This is prefered for stateful applications like databases. 
+# Requests go to same instance, even though IP might change
+apiVersion: v1
+kind: Service
+metadata:
+  name: dbservice 
+  labels:
+    app: postgresdb-service
+spec:
+  selector:
+    app: postgres
+  ports:
+    - port: 5432 
+  clusterIP: None
+---
+# Statefulset managing the deployment and scaling of a set of Pods 
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-stateful
+spec:
+  serviceName: dbservice # Connects to the Headless service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: # Image build from dockerfile
+           env:
+            - name: POSTGRES_USER
+              value: "user"
+          ports:
+            - containerPort: 5432
+              name: postgres
+          volumeMounts:
+            - name: postgres-pvc
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "500m"
+            limits:
+              memory: "5Gi"
+              cpu: "1"
+  # Indicates how the persistent value claim is mounted
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-pvc
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: ssd
+        resources:
+          requests:
+            storage: 5Gi
+

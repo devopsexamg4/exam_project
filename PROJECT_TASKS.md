@@ -63,13 +63,13 @@ In this document all the tasks regarding the project is listed and marked done o
 - [x] Pause a teacher
 - [x] Delete a student or teacher
 
-### 
-
+---
 ## Database
 - [x] Design entities and relations
 - [x] decide on a DBMS
 - [x] Implement DBMS in a way that allows deployment on a generic kubernetes cluster
 
+---
 ## GUI
 - [x] sketch features of individual pages
 - [x] decide on a framework
@@ -98,11 +98,12 @@ In this document all the tasks regarding the project is listed and marked done o
     - [x] schedule tasks to start evaluations
     - [x] schedule tasks to stop evaluations and read results
 - [x] connect to production db
-- [ ] unittests for database queries
+- [x] unittests for database queries
+- [x] unittests for views
 - [ ] beautify pages
 
 ## Deployment
-- [ ] containerize API
+- [x] containerize API
 - [x] containerize GUI
 - [x] containerize DB
 - [x] configure persistent storage
@@ -110,17 +111,20 @@ In this document all the tasks regarding the project is listed and marked done o
     - [x] (optional) get domain
         - [x] get certificate
     - [x] install reverse proxy
-- [ ] store secrets in a safe manner
+- [x] store secrets in a safe manner
+- [ ] set up automatic deployment
+    - [ ] setup terraform
 
 ## Pipeline
-- [ ] set up automatic deployment
-- [ ] set up automatic unittests
+- [x] set up automatic unittests
 - [ ] set up automatic integration tests
-- [ ] set up automatic code analysis
+- [x] set up automatic static code analysis
+- [x] set up automatic coverage test
 
 ## Cluster
 
+
 ## Documentation
-- [ ] User stories
-- [ ] README detailing the deployment on a public cloud
-- [ ] this list
+- [x] User stories
+- [x] README detailing the deployment on a public cloud
+- [x] this list
