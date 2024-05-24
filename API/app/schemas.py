@@ -61,6 +61,7 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     is_active: bool
+    is_superuser: bool
     user_type: str # STU, TEA, ADM
     id: int
     submissions: list[StudentSubmission] = []
