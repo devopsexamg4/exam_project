@@ -112,8 +112,8 @@ In this document all the tasks regarding the project is listed and marked done o
         - [x] get certificate
     - [x] install reverse proxy
 - [x] store secrets in a safe manner
-- [ ] set up automatic deployment
-    - [ ] setup terraform
+- [x] set up automatic deployment
+    - [x] setup terraform
 
 ## Pipeline
 - [x] set up automatic unittests
