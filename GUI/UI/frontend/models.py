@@ -32,10 +32,9 @@ def dockerdir(instance, _):
 
 def subdir(instance, _):
     """Generate a path to save the uploaded submission"""
-    return f"submissions/sub-{str(uuid4())[0:5]}/{instance.File}"
+    return f"submissions/sub-{str(uuid4())[0:5]}/{instance.file}"
 
 def offset():
-    """get the default deadline for an assignment"""
     return timezone.now() + timedelta(days = 14)
 
 class Assignments(models.Model):
@@ -92,7 +91,7 @@ class Assignments(models.Model):
         help_text = """The starting time of this assignment, must be a vaild date and time"""
     )
 
-    end = models.DateTimeField(
+    endtime = models.DateTimeField(
         default = offset(),
         help_text = """The deadline of the assignment must be a valid date and time,
                     must be after the start time, default is 14 days after the start"""
@@ -118,7 +117,7 @@ class Assignments(models.Model):
     )
 
     def _validinterval(self):
-        end = self.end
+        end = self.endtime
         start = self.start
         if end <= start:
             raise ValidationError("Deadline must be later than starting time")
@@ -168,7 +167,7 @@ class User(AbstractUser):
         TEACHER = "TEA", _("Teacher")
         STUDENT = "STU", _("Student")
 
-    type = models.CharField(
+    user_type = models.CharField(
         max_length = 3,
         choices = TypeChoices,
         null = True,
@@ -186,7 +185,7 @@ class User(AbstractUser):
         custom delete function to remove a teachers assignment
         and stop the execution of submission evaluations
         """
-        if self.type == User.TypeChoices.TEACHER:
+        if self.user_type == User.TypeChoices.TEACHER:
             stopsub(self)
             assigns = self.assignments.all()
             # need to do it this way to accurately call the delete function
@@ -231,7 +230,7 @@ class StudentSubmissions(models.Model):
         help_text = """The status of this submission"""
     )
 
-    File = models.FileField(
+    file = models.FileField(
         upload_to = subdir,
         help_text = """The file to be tested, must be a zip archive"""
     )
@@ -243,7 +242,7 @@ class StudentSubmissions(models.Model):
     )
 
     uploadtime = models.DateTimeField(
-        default=timezone.now,
+        auto_now_add = True,
         help_text = """The time this assignment was uploaded"""
     )
 
@@ -263,7 +262,7 @@ class StudentSubmissions(models.Model):
         """validate that the upload time is after assignment start
         and before assignment end
         """
-        end = self.assignment.end
+        end = self.assignment.endtime
         start = self.assignment.start
         upl = timezone.now()
         if (upl < start) or (end < upl):
@@ -276,7 +275,7 @@ class StudentSubmissions(models.Model):
             raise ValidationError("You already have the maximum amount of pending submissions")
         
     def _validateactiveteacher(self):
-        teach = self.assignment.user_set.filter(type = User.TypeChoices.TEACHER).first()
+        teach = self.assignment.user_set.filter(user_type = User.TypeChoices.TEACHER).first()
         if not teach.is_active:
             raise ValidationError("Teacher is marked as inactive")
 
@@ -299,7 +298,7 @@ class StudentSubmissions(models.Model):
     def delete(self):
         """custom delete function to remove the associated files
         """
-        self.File.delete()
+        self.file.delete()
         self.log.delete()
         self.result.delete()
         if self.status == StudentSubmissions.ResChoices.RUNNING:

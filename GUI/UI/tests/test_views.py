@@ -374,7 +374,7 @@ class ReevalViewTest(TestCase):
         self.assignment = Assignments.objects.create(title="Test Assignment", dockerfile=SimpleUploadedFile("file.txt", b"file_content"))
         self.submission = StudentSubmissions.objects.create(
             student=self.student,
-            result=StudentSubmissions.ResChoices.PASSED,
+            result=StudentSubmissions.ResChoices.FINISHED,
             File=SimpleUploadedFile("file.txt", b"file_content"),
             assignment=self.assignment,
             uploadtime=timezone.now()
