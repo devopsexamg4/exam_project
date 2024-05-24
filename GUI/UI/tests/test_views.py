@@ -1,6 +1,7 @@
 from django.test import TestCase, Client
 from django.core.files.uploadedfile import SimpleUploadedFile
 from frontend.models import User, Assignments, StudentSubmissions
+from frontend.forms import AssignmentForm
 from django.utils import timezone
 from django.urls import reverse
 from django.contrib import auth
@@ -289,14 +290,18 @@ class CreateAssignmentViewTest(TestCase):
             'timer':timedelta(seconds=300),
             'start':timezone.now(),
             'endtime':timezone.now() + timedelta(days=7),
+            'maxsubs':5,
             'students': [self.student.pk]
         }
 
     def test_create_assignment_view_teacher(self):
         self.client.login(username='teacher', password='secret')
-        response = self.client.post(reverse('new_assignment'), self.assignment_input, follow=True)
-        # Check if teacher can create the assignment
+        form = AssignmentForm(self.assignment_input, {'dockerfile':self.assignment_input['dockerfile']})
+        self.assertTrue(form.is_valid())
+        response = self.client.post(reverse('new_assignment'), data=self.assignment_input, files=[self.assignment_input['dockerfile']], follow=True)
+        # Check if teacher can create the assignment        
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(User.objects.filter(username='teacher').first().assignments.all().exists())
         self.assertTrue(Assignments.objects.filter(title='Test Assignment').exists())
 
     def test_create_assignment_view_student(self):
@@ -382,9 +387,12 @@ class ReevalViewTest(TestCase):
 
     def test_reeval_view(self):
         self.client.login(username='teacher', password='secret')
-        response = self.client.post(reverse('reeval'), {'mode': 'single', 'pk': self.assignment.pk, 'subpk': self.submission.pk})
+        session = self.client.session
+        session["pk"] = self.assignment.pk
+        session.save()
+        response = self.client.post(reverse('reeval'), {'mode': 'single', 'subpk': self.submission.pk, 'student-pk':self.submission.student.pk})
         self.assertEqual(response.status_code, 302)
         self.submission.refresh_from_db()
         # Assuming that the reeval view updates the result to PASSED
-        self.assertEqual(self.submission.result, StudentSubmissions.ResChoices.PENDING)
+        self.assertEqual(self.submission.status, StudentSubmissions.ResChoices.PENDING)
         
