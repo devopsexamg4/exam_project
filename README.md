@@ -11,9 +11,20 @@
 - [Python helper module to interact with the cluster -> IMAGE_BUILDER](IMAGE_BUILDER)
 
 # A guide to deployment
-## Deploying the entire project
-1. use terraform 
-TODO: elaborate
+## Deploying the entire project on google cloud
+1. Use terraform to deploy on google cloud
+1. Go to `terraform` directory
+    2. Create a file `credentials.json` storing your google cloud service account credentials
+    2. (optional) Create a file `secrets.json` storing all the secrets described in the next sections
+    2. In `setup.sh` set ZONE and PROJECT_ID
+    2. Execute `setup.sh clustername namespace`
+        3. If a `secrets.json` is not found the script will ask for the values
+
+### Deploying the entire project on another cloud provider
+To deploy on a generic cloud 2 options exist:
+    - Deploy the services individually as desribed below
+    - Modify the files in the `terraform` directory according to the documentation provided by [hashicorp](https://registry.terraform.io/namespaces/hashicorp) 
+
 
 ---
 ## Deploying a service by itself
