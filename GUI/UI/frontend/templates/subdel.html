@@ -6,7 +6,7 @@
 				class="btn btn-outline-danger" 
 				data-bs-toggle="modal"
 				data-bs-target="#confirm_del{{record.pk}}"
-                {% if record.result != 'PEN' %}disabled{% endif %}>
+                {% if record.status != 'PEN' %}disabled{% endif %}>
 				Delete
 			</button>
 		</div>

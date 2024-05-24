@@ -2,7 +2,13 @@ FROM python:3.12.2-slim
 # install requirements
 RUN pip install --upgrade pip
 COPY ./requirements.txt .
+COPY ./pod_req.txt ./pod_req.txt
 RUN pip install -r requirements.txt
+RUN pip install -r pod_req.txt
+# install cron to setup scheduled tasks
+RUN apt-get update \
+    && apt-get --no-install-recommends install -y cron \
+    && apt-get clean
 # copy files into container
 COPY ./UI /app
 COPY .env.prod /app/.env
@@ -22,6 +28,22 @@ RUN --mount=type=secret,id=secret_6 \
     sed -i "s|SU_EMAIL=|SU_EMAIL=$(cat /run/secrets/secret_6)|" /app/.env
 RUN --mount=type=secret,id=secret_7 \
     sed -i "s|CSRF_TRUSTED=|CSRF_TRUSTED=$(cat /run/secrets/secret_7)|" /app/.env
+RUN --mount=type=secret,id=secret_8 \
+    sed -i "s|DB_ENGINE=|DB_ENGINE=$(cat /run/secrets/secret_8)|" /app/.env
+RUN --mount=type=secret,id=secret_9 \
+    sed -i "s|DB_USERNAME=|DB_USERNAME=$(cat /run/secrets/secret_9)|" /app/.env
+RUN --mount=type=secret,id=secret_10 \
+    sed -i "s|DB_PASSWORD=|DB_PASSWORD=$(cat /run/secrets/secret_10)|" /app/.env
+RUN --mount=type=secret,id=secret_11 \
+    sed -i "s|DB_HOST=|DB_HOST=$(cat /run/secrets/secret_11)|" /app/.env
+RUN --mount=type=secret,id=secret_12 \
+    sed -i "s|DB_PORT=|DB_POR=$(cat /run/secrets/secret_12)|" /app/.env
+RUN --mount=type=secret,id=secret_13 \
+    sed -i "s|CON_STORE=|CON_STORE=$(cat /run/secrets/secret_13)|" /app/.env
+RUN --mount=type=secret,id=secret_14 \
+    sed -i "s|CLUSTER=|CLUSTER=$(cat /run/secrets/secret_14)|" /app/.env
+RUN --mount=type=secret,id=secret_15 \
+    sed -i "s|MEDIA_PATH=|MEDIA_PATH=$(cat /run/secrets/secret_15)|" /app/.env
 
 # COPY .env /app/.env
 

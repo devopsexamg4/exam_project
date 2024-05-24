@@ -8,7 +8,7 @@
 
 <p class="h4">Title:</p> {{ assignment.title }}</br>
 <p class="h4">Start time:</p> {{ assignment.start }}
-<p class="h4">End time:</p> {{ assignment.end }}</br>
+<p class="h4">End time:</p> {{ assignment.endtime }}</br>
 <hr><hr>
 <p class="h4">Assigned students:</p>
 <form action="" method="get" class="form">
@@ -23,7 +23,7 @@
 <P class="h4">All submissions:</p>
 <form action="" method="get" class="form">
     <div class="row">
-        {% bootstrap_field subfilter.form.result__contains wrapper_class="form-control-sm col-md  p-2" %}
+        {% bootstrap_field subfilter.form.status__contains wrapper_class="form-control-sm col-md  p-2" %}
         {% bootstrap_field subfilter.form.uploadtime__contains wrapper_class="form-control-sm col-md  p-2" %}
     </div>
             {% bootstrap_button 'search table' button_class="btn-secondary" %}

@@ -30,9 +30,9 @@ class UserTypeForm(forms.ModelForm):
     class Meta:
         """The model and attributes needed to perform the action"""
         model = User
-        fields = ['type','is_active']
+        fields = ['user_type','is_active']
         help_texts = {
-            'type':_('Select the type this user should have'),
+            'user_type':_('Select the type this user should have'),
         }
 
 class AssignmentForm(forms.ModelForm):
@@ -40,10 +40,18 @@ class AssignmentForm(forms.ModelForm):
     class Meta:
         """The model and attributes used to create a new assignment"""
         model = Assignments
-        fields = "__all__"
+        fields = ['title',
+                  'status',
+                  'maxmemory',
+                  'maxcpu',
+                  'timer',
+                  'start',
+                  'endtime',
+                  'dockerfile',
+                  'maxsubs',]
         widgets = {
             'start':DateTimePickerInput(),
-            'end':DateTimePickerInput(),
+            'endtime':DateTimePickerInput(),
             'timer':TimePickerInput(),
             'title':forms.Textarea(attrs={'rows':2})
         }
@@ -63,13 +71,14 @@ class SubmissionForm(forms.ModelForm):
     class Meta:
         """The model and atrributes to create a submission"""
         model = StudentSubmissions
-        exclude = ['result','log', 'student']
+        fields = ['file','assignment']
+
 
 class AddStudForm(forms.Form):
     """form to add students to an assignment"""
     def __init__(self, *args, **kwargs):
         super().__init__(*args,**kwargs)
         self.fields['students'].choices = [ (u.id,u.username) 
-                                           for u in User.objects.filter(type = 'STU')]
+                                           for u in User.objects.filter(user_type = User.TypeChoices.STUDENT)]
 
-    students = forms.MultipleChoiceField(widget = forms.CheckboxSelectMultiple())
+    students = forms.MultipleChoiceField(widget = forms.CheckboxSelectMultiple(), required=False)

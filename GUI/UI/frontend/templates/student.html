@@ -19,7 +19,7 @@
     {% if filter %}
     <form action="" method="get" class="form">
         <div class="row">    			
-            {% bootstrap_field filter.form.result__contains wrapper_class="form-control-sm col-md  p-2" %}
+            {% bootstrap_field filter.form.status__contains wrapper_class="form-control-sm col-md  p-2" %}
             {% bootstrap_field filter.form.uploadtime__contains wrapper_class="form-control-sm col-md  p-2" %}
         </div> 
         {% bootstrap_button 'search table' button_class="btn-secondary" %}

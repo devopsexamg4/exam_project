@@ -24,6 +24,8 @@ SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
+# whether or not the application is running in a cluster
+CLUSTER = config('CLUSTER', default=False, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS').split(',')
 
@@ -46,8 +48,8 @@ INSTALLED_APPS = [
     'django_tables2',
     'django_bootstrap5',
     'django_filters',
-    'bootstrap_datepicker_plus'
-
+    'bootstrap_datepicker_plus',
+    'django_crontab',
 ]
 
 MIDDLEWARE = [
@@ -83,14 +85,32 @@ WSGI_APPLICATION = 'UI.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+ENGINE = config('DB_ENGINE')
+if config('DB_ENGINE').split('.')[-1] == 'sqlite3':
+    DATABASES = {
+        'default': {
+            'ENGINE':ENGINE ,
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE':ENGINE ,
+            'NAME': 'postgresdb',
+            'USER':config('DB_USERNAME'),
+            'PASSWORD':config('DB_PASSWORD'),
+            'HOST':config('DB_HOST'),
+            'PORT':config('DB_PORT'),
+        }
+    }
 
+
+# cron jobs
+CRONJOBS = [
+    ('*/20 * * * *', 'frontend.tasks.eval_submissions'),
+    ('*/20 * * * *', 'frontend.tasks.read_res'),
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -134,7 +154,7 @@ STATIC_ROOT = BASE_DIR / 'static/'
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [ BASE_DIR / "frontend/static",]
 
-MEDIA_ROOT = BASE_DIR / 'media/'
+MEDIA_ROOT = config('MEDIA_PATH',default=BASE_DIR / 'media/')
 MEDIA_URL = 'media/'
 
 # Default primary key field type

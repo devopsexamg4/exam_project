@@ -1,16 +1,30 @@
 """
 All models used througout the application is defined in this file
-TODO:
-    - validate the uploaded files
 """
-from datetime import datetime,timedelta
 from uuid import uuid4
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
+from django.utils.timezone import timedelta
 from django.core.validators import MaxValueValidator
 from django.core.exceptions import ValidationError
+from django.conf import settings
 
+from .img import podmanager as pm
+
+def stopsub(usr):
+    """
+    Stop submission evaluation when a teacher is set to inactive or deleted
+    """
+    assigns = usr.assignments.all()
+    subs = []
+    for ass in assigns:
+        subs += list(ass.studentsubmissions_set
+                        .filter(result = StudentSubmissions.ResChoices.PENDING))
+    for s in subs:
+        s.result = StudentSubmissions.ResChoices.STOP
+        s.save()
 
 def dockerdir(instance, _):
     """generate a path to save the uploaded dockerfile"""
@@ -18,7 +32,10 @@ def dockerdir(instance, _):
 
 def subdir(instance, _):
     """Generate a path to save the uploaded submission"""
-    return f"submissions/{str(uuid4())[0:5]}{instance.File}"
+    return f"submissions/sub-{str(uuid4())[0:5]}/{instance.file}"
+
+def offset():
+    return timezone.now() + timedelta(days = 14)
 
 class Assignments(models.Model):
     """
@@ -70,12 +87,12 @@ class Assignments(models.Model):
     )
 
     start = models.DateTimeField(
-        default = datetime.now(),
+        default = timezone.now,
         help_text = """The starting time of this assignment, must be a vaild date and time"""
     )
 
-    end = models.DateTimeField(
-        default = datetime.now() + timedelta(days = 14),
+    endtime = models.DateTimeField(
+        default = offset(),
         help_text = """The deadline of the assignment must be a valid date and time,
                     must be after the start time, default is 14 days after the start"""
     )
@@ -94,15 +111,33 @@ class Assignments(models.Model):
                         must be within [1,15], default is 5"""
     )
 
+    image = models.TextField(
+        default="",
+        help_text="""The image to be used for submission evaluation"""
+    )
+
     def _validinterval(self):
-        end = self.end
+        end = self.endtime
         start = self.start
         if end <= start:
             raise ValidationError("Deadline must be later than starting time")
 
     def save(self, *args, **kwargs):
-        """Validate that the assignment has a valid interval before saving"""
+        """
+        Validate that the assignment has a valid interval before saving
+        after validation build the image used to evaluate submissions
+        """
         self._validinterval()
+        # test are run with the debug set to false
+        # podmanager has to run in a cluster
+        if settings.CLUSTER:
+            # create manifest
+            mani = pm.build_kaniko(self.dockerfile.name, self.title)
+            # build image with kaniko
+            pm.deploy_pod(mani)
+            # save the image name
+            self.image = mani['spec']['containers'][0]['args'][2]
+        # save the assignment object
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -132,7 +167,7 @@ class User(AbstractUser):
         TEACHER = "TEA", _("Teacher")
         STUDENT = "STU", _("Student")
 
-    type = models.CharField(
+    user_type = models.CharField(
         max_length = 3,
         choices = TypeChoices,
         null = True,
@@ -144,6 +179,20 @@ class User(AbstractUser):
         Assignments,
         help_text = """The assignment(s) a user can interact with"""
     )
+
+    def delete(self):
+        """
+        custom delete function to remove a teachers assignment
+        and stop the execution of submission evaluations
+        """
+        if self.user_type == User.TypeChoices.TEACHER:
+            stopsub(self)
+            assigns = self.assignments.all()
+            # need to do it this way to accurately call the delete function
+            for ass in assigns:
+                ass.delete()
+
+        super().delete()
 
     def __str__(self):
         """A textual representation of a user"""
@@ -157,9 +206,9 @@ class StudentSubmissions(models.Model):
     """
     class ResChoices(models.TextChoices):
         """The choices for the result field"""
-        PASSED = "PAS", _("Passed")
-        FAILED = "FAI", _("Failed")
+        FINISHED = "FIN",_("Finished")
         PENDING = "PEN", _("Pending")
+        RUNNING = "RUN",_("Running")
         STOP = "STP",_("Stopped")
 
     student = models.ForeignKey(
@@ -167,15 +216,21 @@ class StudentSubmissions(models.Model):
         on_delete=models.CASCADE,
         help_text = """The student who made this submission"""
     )
+    
+    result = models.FileField(
+        blank=True,
+        null=True,
+        help_text="""The results reported from evaluation"""
+    )
 
-    result = models.CharField(
+    status = models.CharField(
         max_length = 3,
         choices = ResChoices,
         default = ResChoices.PENDING,
         help_text = """The status of this submission"""
     )
 
-    File = models.FileField(
+    file = models.FileField(
         upload_to = subdir,
         help_text = """The file to be tested, must be a zip archive"""
     )
@@ -191,20 +246,25 @@ class StudentSubmissions(models.Model):
         help_text = """The time this assignment was uploaded"""
     )
 
-
     assignment = models.ForeignKey(
         Assignments,
-        on_delete = models.CASCADE,
+        on_delete = models.SET_NULL,
+        null = True,
         help_text = """The assignment for which this is a submission"""
+    )
+
+    eval_job = models.TextField(
+        default="",
+        help_text="""the name of the evaluation job"""        
     )
 
     def _validtime(self):
         """validate that the upload time is after assignment start
         and before assignment end
         """
-        end = self.assignment.end
+        end = self.assignment.endtime
         start = self.assignment.start
-        upl = self.uploadtime
+        upl = timezone.now()
         if (upl < start) or (end < upl):
             raise ValidationError("Submission uploaded outside of assignment time window")
 
@@ -213,6 +273,12 @@ class StudentSubmissions(models.Model):
         current = len(self.student.studentsubmissions_set.filter(assignment = self.assignment))
         if maxsub <= current:
             raise ValidationError("You already have the maximum amount of pending submissions")
+        
+    def _validateactiveteacher(self):
+        teach = self.assignment.user_set.filter(user_type = User.TypeChoices.TEACHER).first()
+        if not teach.is_active:
+            raise ValidationError("Teacher is marked as inactive")
+
 
     def __str__(self):
         """textual representation of a submission
@@ -230,7 +296,12 @@ class StudentSubmissions(models.Model):
         super().save(*args, **kwargs)
 
     def delete(self):
-        """custom delete function to remove the associated file
+        """custom delete function to remove the associated files
         """
-        self.File.delete()
+        self.file.delete()
+        self.log.delete()
+        self.result.delete()
+        if self.status == StudentSubmissions.ResChoices.RUNNING:
+            api = pm.create_api_instance()
+            pm.delete_job(api, self.eval_job)
         super().delete()

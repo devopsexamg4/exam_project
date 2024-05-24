@@ -65,6 +65,7 @@ migrations/
 UI/static/*
 UI/assignments/*
 UI/submissions/*
+UI/media/*
 
 # Flask stuff:
 instance/

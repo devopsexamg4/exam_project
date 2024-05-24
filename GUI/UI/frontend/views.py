@@ -5,14 +5,11 @@ home and about are info pages, viewable by all
 admin, student and teacher presents the views of those types of users
 user_login, signup and user_logout are used as their names suggest
     to login, create a user and logout
-
-    TODO:
-    - do some nice formatting and stuff for the html pages
-    - docstring and stuff
 """
 import csv
 import zipfile
 import io
+import pathlib
 
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -21,12 +18,17 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.generic.edit import DeleteView
 from django.views.generic.detail import SingleObjectMixin
+from django.utils.datastructures import MultiValueDictKeyError
 from django.urls import reverse_lazy
 from django_tables2 import RequestConfig
+from django.conf import settings
 
+
+from .img import podmanager as pm
 from . import tables as t
 from . import forms as f
-from .models import User, Assignments, StudentSubmissions
+from .models import User, Assignments, StudentSubmissions, stopsub
+
 
 STRING_403 = "You do not have permissions to view this page"
 
@@ -47,8 +49,9 @@ def about(request):
 @login_required(login_url='/login/')
 def admin(request):
     """collect data to show on the admin page"""
-    if (User.objects.filter(username = request.user).first()
-        not in User.objects.filter(type = 'ADM')) and (not request.user.is_staff):
+    if ((User.objects.filter(username = request.user).first()
+        not in User.objects.filter(user_type = User.TypeChoices.ADMIN))
+        and (not request.user.is_staff)):
         # the logged in user is not a teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
@@ -59,13 +62,16 @@ def admin(request):
         form = f.UserTypeForm(request.POST, instance=usr)
         if form.is_valid():
             form.save()
+            # if the update was setting a teacher as inactive stop or cancel all submissions
+            if usr.user_type == User.TypeChoices.TEACHER and not usr.is_active:
+                stopsub(usr)
             messages.info(request, f"{usr.username} has been updated")
         else:
             messages.error(request, form.errors)
 
     # populate the user table
     filt = t.UserFilter(request.GET, queryset = User.objects.all())
-    table = t.UserTable(data=filt.qs)
+    table = t.UserTable(data = filt.qs)
     table.exclude = 'teacher'
     RequestConfig(request).configure(table)
 
@@ -84,7 +90,7 @@ def admin(request):
 def student(request):
     """collect data to show on the student page"""
     if (User.objects.filter(username = request.user).first()
-        not in User.objects.filter(type = 'STU')):
+        not in User.objects.filter(user_type = User.TypeChoices.STUDENT)):
         # the logged in user is not a student but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
@@ -117,8 +123,14 @@ def student(request):
 @login_required(login_url='/login')
 def viewstudent(request):
     """Presents a detailed view of a student"""
-    stud = User.objects.get(pk = request.POST['student-pk'])
-    assign = Assignments.objects.get(pk = request.POST['assignment-pk'])
+    try:
+        stud = User.objects.get(pk = request.POST['student-pk'])
+    except MultiValueDictKeyError:
+        stud = User.objects.get(pk = request.session['student-pk'])
+    try:
+        assign = Assignments.objects.get(pk = request.POST['assignment-pk'])
+    except MultiValueDictKeyError:
+        assign = Assignments.objects.get(pk = request.session['pk'])
 
     table = t.SubmissionTable(
         data = StudentSubmissions.objects.filter(student = stud).filter(assignment = assign)
@@ -137,7 +149,7 @@ def viewstudent(request):
 def teacher(request):
     """collect data to show on the teacher page"""
     if (User.objects.filter(username = request.user).first()
-        not in User.objects.filter(type = 'TEA')):
+        not in User.objects.filter(user_type = User.TypeChoices.TEACHER)):
         # the logged in user is not a teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
@@ -211,14 +223,15 @@ def assignment(request):
     assign = Assignments.objects.get(pk=request.session['pk'])
     # make sure the user is a teacher who is associated with the assignment
     if (User.objects.filter(username = request.user).first() not in
-        User.objects.filter(type = 'TEA').filter(assignments__pk = assign.pk)):
+        (User.objects.filter(user_type = User.TypeChoices.TEACHER)
+         .filter(assignments__pk = assign.pk))):
         # the logged in user is not a teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
-    studs = assign.user_set.filter(type = 'STU')
+    studs = assign.user_set.filter(user_type = User.TypeChoices.STUDENT)
     filter = t.UserFilter(request.GET, queryset = studs)
     table = t.UserTable(data = filter.qs)
-    table.exclude = ('type','is_active','action')
+    table.exclude = ('user_type','is_active','action')
     table._orderable = False
 
     subfilter = t.SubmissionFilter(request.GET, queryset =
@@ -248,7 +261,8 @@ def edit_assignment(request):
     assign = Assignments.objects.get(pk = request.POST['pk'])
 
     if (User.objects.filter(username = request.user).first() not in
-        User.objects.filter(type = 'TEA').filter(assignments__pk = assign.pk)):
+        (User.objects.filter(user_type = User.TypeChoices.TEACHER)
+        .filter(assignments__pk = assign.pk))):
         # the logged in user is not a teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
@@ -293,7 +307,7 @@ def edit_assignment(request):
 def create_assignment(request):
     """view presents the form to create a new assignment"""
     if (User.objects.filter(username = request.user).first() not in
-        User.objects.filter(type = 'TEA')):
+        User.objects.filter(user_type = User.TypeChoices.TEACHER)):
         # the logged in user is not a teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
@@ -333,8 +347,8 @@ def submission(request):
     """View presenting the details of a submission"""
     sub = StudentSubmissions.objects.get(pk = request.POST['pk'])
     if (User.objects.filter(username = request.user).first()
-        not in (User.objects.filter(type = 'STU').filter(studentsubmissions = sub)
-        and User.objects.filter(type = 'TEA'))):
+        not in (User.objects.filter(user_type = User.TypeChoices.STUDENT).filter(studentsubmissions = sub)
+                | User.objects.filter(user_type = User.TypeChoices.TEACHER))):
         # the logged in user is not a student or teacher but is trying to access the page
         messages.error(request, STRING_403)
         return redirect('index')
@@ -349,18 +363,32 @@ def submission(request):
 def reeval(request):
     """trigger the re-evaluation of assignment(s)"""
     mode = request.POST['mode']
-
+    request.session['student-pk'] = request.POST['student-pk']
     assign = Assignments.objects.get(pk = request.session['pk'])
     if mode == 'single':
         subs = StudentSubmissions.objects.filter(pk = request.POST['subpk'])
     else:
         subs = assign.studentsubmissions_set.exclude(
-            result = StudentSubmissions.ResChoices.PENDING
+            status = StudentSubmissions.ResChoices.PENDING
             )
 
     for sub in subs:
-        sub.result = StudentSubmissions.ResChoices.PENDING
+        sub.status = StudentSubmissions.ResChoices.PENDING
+        if settings.CLUSTER:
+            api = pm.create_api_instance()
+            path = pathlib.Path(sub.file.path)
+            job,name = pm.create_job_object(assign.title,
+                                            assign.image,
+                                            resources={
+                                                'maxmemory':assign.maxmemory,
+                                                'maxcpu':assign.maxcpu,
+                                                'timer':assign.timer,
+                                                'sub':str(path.parent)
+                                                })
+            sub.eval_job = name
+            pm.create_job(api, job)
         sub.save()
+        
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
@@ -368,16 +396,23 @@ def reeval(request):
 def stopeval(request):
     """stop the evaluation of assignment(s)"""
     mode = request.POST['mode']
-
+    request.session['student-pk'] = request.POST['student-pk']
     assign = Assignments.objects.get(pk = request.session['pk'])
     if mode == 'single':
         subs = StudentSubmissions.objects.filter(pk = request.POST['subpk'])
     else:
-        subs = assign.studentsubmissions_set.filter(result = StudentSubmissions.ResChoices.PENDING )
+        subs = assign.studentsubmissions_set.filter(status = StudentSubmissions.ResChoices.RUNNING )
 
     for sub in subs:
-        sub.result = StudentSubmissions.ResChoices.STOP
-        sub.save()
+        sub.status = StudentSubmissions.ResChoices.STOP
+        if settings.CLUSTER:
+            name = sub.eval_job
+            sub.eval_job = ""
+            sub.save()
+            api = pm.create_api_instance()
+            pm.delete_job(api, name)
+        else:
+            sub.save()
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
@@ -404,7 +439,7 @@ def getcsv(request):
         writer.writerow([sub.student.username,
                          str(sub.pk),
                          sub.uploadtime.strftime("%d/%m/%y, %H:%M:%S"),
-                         sub.get_result_display() ])
+                         sub.result.open('r').read() ])
 
     return response
 
