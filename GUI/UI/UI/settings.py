@@ -97,7 +97,7 @@ else:
     DATABASES = {
         'default': {
             'ENGINE':ENGINE ,
-            'NAME': 'postgresdb',
+            'NAME': 'postgres',
             'USER':config('DB_USERNAME'),
             'PASSWORD':config('DB_PASSWORD'),
             'HOST':config('DB_HOST'),
