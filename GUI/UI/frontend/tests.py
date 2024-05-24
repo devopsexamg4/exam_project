@@ -1,7 +1,4 @@
 """
 unit tests for the GUI module
-TODO:
-    - make some tests
+the tests are found in ../tests/
 """
-
-# from django.test import TestCase

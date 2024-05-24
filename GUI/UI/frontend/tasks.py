@@ -29,7 +29,7 @@ def eval_submissions():
             'maxmemory':sub.assignment.maxmemory,
             'maxcpu':sub.assignment.maxcpu,
             'timer':sub.assignment.timer,
-            'sub':str(pathlib.Path(sub.File.path).parent)
+            'sub':str(pathlib.Path(sub.file.path).parent)
         }
         job,name = pm.create_job_object(sub.assignment.title,
                                         sub.assignment.image,
@@ -50,7 +50,7 @@ def read_res():
         res = pm.get_job_status(api, sub.eval_job)
         if res.status.succeeded is not None or res.status.failed is not None:
             # job has fininshed read the results
-            result = str(pathlib.Path(sub.File.path).parent)+"/result.txt"
+            result = str(pathlib.Path(sub.file.path).parent)+"/result.txt"
             sub.result = result
             sub.status = StudentSubmissions.ResChoices.FINISHED
             sub.save()
