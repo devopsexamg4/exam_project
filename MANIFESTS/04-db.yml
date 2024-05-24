@@ -63,9 +63,6 @@ spec:
       containers:
         - name: postgres
           image: # Image build from dockerfile
-           env:
-            - name: POSTGRES_USER
-              value: "user"
           ports:
             - containerPort: 5432
               name: postgres

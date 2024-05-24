@@ -22,8 +22,8 @@
 
 ### Deploying the entire project on another cloud provider
 To deploy on a generic cloud 2 options exist:
-    - Deploy the services individually as desribed below
-    - Modify the files in the `terraform` directory according to the documentation provided by [hashicorp](https://registry.terraform.io/namespaces/hashicorp) 
+    - Deploy the services individually as desribed below</br>
+    - Modify the files in the `terraform` directory according to the documentation provided by [hashicorp](https://registry.terraform.io/namespaces/hashicorp)</br>
 
 ---
 ## Deploying a service by itself
