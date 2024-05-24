@@ -2,7 +2,6 @@
 
 export $(grep -v '^#' .env | xargs)
 
-
 service cron start
 
 python manage.py collectstatic --no-input

@@ -30,9 +30,9 @@ class UserTypeForm(forms.ModelForm):
     class Meta:
         """The model and attributes needed to perform the action"""
         model = User
-        fields = ['type','is_active']
+        fields = ['user_type','is_active']
         help_texts = {
-            'type':_('Select the type this user should have'),
+            'user_type':_('Select the type this user should have'),
         }
 
 class AssignmentForm(forms.ModelForm):
@@ -46,12 +46,12 @@ class AssignmentForm(forms.ModelForm):
                   'maxcpu',
                   'timer',
                   'start',
-                  'end',
+                  'endtime',
                   'dockerfile',
                   'maxsubs',]
         widgets = {
             'start':DateTimePickerInput(),
-            'end':DateTimePickerInput(),
+            'endtime':DateTimePickerInput(),
             'timer':TimePickerInput(),
             'title':forms.Textarea(attrs={'rows':2})
         }
@@ -68,11 +68,10 @@ class SubmissionForm(forms.ModelForm):
             self.fields['assignment'].queryset = user.assignments.all()
         else:
             self.fields['assignment'].queryset = Assignments.objects.none()
-        self.fields['status'].required = False
     class Meta:
         """The model and atrributes to create a submission"""
         model = StudentSubmissions
-        fields = ['status','File','assignment']
+        fields = ['file','assignment']
 
 
 class AddStudForm(forms.Form):
@@ -80,6 +79,6 @@ class AddStudForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args,**kwargs)
         self.fields['students'].choices = [ (u.id,u.username) 
-                                           for u in User.objects.filter(type = 'STU')]
+                                           for u in User.objects.filter(user_type = User.TypeChoices.STUDENT)]
 
     students = forms.MultipleChoiceField(widget = forms.CheckboxSelectMultiple(), required=False)
