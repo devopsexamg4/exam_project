@@ -35,7 +35,7 @@ def subdir(instance, _):
     return f"submissions/sub-{str(uuid4())[0:5]}/{instance.File}"
 
 def offset():
-  """get the default deadline for an assignment"""
+    """get the default deadline for an assignment"""
     return timezone.now() + timedelta(days = 14)
 
 class Assignments(models.Model):
