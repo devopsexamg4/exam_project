@@ -41,7 +41,7 @@ resource "kubernetes_deployment" "traefik_deployment" {
                     name  = "volume-permissions"
                     image = "busybox:1.36.1"
 
-                    command = ["sh", "-c", "touch /letsencrypt/acme.json && chmod -Rv 600 /letsencrypt/* && chown 65532:65532 /letsencrypt/acme.json"]
+                    command = ["sh", "-c", "rm -f /letsencrypt/acme.json && touch /letsencrypt/acme.json && chmod -Rv 600 /letsencrypt/* && chown 65532:65532 /letsencrypt/acme.json"]
 
                     volume_mount {
                         mount_path = "/letsencrypt"
@@ -71,7 +71,7 @@ resource "kubernetes_deployment" "traefik_deployment" {
                         "--certificatesresolvers.myresolver.acme.dnschallenge.provider=duckdns",
                         "--certificatesresolvers.myresolver.acme.dnschallenge=true",
                         "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json",
-                        "--certificatesresolvers.myresolver.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory",
+                        "--certificatesresolvers.myresolver.acme.caServer=https://acme-v02.api.letsencrypt.org/directory",
                         "--entrypoints.web.http.redirections.entrypoint.to=websecure",
                         "--entrypoints.web.http.redirections.entrypoint.scheme=https",
                         "--entrypoints.web.address=:80",
