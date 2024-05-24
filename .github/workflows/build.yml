@@ -24,13 +24,28 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
-      - name: install tox
+      - name: install requirements
         run: |
-          pip install tox
-          pip install pytest
-      - name: run tox
-        run: echo "this is where i would run tox" 
-        # tox -e py
+          pip install coverage
+           # get all requirement.txt files and call pip install on them
+          echo "installing requirements"
+          git ls-files --full-name | grep -E *requirements.txt 2>/dev/null  | while read line; do echo installing requirements from $line ; pip install -r $line ; done
+          echo "done installing requirements"
+      - name: coverage
+        run: |
+          python ./GUI/UI/manage.py makemigrations --no-input
+          python ./GUI/UI/manage.py migrate --no-input
+          coverage run ./GUI/UI/manage.py test tests
+          coverage xml
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DEBUG: ${{ secrets.DEBUG }}
+          ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+          CSRF_TRUSTED: ${{ secrets.CSRF_TRUSTED }}
+          SU_PASSWORD: ${{ secrets.SU_PASSWORD }}
+          SU_USER: ${{ secrets.SU_USER }}
+          SU_EMAIL: ${{ secrets.SU_EMAIL }}
+          DB_ENGINE: 'django.db.backends.sqlite3'
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:

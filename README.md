@@ -1,60 +1,62 @@
-# THE VERY BEST REPO
-# For development purposes only
-## Staring the UI service first time(Hardmode)
+# DM885 - Microservices and Dev(sec)ops
+# Final project
+# Group 4
 
-1. assuming linux environment with python installed and project has been pulled
-1. go to UI directory open terminal
-1.	`python -m venv env` to start a virtual python environment
-1. `source env/bin/activate` to start python env(ironment)
-1. `pip install -r requirements.txt` to install dependencies into env
-1. `./UI/manage.py runserver` to start development server<br>
+# A map of the repo
+### i.e. What goes where
+- [Configuration of the database -> DB](DB)
+- [Code for the GUI service build with django -> GUI](GUI)
+- [Code for the API service build with FastAPI -> API](API)
+- [Manifests for the deployment of the system -> MANIFESTS](MANIFESTS)
+- [Python helper module to interact with the cluster -> IMAGE_BUILDER](IMAGE_BUILDER)
 
-## Staring the UI service(easy mode)
+# A guide to deployment
+## Deploying the reverse proxy
+1. Configure your certificate resolver ([Documentation](https://doc.traefik.io/traefik/https/acme/#providers))
+    - In `MANIFESTS/02-traefik.yml` set:
+        - your email on line 64 (`- --certificatesresolvers.myresolver.acme.email=<your email>`)
+        - your provider on line 66 (`- --certificatesresolvers.myresolver.acme.dnschallenge.provider=<provider code>`)
+        - set required environment variables as specified by the linked documentation (starting at line 84)
+1. Configure domains ([Documentation](https://doc.traefik.io/traefik/https/acme/#configuration-examples))
+    - in `MANIFESTS/03-ingressroutes.yml` set:
+        - `spec.routes.match`
+        - `spec.tls.domains.main`
+        - (optional) `spec.tls.domains.sans`
+1. Apply manifests to your kubernetes cluster
+    - `MANIFESTS/00-rdef.yml`
+    - `MANIFESTS/01-rbac.yml`
+    - `MANIFESTS/02-traefik.yml`
+    - `MANIFESTS/03-ingressroutes.yml`
 
-1. Have docker installed and running
-1. run `docker compose build`
-1. run `docker compose up -d`
-1. open browser to [frontpage](http://localhost:8000)
+## Deploying the database
 
-## link to overleaf
-[overleaf doc](https://www.overleaf.com/1442327655stwrrmfrymjv#707254)<br>
+## Deploying the API
 
-## Structure of our project
-
-### environments
-- testing på sdu ucloud
-- production på google cloud
-
-### Techstack
-- primary language: python
-- secondary languages: JS, CSS, HTML
-- version control: github
-- pipeline: github actions
-- database: postgresql
-- containerisation: docker
-- some sort of orchestrator
-- webserver: nginx
-- GUI: django
-- API: FastAPI
-- consider rabbitmq for message passing between containers
+## Building and deploying the GUI
+1. Give a value to the secrects in `GUI/UI/.env.prod`
+    - SECRET_KEY: from django [documentation](https://docs.djangoproject.com/en/5.0/topics/signing/) "This value is the key to securing signed data"
+    - DEBUG: [Documentation](https://docs.djangoproject.com/en/5.0/ref/settings/#debug)
+    - ALLOWED_HOSTS: [Documentation](https://docs.djangoproject.com/en/5.0/ref/settings/#allowed-hosts)
+    - CSRF_TRUSTED: [Documentation](https://docs.djangoproject.com/en/5.0/ref/settings/#csrf-trusted-origins)
+    - SU_PASSWORD: The password used for the initial admin user
+    - SU_USER: Username used for the initial admin user
+    - SU_EMAIL: Email address used for the initial admain user
+    - DB_ENGINE: The databse engine [Documentation](https://docs.djangoproject.com/en/5.0/ref/databases/)
+    - DB_USERNAME: the username for the database
+    - DB_PASSWORD: the password for the database
+    - DB_HOST: Where the database is hosted
+    - DB_PORT: on which port the database can be accessed
+    - CON_STORE: url to a container registry, images for assignments will be pushed to this registry
+    - CLUSTER: Boolean to indicate whether or not the application is running in a cluster
+1. Build the image defined in `GUI/Dockerfile`
+1. Push the image to your container registry
+1. In the file `MANIFESTS/04-gui.yml` set the image to be the one just build
+1. Apply `MANIFESTS/04-gui.yml` to your kubernetes cluster
 
 
-### pre-work
-- user stories
-- documentation in README.md
-- consider attack vectors
 
-### tasks
-- setup pipeline
-- tests
-- db design
-- frontend GUI design
-
-### post work
-- group report
-- individual reports
-
-### This is but a test
-[Link to API readme](https://github.com/devopsexamg4/api/blob/a0b96d2763a471bad7a3e72c5c6bce2d5c8e5971/README.md)
-
-=======
+---
+## But what if I want to run this locally?
+[This](https://youtu.be/Ef9QnZVpVd8?si=GJXBrbplXsq9dCLL)</br>
+Running API in development mode: [Guide](API/README.md)</br>
+Running GUI in development mode: [Guide](GUI/README.md)</br>

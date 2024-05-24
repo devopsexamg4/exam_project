@@ -2,93 +2,76 @@
 	{
 		"As_a":"Teacher",
 		"I_want":"to login",
-		"such_that":"I can use the project service",
+		"such_that":"I can use the project service"
 	},
 	{
 		"As_a":"Teacher",
 		"I_want":"to start a new assignment for my students",
-		"such_that":"I can evaluate their knowledge of a subject",
+		"such_that":"I can evaluate their knowledge of a subject"
 	},
 	{
 		"As_a":"Teacher",
 		"I_want":"add students to an assignment",
-		"such_that":"I can ensure all students are evaluated",
+		"such_that":"I can ensure all students are evaluated"
 	},
 	{
 		"As_a":"Teacher",
 		"I_want":"remove a student from an assignment",
-		"such_that":"a student who is no longer following the course, is not evaluated",
+		"such_that":"a student who is no longer following the course, is not evaluated"
 	},
 	{
 		"As_a":"Teacher",
 		"I_want":"add a single student to an assignment",
-		"such_that":"a student who joined later can still be evaluated",
+		"such_that":"a student who joined later can still be evaluated"
 	},
 	{
 		"As_a":"Teacher",
 		"I_want":"prepare assignments",
-		"such_that":"it is ready when the students expect",
+		"such_that":"it is ready when the students expect"
 	},
 	{
 		"As_a":"Teacher",
 		"I_want":"have a GUI",
-		"such_that":"i can easily use the system",
+		"such_that":"i can easily use the system"
 	},
 	{
 		"As_a":"Teacher",
 		"I_want":"to extract data with a script",
-		"such_that":"i can easily retrieve all data of an assignment",
-	}{
+		"such_that":"i can easily retrieve all data of an assignment"
+	},
+	{
 		"As_a":"Teacher",
 		"I_want":"to view submissions of individual students",
-		"such_that":"i can quickly evaluate a student",
-	}{
+		"such_that":"i can quickly evaluate a student"
+	},
+	{
 		"As_a":"Teacher",
 		"I_want":"to not rely on a GUI to access the system",
-		"such_that":"i can automate all my interactions with it",
-	}{
+		"such_that":"i can automate all my interactions with it"
+	},
+	{
 		"As_a":"Teacher",
 		"I_want":"edit an assignment",
-		"such_that":"misconfiguration of an assignment does not persist throughout the assignment duration",
-	}{
+		"such_that":"misconfiguration of an assignment does not persist throughout the assignment duration"
+	},
+	{
 		"As_a":"Teacher",
 		"I_want":"get a list of students assigned to a project",
-		"such_that":"i can verify that all students are enrolled",
-	}{
+		"such_that":"i can verify that all students are enrolled"
+	},
+	{
 		"As_a":"Teacher",
 		"I_want":"re-evaluate individual submissions",
-		"such_that":"if a student complains, the complaint can be addressed immediately",
-	}{
+		"such_that":"if a student complains, the complaint can be addressed immediately"
+	},
+	{
 		"As_a":"Teacher",
 		"I_want":"stop the evaluation of a submission",
-		"such_that":"a malformed submission does not block the evaluation of other submissions",
-	}{
+		"such_that":"a malformed submission does not block the evaluation of other submissions"
+	},
+	{
 		"As_a":"Teacher",
 		"I_want":"automatic evaluation of submissions",
-		"such_that":"manual labour is reduced",
-	}{
-		"As_a":"Teacher",
-		"I_want":"",
-		"such_that":"",
-	}{
-		"As_a":"Teacher",
-		"I_want":"",
-		"such_that":"",
-	}{
-		"As_a":"Teacher",
-		"I_want":"",
-		"such_that":"",
-	}{
-		"As_a":"Teacher",
-		"I_want":"",
-		"such_that":"",
-	}{
-		"As_a":"Teacher",
-		"I_want":"",
-		"such_that":"",
-	}{
-		"As_a":"Teacher",
-		"I_want":"",
-		"such_that":"",
+		"such_that":"manual labour is reduced"
 	}
 ]

@@ -1,7 +1,5 @@
 """
-TODO:
-    - add a descriptive docstring to this module
-    - ensure descriptive docstrings for all classes
+This file contains all the tables used throughout the application
 """
 import django_tables2 as tables
 from django_tables2 import SingleTableMixin
@@ -44,7 +42,7 @@ class SubmissionTable(tables.Table):
         """Meta class for the SubmissionTable."""
         model = StudentSubmissions
         template_name = TABLE_TEMPLATE
-        fields = ( 'result', 'assignment', 'uploadtime', 'File', 'log'  )
+        fields = ( 'status', 'assignment', 'uploadtime', 'File', 'log'  )
         attrs = {'ref':'SubmissionTable'}
 
 class UserFilter(FilterSet):
@@ -71,7 +69,7 @@ class SubmissionFilter(FilterSet):
     class Meta:
         """Meta class for the SubmissionFilter."""
         model = StudentSubmissions
-        fields = {'result':["contains"],
+        fields = {'status':["contains"],
                   'uploadtime':["contains"]}
 
 
