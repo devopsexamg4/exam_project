@@ -3,4 +3,4 @@ FROM postgres:latest
 
 
 # database table configuration
-COPY init.sql /docker-entrypoint-initdb.d/
+#COPY init.sql /docker-entrypoint-initdb.d/
