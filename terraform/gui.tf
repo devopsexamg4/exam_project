@@ -1,7 +1,7 @@
 variable "secrets_GUI" {
     description = "List of secrets to fetch from Google Secret Manager"
     type        = list(string)
-    default     = ["SECRET_KEY", "DEBUG", "ALLOWED_HOSTS", "CSRF_TRUSTED", "SU_PASSWORD", "SU_USER", "SU_EMAIL", "DB_ENGINE", "DB_USERNAME", "DB_PASSWORD", "DB_HOST", "DB_PORT", "CON_STORE"]
+    default     = ["SECRET_KEY", "ALLOWED_HOSTS", "CSRF_TRUSTED", "SU_PASSWORD", "SU_USER", "SU_EMAIL", "DB_ENGINE", "DB_USERNAME", "DB_PASSWORD", "DB_HOST", "DB_PORT", "CON_STORE", "MEDIA_PATH"]
 }
 
 data "google_secret_manager_secret_version" "secrets_GUI" {

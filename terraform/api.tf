@@ -1,7 +1,7 @@
 variable "secrets_API" {
     description = "List of secrets to fetch from Google Secret Manager"
     type        = list(string)
-    default     = ["DB_USERNAME", "DB_PASSWORD", "DB_PORT", "DB_HOST", "DB_NAME"]
+    default     = ["DB_PORT", "DB_HOST", "DB_NAME"]
 }
 
 variable "env_var_mapping_API" {
