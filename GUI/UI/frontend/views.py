@@ -343,7 +343,7 @@ def create_assignment(request):
 def submission(request):
     """View presenting the details of a submission"""
     sub = StudentSubmissions.objects.get(pk = request.POST['pk'])
-if (User.objects.filter(username = request.user).first()
+    if (User.objects.filter(username = request.user).first()
         not in (User.objects.filter(user_type = User.TypeChoices.STUDENT).filter(studentsubmissions = sub)
                 | User.objects.filter(user_type = User.TypeChoices.TEACHER))):
         # the logged in user is not a student or teacher but is trying to access the page
