@@ -1,10 +1,13 @@
 from django.test import TestCase, Client
 from django.core.files.uploadedfile import SimpleUploadedFile
 from frontend.models import User, Assignments, StudentSubmissions
+from frontend.forms import AssignmentForm
 from django.utils import timezone
 from django.urls import reverse
+from django.contrib import auth
 from django.contrib.messages import get_messages, test
 from django.contrib.messages.storage.base import Message
+from datetime import timedelta
 
 
 class HomeViewTest(TestCase):
@@ -120,18 +123,276 @@ class TeacherViewTest(TestCase):
         self.assertEqual(response.status_code, 302)  # Expecting a redirect
 
 
-
 class UserLoginViewTest(TestCase):
-    def test_user_login_view(self):
+    def setUp(self):
+        self.client = Client()
+        self.credentials = {
+            'username': 'testuser',
+            'password': 'secret'
+        }
+        User.objects.create_user(**self.credentials)
+
+    def test_login_view(self):
+        # Test if login page is accessible
         response = self.client.get(reverse('login'))
         self.assertEqual(response.status_code, 200)
 
+        # Test if user can login
+        response = self.client.post(reverse('login'), self.credentials, follow=True)
+        user = auth.get_user(self.client)
+        # Check if user is logged in
+        self.assertTrue(user.is_authenticated)
+        # Check if response is redirected to the index page
+        self.assertRedirects(response, reverse('index'), status_code=302)
+
+    def test_invalid_login(self):
+        # Test if login fails with invalid credentials
+        self.credentials['password'] = 'wrong_password'
+        response = self.client.post(reverse('login'), self.credentials, follow=True)
+        user = auth.get_user(self.client)
+        # Check if user is not logged in
+        self.assertFalse(user.is_authenticated)
+        # Check if response is still on the login page
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'login.html')
+
 class SignupViewTest(TestCase):
+    def setUp(self):
+        self.credentials = {
+            'username': 'testuser',
+            'password1': 'd62jndic62b',
+            'password2': 'd62jndic62b'
+        }
+
     def test_signup_view(self):
+        # Test if signup page is accessible
         response = self.client.get(reverse('signup'))
         self.assertEqual(response.status_code, 200)
 
+        # Test if user can signup
+        response = self.client.post(reverse('signup'), self.credentials, follow=True)
+        # Check if user is created
+        self.assertTrue(User.objects.filter(username=self.credentials['username']).exists())
+        # Check if response is redirected to the login page
+        self.assertRedirects(response, reverse('login'), status_code=302)
+
 class UserLogoutViewTest(TestCase):
-    def test_user_logout_view(self):
-        response = self.client.get(reverse('logout'))
+    def setUp(self):
+        self.credentials = {
+            'username': 'testuser',
+            'password': 'secret'
+        }
+        User.objects.create_user(**self.credentials)
+        self.client.login(username='testuser', password='secret')
+
+    def test_logout_view(self):
+        # Test if user can logout
+        response = self.client.get(reverse('logout'), follow=True)
+        user = auth.get_user(self.client)
+        # Check if user is logged out
+        self.assertFalse(user.is_authenticated)
+        # Check if response is redirected to the index page
+        self.assertRedirects(response, reverse('index'), status_code=302)
+
+class AssignmentViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.teacher_credentials = {
+            'username': 'teacher',
+            'password': 'secret',
+            'user_type': User.TypeChoices.TEACHER
+        }
+        self.student_credentials = {
+            'username': 'student',
+            'password': 'secret',
+            'user_type': User.TypeChoices.STUDENT
+        }
+        self.teacher = User.objects.create_user(**self.teacher_credentials)
+        self.student = User.objects.create_user(**self.student_credentials)
+        self.assignment = Assignments.objects.create(title="Test Assignment", dockerfile=SimpleUploadedFile("file.txt", b"file_content"))
+        self.teacher.assignments.add(self.assignment)
+
+    def test_assignment_view_teacher(self):
+        self.client.login(username='teacher', password='secret')
+        response = self.client.post(reverse('assignment_detail'), {'pk': self.assignment.pk}, follow=True)
+        # Check if teacher can access the assignment
+        self.assertEqual(response.status_code, 200)
+
+    def test_assignment_view_student(self):
+        self.client.login(username='student', password='secret')
+        response = self.client.post(reverse('assignment_detail'), {'pk': self.assignment.pk}, follow=True)
+        # Check if student is redirected
+        self.assertRedirects(response, reverse('index'), status_code=302)
+
+    def test_assignment_view_unauthenticated(self):
+        response = self.client.post(reverse('assignment_detail'), {'pk': self.assignment.pk}, follow=True)
+        # Check if unauthenticated user is redirected to login
+        self.assertRedirects(response, reverse('login') + '?next=' + reverse('assignment_detail'), status_code=302)
+
+class EditAssignmentViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.teacher_credentials = {
+            'username': 'teacher',
+            'password': 'secret',
+            'user_type': User.TypeChoices.TEACHER
+        }
+        self.student_credentials = {
+            'username': 'student',
+            'password': 'secret',
+            'user_type': User.TypeChoices.STUDENT
+        }
+        self.teacher = User.objects.create_user(**self.teacher_credentials)
+        self.student = User.objects.create_user(**self.student_credentials)
+        self.assignment = Assignments.objects.create(title="Test Assignment", dockerfile=SimpleUploadedFile("file.txt", b"file_content"))
+        self.teacher.assignments.add(self.assignment)
+
+    def test_edit_assignment_view_teacher(self):
+        self.client.login(username='teacher', password='secret')
+        response = self.client.post(reverse('edit_assignment'), {'pk': self.assignment.pk, 'title': 'New Title'}, follow=True)
+        # Check if teacher can edit the assignment
+        self.assertEqual(response.status_code, 200)
+        self.assignment.refresh_from_db()
+        self.assertEqual(self.assignment.title, 'Test Assignment')
+
+    def test_edit_assignment_view_student(self):
+        self.client.login(username='student', password='secret')
+        response = self.client.post(reverse('edit_assignment'), {'pk': self.assignment.pk, 'title': 'New Title'}, follow=True)
+        # Check if student is redirected
+        self.assertRedirects(response, reverse('index'), status_code=302)
+
+    def test_edit_assignment_view_unauthenticated(self):
+        response = self.client.post(reverse('edit_assignment'), {'pk': self.assignment.pk, 'title': 'New Title'}, follow=True)
+        # Check if unauthenticated user is redirected to login
+        self.assertRedirects(response, reverse('login') + '?next=' + reverse('edit_assignment'), status_code=302)
+
+class CreateAssignmentViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.teacher_credentials = {
+            'username': 'teacher',
+            'password': 'secret',
+            'user_type': User.TypeChoices.TEACHER
+        }
+        self.student_credentials = {
+            'username': 'student',
+            'password': 'secret',
+            'user_type': User.TypeChoices.STUDENT
+        }
+        self.teacher = User.objects.create_user(**self.teacher_credentials)
+        self.student = User.objects.create_user(**self.student_credentials)
+        self.assignment_input = {
+            'title':"Test Assignment",
+            'status':Assignments.StatusChoices.ACTIVE,
+            'dockerfile':SimpleUploadedFile("file.txt", b"file_content"),
+            'maxmemory':200,
+            'maxcpu':2,
+            'timer':timedelta(seconds=300),
+            'start':timezone.now(),
+            'endtime':timezone.now() + timedelta(days=7),
+            'maxsubs':5,
+            'students': [self.student.pk]
+        }
+
+    def test_create_assignment_view_teacher(self):
+        self.client.login(username='teacher', password='secret')
+        form = AssignmentForm(self.assignment_input, {'dockerfile':self.assignment_input['dockerfile']})
+        self.assertTrue(form.is_valid())
+        response = self.client.post(reverse('new_assignment'), data=self.assignment_input, files=[self.assignment_input['dockerfile']], follow=True)
+        # Check if teacher can create the assignment        
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(User.objects.filter(username='teacher').first().assignments.all().exists())
+        self.assertTrue(Assignments.objects.filter(title='Test Assignment').exists())
+
+    def test_create_assignment_view_student(self):
+        self.client.login(username='student', password='secret')
+        response = self.client.post(reverse('new_assignment'), {'title': 'Test Assignment', 'students': [self.student.pk]}, follow=True)
+        # Check if student is redirected
+        self.assertRedirects(response, reverse('index'), status_code=302)
+
+    def test_create_assignment_view_unauthenticated(self):
+        response = self.client.post(reverse('new_assignment'), {'title': 'Test Assignment', 'students': [self.student.pk]}, follow=True)
+        # Check if unauthenticated user is redirected to login
+        self.assertRedirects(response, reverse('login') + '?next=' + reverse('new_assignment'), status_code=302)
+
+class SubmissionViewTest(TestCase):
+    def setUp(self):
+        self.teacher_credentials = {
+            'username': 'teacher',
+            'password': 'secret',
+            'user_type': User.TypeChoices.TEACHER
+        }
+        self.student_credentials = {
+            'username': 'student',
+            'password': 'secret',
+            'user_type': User.TypeChoices.STUDENT
+        }
+        self.admin_credentials = {
+            'username': 'admin',
+            'password': 'secret',
+            'user_type': User.TypeChoices.ADMIN
+        }
+        self.client = Client()
+        self.teacher = User.objects.create_user(**self.teacher_credentials)
+        self.student = User.objects.create_user(**self.student_credentials)
+        self.admin = User.objects.create_user(**self.admin_credentials)
+        self.assignment = Assignments.objects.create(
+            title="Test Assignment",
+            status=Assignments.StatusChoices.ACTIVE,
+            dockerfile=SimpleUploadedFile("file1.txt", b"file_content"),
+        )
+        self.submission = StudentSubmissions.objects.create(
+            student=self.student,
+            result=StudentSubmissions.ResChoices.PENDING,
+            file=SimpleUploadedFile("file2.txt", b"file_content"),
+            assignment=self.assignment,
+            uploadtime=timezone.now()
+        )
+
+    def test_submission_view_student(self):
+        self.client.login(username='student', password='secret') 
+        response = self.client.post(reverse('sub_details'), {'pk': self.submission.pk})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Details')
+
+    def test_submission_view_teacher(self):
+        self.client.login(username='teacher', password='secret')
+        response = self.client.post(reverse('sub_details'), {'pk': self.submission.pk})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Details')
+
+    def test_submission_view_unauthorized(self):
+        self.client.login(username='admin', password='secret')
+        response = self.client.post(reverse('sub_details'), {'pk': self.submission.pk}, follow=True)
+        self.assertRedirects(response, reverse('index'), status_code=302)
+
+class ReevalViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.teacher_credentials = {
+            'username': 'teacher',
+            'password': 'secret',
+            'user_type': User.TypeChoices.TEACHER
+        }
+        self.teacher = User.objects.create_user(**self.teacher_credentials)
+        self.student = User.objects.create_user(username='student', password='secret', user_type=User.TypeChoices.STUDENT)
+        self.assignment = Assignments.objects.create(title="Test Assignment", dockerfile=SimpleUploadedFile("file.txt", b"file_content"))
+        self.submission = StudentSubmissions.objects.create(
+            student=self.student,
+            result=StudentSubmissions.ResChoices.FINISHED,
+            file=SimpleUploadedFile("file.txt", b"file_content"),
+            assignment=self.assignment,
+            uploadtime=timezone.now()
+        )
+
+    def test_reeval_view(self):
+        self.client.login(username='teacher', password='secret')
+        session = self.client.session
+        session["pk"] = self.assignment.pk
+        session.save()
+        response = self.client.post(reverse('reeval'), {'mode': 'single', 'subpk': self.submission.pk, 'student-pk':self.submission.student.pk})
         self.assertEqual(response.status_code, 302)
+        self.submission.refresh_from_db()
+        # Assuming that the reeval view updates the result to PASSED
+        self.assertEqual(self.submission.status, StudentSubmissions.ResChoices.PENDING)
+        

@@ -48,7 +48,7 @@ class AssignmentForm(forms.ModelForm):
                   'start',
                   'endtime',
                   'dockerfile',
-                  'maxsubs',]
+                  'maxsubs']
         widgets = {
             'start':DateTimePickerInput(),
             'endtime':DateTimePickerInput(),
@@ -72,7 +72,6 @@ class SubmissionForm(forms.ModelForm):
         """The model and atrributes to create a submission"""
         model = StudentSubmissions
         fields = ['file','assignment']
-
 
 class AddStudForm(forms.Form):
     """form to add students to an assignment"""

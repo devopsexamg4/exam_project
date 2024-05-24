@@ -108,7 +108,7 @@ class StudentSubmissionModelTest(TestCase):
         )
         self.submission = StudentSubmissions.objects.create(
             student=self.user,
-            result=StudentSubmissions.ResChoices.PENDING,
+            status=StudentSubmissions.ResChoices.PENDING,
             file=SimpleUploadedFile("file.txt", b"file_content"),
             assignment=self.assignment,
             uploadtime=timezone.now()
