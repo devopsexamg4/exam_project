@@ -35,7 +35,7 @@ TODO: elaborate
     - `MANIFESTS/03-ingressroutes.yml`
 
 ### Deploying the database
-1. Set value for environvariables listed in `DB/.env`
+1. Set value for environment variables listed in `DB/.env`
     - POSTGRES_USER: The username for the database
     - POSTGRES_PASSWORD: The password for the database
     - POSTGRES_DB: The name of the database
@@ -45,7 +45,7 @@ TODO: elaborate
 1. Apply `MANIFESTS/04-db.yml` to your kubernetes cluster
 
 ### Building and deploying the GUI
-1. Give a value to the secrects listed in `GUI/UI/.env.prod`
+1. Give a value to the environment varibles listed in `GUI/UI/.env.prod`
     - SECRET_KEY: From django [documentation](https://docs.djangoproject.com/en/5.0/topics/signing/) "This value is the key to securing signed data"
     - DEBUG: [Documentation](https://docs.djangoproject.com/en/5.0/ref/settings/#debug)
     - ALLOWED_HOSTS: [Documentation](https://docs.djangoproject.com/en/5.0/ref/settings/#allowed-hosts)
@@ -68,7 +68,7 @@ TODO: elaborate
 
 
 ### Deploying the API
-1. Give a value to the secrects listed in `API/app/.env`
+1. Give a value to the environment varibles listed in `API/app/env.template`
     - SECRET_KEY: Used to sign JWT tokens -[documentation](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/#handle-jwt-tokens)
     - CON_STORE: URL to a container registry, images for assignments will be pushed to this registry
     - DB_HOST: Where the database is hosted

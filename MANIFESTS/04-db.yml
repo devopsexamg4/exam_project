@@ -63,6 +63,9 @@ spec:
       containers:
         - name: postgres
           image: # Image build from dockerfile
+           env:
+            - name: POSTGRES_USER
+              value: "user"
           ports:
             - containerPort: 5432
               name: postgres
@@ -76,29 +79,6 @@ spec:
             limits:
               memory: "5Gi"
               cpu: "1"
-          
-          # Checks whether pod is still alive
-          livenessProbe:
-            exec:
-              command:
-              - /usr/bin/pg_isready
-              - -h
-              - localhost         # localhost used, because of running inside the cluster
-              - -U
-              - postgres
-            initialDelaySeconds: 20
-            periodSeconds: 10
-          # Checks whether pod was initialized correctly
-          readinessProbe:
-            exec:
-              command:
-              - /usr/bin/pg_isready
-              - -h
-              - localhost
-              - -U
-              - postgres
-            initialDelaySeconds: 20
-            periodSeconds: 2
   # Indicates how the persistent value claim is mounted
   volumeClaimTemplates:
     - metadata:
