@@ -53,7 +53,8 @@ def create_user_admin(db: Session, user: schemas.UserCreate):
                           user_type="ADM", 
                           email=user.email, 
                           password=hashed_password,
-                          is_active = True)
+                          is_active = True,
+                         is_superuser = True)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
