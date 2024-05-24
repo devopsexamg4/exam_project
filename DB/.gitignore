@@ -1,10 +1,6 @@
 DB/test/test/psycopg2/*
 DB/test
 test
-# *.sql
-# Dockerfile
-# createdb.py
-# dbtest.py
 /users
 confignotes.txt
 createdb.py
