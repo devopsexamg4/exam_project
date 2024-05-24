@@ -25,7 +25,7 @@ class SubdirTest(TestCase):
     """Test the subdir function in models.py"""
     def test_subdir(self):
         instance = Mock()
-        instance.File = SimpleUploadedFile("file.txt", b"file_content")
+        instance.file = SimpleUploadedFile("file.txt", b"file_content")
         result = subdir(instance, None)
         uuid_part = result.split('/')[1][4:9]
         self.assertEqual(len(uuid_part), 5)
@@ -109,7 +109,7 @@ class StudentSubmissionModelTest(TestCase):
         self.submission = StudentSubmissions.objects.create(
             student=self.user,
             status=StudentSubmissions.ResChoices.PENDING,
-            File=SimpleUploadedFile("file.txt", b"file_content"),
+            file=SimpleUploadedFile("file.txt", b"file_content"),
             assignment=self.assignment,
             uploadtime=timezone.now()
         )
@@ -117,7 +117,7 @@ class StudentSubmissionModelTest(TestCase):
     def test_submission_creation(self):
         self.assertEqual(self.submission.student, self.user)
         self.assertEqual(self.submission.status, StudentSubmissions.ResChoices.PENDING)
-        self.assertTrue(self.submission.File)
+        self.assertTrue(self.submission.file)
         self.assertEqual(self.submission.assignment, self.assignment)
 
     def test_str(self):
@@ -137,11 +137,11 @@ class StudentSubmissionModelTest(TestCase):
             StudentSubmissions.objects.create(
                 student=self.user,
                 assignment=self.assignment,
-                File=SimpleUploadedFile('test_file', b'file_content'),
+                file=SimpleUploadedFile('test_file', b'file_content'),
             )
 
     def test_delete(self):
-        file_path = self.submission.File.path
+        file_path = self.submission.file.path
         self.submission.delete()
         self.assertFalse(exists(file_path), "File was not deleted")
 

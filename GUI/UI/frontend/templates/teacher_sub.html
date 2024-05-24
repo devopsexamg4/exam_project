@@ -2,7 +2,7 @@
     <div class="col">
         <form method="post" action="{% url 'reeval' %}">
             {% csrf_token %}
-            <button class="btn btn-secondary" type="submit" {% if record.result == 'PEN' %}disabled{% endif %}>Re-evaluate</button>
+            <button class="btn btn-secondary" type="submit" {% if record.status == 'PEN' %}disabled{% endif %}>Re-evaluate</button>
             <input type="hidden" value={{ record.pk }} name="subpk"/>
             <input type="hidden" value={{ record.assignment.pk }} name="pk"/>
             <input type="hidden" value={{ record.student.pk }} name="student-pk"/>
@@ -12,7 +12,7 @@
     <div class="col">
         <form method="post" action="{% url 'stopeval' %}">
             {% csrf_token %}
-            <button class="btn btn-secondary" type="submit" {% if record.result == 'RUN' %}disabled{% endif %}>Stop evaluation</button>
+            <button class="btn btn-secondary" type="submit" {% if record.status != 'RUN' %}disabled{% endif %}>Stop evaluation</button>
             <input type="hidden" value={{ record.pk }} name="subpk"/>
             <input type="hidden" value={{ record.assignment.pk }} name="pk"/>
             <input type="hidden" value={{ record.student.pk }} name="student-pk"/>

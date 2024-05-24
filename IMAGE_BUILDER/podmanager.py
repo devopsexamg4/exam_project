@@ -14,6 +14,7 @@ from uuid import uuid4
 
 import yaml
 from decouple import config as env
+from pathlib import Path
 from kubernetes import client, config, utils
 from kubernetes.utils.create_from_yaml import FailToCreateError
 
@@ -28,7 +29,8 @@ def build_kaniko(dockerfile: str, name: str, tag: str='latest') -> dict:
     and push it to the container storage defined in environment variable CON_STORE
     """
     # open kaniko template
-    with open("kaniko.yml",'r', encoding='utf-8') as kan:
+    template = Path(__file__).with_name('kaniko.yml')
+    with open(template,'r', encoding='utf-8') as kan:
         manifest = yaml.safe_load(kan)
 
     # get and replace the args
@@ -161,7 +163,7 @@ if __name__ == '__main__':
     import sys
     argv = sys.argv
 
-    if ('--test' or '-t') in argv:
+    if ('--test' in argv) or ( '-t' in argv):
         # unscientific 'test' of collisions in uuid
         # to determine the appropriate length of identifiers
         test = []

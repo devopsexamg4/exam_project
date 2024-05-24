@@ -19,7 +19,7 @@ class UserTable(tables.Table):
         """Meta class for the UserTable."""
         model = User
         template_name = TABLE_TEMPLATE
-        fields = ('username', 'email', 'type', 'is_active')
+        fields = ('username', 'email', 'user_type', 'is_active')
         attrs = {'ref':'UserTable'}
 
 class AssTable(tables.Table):
@@ -30,7 +30,7 @@ class AssTable(tables.Table):
         """Meta class for the AssTable."""
         model = Assignments
         template_name = TABLE_TEMPLATE
-        fields = ('status', 'title', 'start', 'end' )
+        fields = ('status', 'title', 'start', 'endtime' )
         attrs = {'ref':'AssTable'}
 
 class SubmissionTable(tables.Table):
@@ -42,7 +42,7 @@ class SubmissionTable(tables.Table):
         """Meta class for the SubmissionTable."""
         model = StudentSubmissions
         template_name = TABLE_TEMPLATE
-        fields = ( 'status', 'assignment', 'uploadtime', 'File', 'log'  )
+        fields = ( 'status', 'assignment', 'uploadtime', 'file', 'log'  )
         attrs = {'ref':'SubmissionTable'}
 
 class UserFilter(FilterSet):
@@ -52,7 +52,7 @@ class UserFilter(FilterSet):
         model = User
         fields = {'username':["contains"],
                   'email':["contains"],
-                  'type':["exact"]}
+                  'user_type':["exact"]}
 
 class AssFilter(FilterSet):
     """A filter for the AssTable."""
@@ -62,7 +62,7 @@ class AssFilter(FilterSet):
         fields = {'status':["contains"],
                   'title':["contains"],
                   'start':["contains"],
-                  'end':["contains"]}
+                  'endtime':["contains"]}
 
 class SubmissionFilter(FilterSet):
     """A filter for the SubmissionTable."""
