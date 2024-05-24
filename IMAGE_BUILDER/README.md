@@ -1,5 +1,57 @@
 # Kaniko to build images from a dockerfile
-### doc from [kaniko](https://raw.githubusercontent.com/GoogleContainerTools/kaniko/main/README.md)
+## How to include
+To use the image builder:
+- copy the files ```__init__.py, kaniko.yml, podmanager.py, requirements.txt``` into your application,</br>be sure not to overwrite any files in your application.
+- In your application set the environment variable ```CON_STORAGE``` to be the path/url to your container storage.
+- Install the requirements with ```pip install -r requirements.txt```
+- import the functions into your applications like you would any other import in python e.g. ```import podmanager as pm```
+---
+- In the case of the GUI application, copy the files into ```GUI/UI/frontend/img/*``` as specified in the ```/builder_to_gui.sh``` (or simply execute the script)
+---
+## How to use
+All operations will be performed in namespace "default" on the cluster it is run</br>
+To build an image:
+```python
+manifest = build_kaniko(dockerfile, image_name, tag=latest)
+api_response = deploy_pod(manifest)
+```
+To start a job e.g. to evaluate a submission:
+```python
+resource_dict = {'maxmemory':str(memory limit in Mi),
+                  'maxcpu':str(cpu limit),
+                  'timer':str(maximum execution time from jobstart),
+                  'sub':str(path to folder containing assignment)}
+api = create_api_instance()
+job, name = create_job_object(jobname, jobimage, resources=resource_dict)
+api_response = create_job(api, job)
+```
+
+To get the status of a job:
+```python
+api = create_api_instance()
+name = <name returned from create_job_object>
+api_response = get_job_status(api,name)
+```
+
+To delete a job:
+```python
+api = create_api_instance()
+name = <name returned from create_job_object>
+api_response = delete_job(api,name)
+```
+
+Update a runninng job:
+```python
+old_name = <name returned from initial create_job_object>
+resource_dict = {'maxmemory':str(memory limit in Mi),
+                  'maxcpu':str(cpu limit),
+                  'timer':str(maximum execution time from jobstart),
+                  'sub':str(path to folder containing assignment)}
+api = create_api_instance()
+job, new_name = create_job_object(jobname, jobimage, resources=resource_dict)
+api_response = update_job(api,job,old_name)
+```
+## Doc from [kaniko](https://raw.githubusercontent.com/GoogleContainerTools/kaniko/main/README.md)
 #### Running kaniko in a Kubernetes cluster
 
 Requirements:

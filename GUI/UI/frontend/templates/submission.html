@@ -3,15 +3,19 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
+{% if submission.assignment %}
 Assignment: {{submission.assignment }}</br>
-Uploaded: {{ submission.uploadtime }}</br>
-Result: {{ submission.result }}</br>
-{% if submission.log %} <!-- Check if a log file has been uploaded -->
-Log: <a href="{{ submission.log.url }}">{{submission.log}}</a>
 {% else %}
-Log: No log created yet.
+Assignment: Deleted</br>
 {% endif %}
-
+Uploaded: {{ submission.uploadtime }}</br>
+Status: {{ submission.status }}</br>
+{% if submission.result %}
+Result: <a href="{{ submission.result.url }}">{{submission.result}}</a>
+{% endif %}
+{% if submission.log %}
+Log: <a href="{{ submission.log.url }}">{{submission.log}}</a>
+{% endif %}
 {% endblock %}
 
 {% block footer %}{% endblock %}

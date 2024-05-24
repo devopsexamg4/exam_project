@@ -8,6 +8,7 @@ from django.contrib.messages import get_messages, test
 from django.contrib.messages.storage.base import Message
 from datetime import timedelta
 
+
 class HomeViewTest(TestCase):
     def test_home_view(self):
         response = self.client.get(reverse('index'))
@@ -119,6 +120,7 @@ class TeacherViewTest(TestCase):
         self.client.login(username='student', password='12345')
         response = self.client.get(reverse('teacher'))
         self.assertEqual(response.status_code, 302)  # Expecting a redirect
+
 
 class UserLoginViewTest(TestCase):
     def setUp(self):
@@ -385,3 +387,4 @@ class ReevalViewTest(TestCase):
         self.submission.refresh_from_db()
         # Assuming that the reeval view updates the result to PASSED
         self.assertEqual(self.submission.result, StudentSubmissions.ResChoices.PENDING)
+        

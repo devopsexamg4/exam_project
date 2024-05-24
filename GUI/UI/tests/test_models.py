@@ -27,7 +27,7 @@ class SubdirTest(TestCase):
         instance = Mock()
         instance.File = SimpleUploadedFile("file.txt", b"file_content")
         result = subdir(instance, None)
-        uuid_part = result.split('/')[1][0:5]
+        uuid_part = result.split('/')[1][4:9]
         self.assertEqual(len(uuid_part), 5)
         # Check that the UUID part only contains hexadecimal characters
         self.assertTrue(all(c in '0123456789abcdef' for c in uuid_part))
@@ -116,7 +116,7 @@ class StudentSubmissionModelTest(TestCase):
 
     def test_submission_creation(self):
         self.assertEqual(self.submission.student, self.user)
-        self.assertEqual(self.submission.result, StudentSubmissions.ResChoices.PENDING)
+        self.assertEqual(self.submission.status, StudentSubmissions.ResChoices.PENDING)
         self.assertTrue(self.submission.File)
         self.assertEqual(self.submission.assignment, self.assignment)
 
@@ -147,6 +147,6 @@ class StudentSubmissionModelTest(TestCase):
 
     def test_result_choices(self):
         for choice in StudentSubmissions.ResChoices:
-            self.submission.result = choice
+            self.submission.status = choice
             self.submission.save()
-            self.assertEqual(StudentSubmissions.objects.get(id=self.submission.id).result, choice)
+            self.assertEqual(StudentSubmissions.objects.get(id=self.submission.id).status, choice)
