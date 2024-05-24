@@ -121,8 +121,19 @@ In this document all the tasks regarding the project is listed and marked done o
 - [x] set up automatic static code analysis
 - [x] set up automatic coverage test
 
-## Cluster
-
+## Infrastructure and Deployment Automation
+- [x] Set up automatic compiling of images for each service using Google Cloud Build
+	- [x] Define the build configuration for each service
+	- [x] Configure the build triggers
+- [x] Set up Terraform for infrastructure deployment
+	- [x] Define the infrastructure for the cluster
+	- [x] Define the deployments for each microservice
+	- [x] Define the services
+	- [x] Define the ingress
+	- [x] Define the volumes and volume claims
+- [x] Automate deployment of new clusters
+	- [x] Write scripts for automatic deployment
+	- [x] Test the automated deployment scripts
 
 ## Documentation
 - [x] User stories
