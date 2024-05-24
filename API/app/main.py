@@ -18,8 +18,8 @@ from . import crud, models, schemas, database
 from . import podmanager as pm
 from .database import SessionLocal, engine
 
-ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "pass"
+ADMIN_USERNAME=os.getenv("ADMIN_USERNAME")
+ADMIN_PASSWORD=os.getenv("ADMIN_PASSWORD")
 pvc_file_path = "/var/www/api" # append name of file to look for, path as well if needed
 
 database.Base.metadata.create_all(bind=engine)

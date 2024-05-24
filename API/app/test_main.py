@@ -2,11 +2,12 @@ from fastapi.testclient import TestClient
 from passlib.context import CryptContext
 from . import main # app, ADMIN_PASSWORD, ADMIN_USERNAME, get_db 
 import pytest
+import os
 
-from datetime import datetime, timedelta
 from . import crud
 
-# client = TestClient(main.app)
+ADMIN_USERNAME=os.getenv("ADMIN_USERNAME")
+ADMIN_PASSWORD=os.getenv("ADMIN_PASSWORD")
 
 @pytest.fixture(autouse=True)
 def create_admin_user():
@@ -42,8 +43,6 @@ def admin_get_access_token(client: TestClient):
     }
     response = client.post("/login/", data=in_data)
     return response.json()["access_token"]
-
-# Student endpoints
 
 def test_create_profile_student_success(client: TestClient):
     in_data: dict = {
@@ -147,10 +146,6 @@ def test_get_assignments_success(client: TestClient):
     response = client.get("/student/assignments/", headers=headers)
     assert response.status_code == 200
     assert isinstance(response.json(), list)
-
-# Teacher endpoints
-
-# Admin endpoints
 
 def test_add_teacher_success(client: TestClient):
     token = admin_get_access_token(client)
