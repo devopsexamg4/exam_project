@@ -12,6 +12,7 @@ class User(Base):
     email = Column(String, index=True)
     password = Column(String) 
     is_active = Column(Boolean)
+    is_superuser = Column(Boolean)
 
     submissions = relationship("StudentSubmissions", back_populates="submitter")
     assignments = relationship("Assignments", secondary="user_assignment_association", back_populates="contributors") # both teacher and student?
