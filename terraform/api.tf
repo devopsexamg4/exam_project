@@ -1,7 +1,7 @@
 variable "secrets_API" {
     description = "List of secrets to fetch from Google Secret Manager"
     type        = list(string)
-    default     = ["DB_PORT", "DB_HOST", "DB_NAME"]
+    default     = ["DB_PORT", "DB_HOST", "DB_NAME", "ADMIN_USERNAME", "ADMIN_PASSWORD"]
 }
 
 variable "env_var_mapping_API" {
@@ -12,7 +12,9 @@ variable "env_var_mapping_API" {
         "DB_PASSWORD" = "DB_PASSWORD",
         "DB_PORT"     = "DB_PORT",
         "DB_HOST"     = "DB_HOST",
-        "DB_NAME"     = "DB_NAME"
+        "DB_NAME"     = "DB_NAME",
+        "ADMIN_USERNAME" = "ADMIN_USERNAME",
+        "ADMIN_PASSWORD" = "ADMIN_PASSWORD"
     }
 }
 
@@ -100,6 +102,26 @@ resource "kubernetes_deployment" "api_deployment" {
                         }
                         }
                     }
+                    env {
+                        name = "DB_USER"
+                        value_from {
+                            secret_key_ref {
+                                name = "db-username"
+                                key  = "DB_USERNAME"
+                            }
+                        }
+                    }
+
+                    env {
+                        name = "DB_PASSWORD"
+                        value_from {
+                            secret_key_ref {
+                                name = "db-password"
+                                key  = "DB_PASSWORD"
+                            }
+                        }
+                    }
+
                 }
             }
         }
