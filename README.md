@@ -9,6 +9,7 @@
 - [Code for the API service built with FastAPI -> API](API)
 - [Manifests for the deployment of the system -> MANIFESTS](MANIFESTS)
 - [Python helper module to interact with the cluster -> IMAGE_BUILDER](IMAGE_BUILDER)
+- [Terraform configuration files](terraform)
 
 # A guide to deployment
 ## Deploying the entire project on google cloud
