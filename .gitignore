@@ -14,6 +14,7 @@ db.*
 UI/.env
 clear.sh
 GUI/rm-db
+API/__init__.py
 
 # files from ignored folders to include
 !UI/UI/frontend/migrations/__init__.py
