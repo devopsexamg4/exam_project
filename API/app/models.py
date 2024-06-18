@@ -39,7 +39,7 @@ class Assignments(Base):
     submissions = relationship("StudentSubmissions", back_populates="assignment")
 
 class StudentSubmissions(Base):
-    __tablename__ = "frontend_student_submissions"
+    __tablename__ = "frontend_studentsubmissions"
     id = Column(Integer, primary_key=True)
     eval_job = Column(String)
     file = Column(String) # path to sourcefile
