@@ -9,10 +9,11 @@ from . import models, schemas
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 def hash_password(password: str):
-    return pwd_context.hash(password)
+    return "argon2" + pwd_context.hash(password)
 
 def verify_password(password: str, hashed_password: str):
-    return pwd_context.verify(password, hashed_password)
+    actual_hash = hashed_password.removeprefix("argon2")
+    return pwd_context.verify(password, actual_hash)
 
 def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
