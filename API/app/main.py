@@ -70,7 +70,7 @@ def create_access_token(data: dict, expires_delta: datetime.timedelta | None = N
         expire = datetime.datetime.utcnow() + expires_delta
     else:
         expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
-    to_encode.update({"exp": expire})
+    to_encode.update({"exp": expire.strftime("%Y-%m-%d %H:%M:%S")})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
