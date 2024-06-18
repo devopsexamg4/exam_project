@@ -111,7 +111,7 @@ def delete_submission(db: Session, sub_id: int):
     db.commit()
 
 def create_assignment(db: Session, assignment: schemas.AssignmentCreate, docker_image: bytes):
-    db_assignment = models.Assignments(docker_file=docker_image, 
+    db_assignment = models.Assignments(dockerfile=docker_image, 
                                       status=assignment.status, 
                                       maxmemory=assignment.maxmemory, 
                                       maxcpu=assignment.maxcpu, 

@@ -197,7 +197,7 @@ def add_assignment(current_user: Annotated[schemas.User, Depends(get_current_act
     if current_user.user_type == "STU":
         raise HTTPException(status_code=401, detail="User is not a teacher", headers={"WWW-Authenticate": "Bearer"})
     with open(pvc_file_path+assignment.title, 'w') as file:
-        file.write(assignment.docker_file)
+        file.write(assignment.dockerfile)
     return crud.create_assignment(db=db, assignment=assignment, docker_image=docker_image.read())
 
 @app.patch("/teacher/assignment/{assignment_id}/", response_model=schemas.Assignment, status_code=200)
